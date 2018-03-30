@@ -4,6 +4,7 @@ package edu.berkeley.riselab.rlqopt.opt;
 import java.util.HashMap;
 import edu.berkeley.riselab.rlqopt.Expression;
 
+
 public class AttributeStatistics{
 
 	public long distinctValues;

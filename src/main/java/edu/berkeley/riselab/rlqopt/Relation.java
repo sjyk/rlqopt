@@ -28,6 +28,17 @@ public class Relation extends HashSet<String> {
 
 	}
 
+	public HashSet<Attribute> attributes(){
+
+		HashSet<Attribute> attrs = new HashSet();
+
+		for(String s: this)
+			attrs.add(get(s));
+
+		return attrs;
+
+	}
+
 	public ExpressionList getExpressionList(){
 
 		return new ExpressionList(this);
