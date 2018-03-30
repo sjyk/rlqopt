@@ -2,6 +2,8 @@ package edu.berkeley.riselab.rlqopt.opt;
 
 import java.util.HashMap;
 import edu.berkeley.riselab.rlqopt.Attribute;
+import edu.berkeley.riselab.rlqopt.Operator;
+import edu.berkeley.riselab.rlqopt.Expression;
 
 public class TableStatisticsModel extends HashMap<Attribute, Long> implements CostModel {
 
@@ -10,7 +12,7 @@ public class TableStatisticsModel extends HashMap<Attribute, Long> implements Co
 	}
 
 
-	private long estimateTableScan(Operator in){
+	private Cost estimateTableScan(Operator in){
 		long max = 0;
 		for (Expression e: in.params.expression){
 
@@ -19,21 +21,28 @@ public class TableStatisticsModel extends HashMap<Attribute, Long> implements Co
 		
 		}
 
-		return max;
+		return new Cost(max, max,0);
 	}
 
-	private long estimateProject(Operator in, long cost){
-		return cost;
+	private Cost estimateProject(Operator in, Cost inCost){
+		return new Cost(inCost.resultCardinality, inCost.resultCardinality,0);
 	}
 
-	private long estimateJoin(Operator in, long cost){
-		return cost;
+	private Cost estimateSelect(Operator in, Cost inCost){
+
+
+
+		return new Cost(inCost.resultCardinality, inCost.resultCardinality,0);
+	}
+
+	private Cost estimateJoin(Operator s1, Operator s2, long cost){
+		return new Cost(0,0,0);
 	}
 
 
-	public long estimate(Operator in){
+	public Cost estimate(Operator in){
 
-		return 0;
+		return new Cost(0,0,0);
 
 	}
 

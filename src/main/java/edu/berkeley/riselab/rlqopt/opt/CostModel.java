@@ -1,7 +1,9 @@
 package edu.berkeley.riselab.rlqopt.opt;
 
+import edu.berkeley.riselab.rlqopt.Operator;
+
 public interface CostModel {
 
-	public long estimate(Operator in);
+	public Cost estimate(Operator in);
 
 }

@@ -69,4 +69,19 @@ public class Expression {
 
 	}
 
+	public boolean isUDF(){
+		return ! (op.equals(EQUALS) || 
+				  op.equals(AND) || 
+				  op.equals(NOT) || 
+				  op.equals(OR) || 
+		    	  op.equals(GREATER_THAN) || 
+		    	  op.equals(GREATER_THAN_EQUALS) || 
+		    	  op.equals(LESS_THAN) || 
+		    	  op.equals(LESS_THAN_EQUALS));
+	}
+
+	public boolean isLiteral(){
+		return (children.size() == 0);
+	}
+
 }
