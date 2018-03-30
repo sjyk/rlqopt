@@ -4,6 +4,5 @@ import edu.berkeley.riselab.rlqopt.Operator;
 
 public interface CostModel {
 
-	public Cost estimate(Operator in);
-
+  public Cost estimate(Operator in);
 }

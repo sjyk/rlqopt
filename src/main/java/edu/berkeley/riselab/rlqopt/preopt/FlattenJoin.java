@@ -1,85 +1,75 @@
 package edu.berkeley.riselab.rlqopt.preopt;
 
-import edu.berkeley.riselab.rlqopt.Operator;
 import edu.berkeley.riselab.rlqopt.ExpressionList;
+import edu.berkeley.riselab.rlqopt.Operator;
+import edu.berkeley.riselab.rlqopt.OperatorException;
+import edu.berkeley.riselab.rlqopt.OperatorParameters;
 import edu.berkeley.riselab.rlqopt.relalg.*;
 import java.util.LinkedList;
-import edu.berkeley.riselab.rlqopt.OperatorParameters;
-import edu.berkeley.riselab.rlqopt.OperatorException;
 
+public class FlattenJoin implements PreOptimizationRewrite {
 
-public class FlattenJoin implements PreOptimizationRewrite{
+  public FlattenJoin() {}
 
-	public FlattenJoin(){}
+  private LinkedList<Operator> flattenRecurse(Operator in) {
 
+    LinkedList<Operator> arguments = new LinkedList();
 
-	private LinkedList<Operator> flattenRecurse(Operator in){
+    if (!(in instanceof JoinOperator)) {
+      arguments.add(in);
+      return arguments;
+    }
 
-		LinkedList<Operator> arguments = new LinkedList();
+    for (Operator child : in.source) arguments.addAll(flattenRecurse(child));
 
-		if (!(in instanceof JoinOperator)){
-			arguments.add(in);
-			return arguments;
-		}
+    return arguments;
+  }
 
-		for(Operator child: in.source)
-			arguments.addAll(flattenRecurse(child));
+  private ExpressionList flattenRecurseKey(Operator in) {
 
-		return arguments;
-	}
+    ExpressionList keys = new ExpressionList();
 
+    if (!(in instanceof JoinOperator)) {
+      return keys;
+    }
 
+    keys.addAll(in.params.expression);
 
-	private ExpressionList flattenRecurseKey(Operator in){
+    for (Operator child : in.source) {
+      keys.addAll(flattenRecurseKey(child));
+    }
 
-		ExpressionList keys = new ExpressionList();
+    return keys;
+  }
 
-		if (!(in instanceof JoinOperator)){
-			return keys;
-		}
+  private Operator flatten(Operator in) throws OperatorException {
 
-		keys.addAll(in.params.expression);
+    if (!(in instanceof JoinOperator)) {
+      return in;
+    }
 
-		for(Operator child: in.source){
-			keys.addAll(flattenRecurseKey(child));
-		}
+    LinkedList<Operator> kwayargs = flattenRecurse(in);
+    OperatorParameters kwayjoinkeys = new OperatorParameters(flattenRecurseKey(in));
 
-		return keys;
-	}
+    return new KWayJoinOperator(kwayjoinkeys, kwayargs.toArray(new Operator[kwayargs.size()]));
+  }
 
+  public Operator apply(Operator in) {
 
-	private Operator flatten(Operator in) throws OperatorException {
+    Operator flattened;
 
-		if (!(in instanceof JoinOperator)){
-			return in;
-		}
+    try {
+      flattened = flatten(in);
+    } catch (OperatorException e) {
+      return in;
+    }
 
-		LinkedList<Operator> kwayargs = flattenRecurse(in);
-		OperatorParameters kwayjoinkeys = new OperatorParameters(flattenRecurseKey(in));
+    LinkedList<Operator> children = new LinkedList();
 
-		return new KWayJoinOperator(kwayjoinkeys,kwayargs.toArray(new Operator[kwayargs.size()]));
-	}
+    for (Operator child : flattened.source) children.add(apply(child));
 
+    flattened.source = children;
 
-	public Operator apply(Operator in){
-
-		Operator flattened; 
-
-		try{
-			flattened = flatten(in);
-		}
-		catch(OperatorException e){
-			return in;
-		}
-		
-		LinkedList<Operator> children = new LinkedList();
-
-	    for(Operator child: flattened.source) 
-	    	children.add(apply(child));
-
-	    flattened.source = children;
-
-	    return flattened;
-	}
-
+    return flattened;
+  }
 }

@@ -1,45 +1,39 @@
 package edu.berkeley.riselab.rlqopt.opt;
 
-import edu.berkeley.riselab.rlqopt.preopt.PreOptimizationRewrite;
-import edu.berkeley.riselab.rlqopt.preopt.InitRewrite;
-import java.util.List;
 import edu.berkeley.riselab.rlqopt.Operator;
-import edu.berkeley.riselab.rlqopt.OperatorParameters;
-import edu.berkeley.riselab.rlqopt.OperatorException;
+import edu.berkeley.riselab.rlqopt.preopt.InitRewrite;
+import edu.berkeley.riselab.rlqopt.preopt.PreOptimizationRewrite;
+import java.util.List;
 
-//the main planner class 
-public class Planner{
+// the main planner class
+public class Planner {
 
-	List<PreOptimizationRewrite> preopt;
-	List<InitRewrite> init;
+  List<PreOptimizationRewrite> preopt;
+  List<InitRewrite> init;
 
-	public Planner(List<PreOptimizationRewrite> preopt,
-				   List<InitRewrite> init){
-		
-		this.preopt = preopt;
-		this.init = init;
-	}
+  public Planner(List<PreOptimizationRewrite> preopt, List<InitRewrite> init) {
 
-	private Operator initialize(Operator nominal){
+    this.preopt = preopt;
+    this.init = init;
+  }
 
-		//long now = System.currentTimeMillis();
+  private Operator initialize(Operator nominal) {
 
-		for (PreOptimizationRewrite p: preopt)
-			nominal = p.apply(nominal);
+    // long now = System.currentTimeMillis();
 
-		for (InitRewrite p: init)
-			nominal = p.apply(nominal);
+    for (PreOptimizationRewrite p : preopt) nominal = p.apply(nominal);
 
-		//System.out.println("Init duration: " + (System.currentTimeMillis() - now) + " ms");
+    for (InitRewrite p : init) nominal = p.apply(nominal);
 
-		return nominal;
-	}
+    // System.out.println("Init duration: " + (System.currentTimeMillis() - now) + " ms");
 
-	public Operator plan(Operator nominal){
+    return nominal;
+  }
 
-		nominal = initialize(nominal);
+  public Operator plan(Operator nominal) {
 
-		return nominal;
-	}
+    nominal = initialize(nominal);
 
+    return nominal;
+  }
 }
