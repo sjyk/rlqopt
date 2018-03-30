@@ -38,11 +38,11 @@ public class PreoptTest extends TestCase {
     FlattenJoin f = new FlattenJoin();
 
     assertEquals(
-        f.apply(j3).toString(),
-        "KWayJoinOperator([TableAccessOperator([R302.a, R302.f, R302.g]), TableAccessOperator([R201.d, R201.e]), TableAccessOperator([R294.a, R294.b, R294.c]), TableAccessOperator([R297.b, R297.c, R297.d])])");
+        "KWayJoinOperator([TableAccessOperator([R302.a, R302.f, R302.g]), TableAccessOperator([R201.d, R201.e]), TableAccessOperator([R294.a, R294.b, R294.c]), TableAccessOperator([R297.b, R297.c, R297.d])])",
+        f.apply(j3).toString());
     assertEquals(
-        f.apply(j3).params.expression.toString(),
-        "[equals([R294.a, R302.a]), equals([R297.d, R201.d]), and([equals([R294.c, R297.c]), equals([R294.b, R297.b])])]");
+        "[equals([R294.a, R302.a]), equals([R297.d, R201.d]), and([equals([R294.c, R297.c]), equals([R294.b, R297.b])])]",
+        f.apply(j3).params.expression.toString());
   }
 
   public void testGroupByProjection() throws OperatorException {
@@ -53,13 +53,25 @@ public class PreoptTest extends TestCase {
     ExpressionList agg = new ExpressionList(new Expression("sum", r.get("b").getExpression()));
     OperatorParameters gb_params = new OperatorParameters(agg, ea);
 
+    // SELECT SUM(b)
+    // FROM R
+    // GROUP BY a
     Operator gb = new GroupByOperator(gb_params, scan);
+    assertEquals("GroupByOperator([TableAccessOperator([R294.a, R294.b, R294.c])])", gb.toString());
+    assertEquals("[R294.a, R294.b, R294.c]", gb.source.get(0).params.expression.toString());
+    assertEquals("[sum([R294.b])]", gb.params.expression.toString());
+    assertEquals("[R294.a]", gb.params.secondary_expression.toString());
 
+    // Insert a projection that should prune away attribute "c".
     ExposeProjection f = new ExposeProjection();
+    Operator transformed = f.apply(gb);
 
-    assertEquals(f.apply(gb).source.get(0).params.expression.toString(), "[R294.b, R294.a]");
-    // assertEquals(f.apply(j3).params.expression.toString(), "[equals([R294.a, R302.a]),
-    // equals([R297.d, R201.d]), and([equals([R294.c, R297.c]), equals([R294.b, R297.b])])]");
+    assertEquals(
+        "GroupByOperator([ProjectOperator([TableAccessOperator([R294.a, R294.b, R294.c])])])",
+        transformed.toString());
+    assertEquals("[R294.b, R294.a]", transformed.source.get(0).params.expression.toString());
+    assertEquals("[sum([R294.b])]", transformed.params.expression.toString());
+    assertEquals("[R294.a]", transformed.params.secondary_expression.toString());
   }
 
   public void testCascadedSelect() throws OperatorException {
@@ -73,17 +85,22 @@ public class PreoptTest extends TestCase {
             new Expression(Expression.EQUALS, r.get("b").getExpression(), new Expression("2")));
 
     ExpressionList el = e.getExpressionList();
-    OperatorParameters gb_params = new OperatorParameters(el);
+    OperatorParameters params = new OperatorParameters(el);
 
-    Operator sel = new SelectOperator(gb_params, scan);
+    Operator sel = new SelectOperator(params, scan);
+    assertEquals("SelectOperator([TableAccessOperator([R294.a, R294.b, R294.c])])", sel.toString());
+    assertEquals(
+        "[and([equals([R294.a, 1([])]), equals([R294.b, 2([])])])]",
+        sel.params.expression.toString());
 
     CascadedSelect f = new CascadedSelect();
+    Operator transformed = f.apply(sel);
     assertEquals(
-        f.apply(sel).toString(),
-        "SelectOperator([SelectOperator([TableAccessOperator([R294.a, R294.b, R294.c])])])");
-
-    // assertEquals(f.apply(j3).params.expression.toString(), "[equals([R294.a, R302.a]),
-    // equals([R297.d, R201.d]), and([equals([R294.c, R297.c]), equals([R294.b, R297.b])])]");
+        "SelectOperator([SelectOperator([TableAccessOperator([R294.a, R294.b, R294.c])])])",
+        transformed.toString());
+    assertEquals("[equals([R294.b, 2([])])]", transformed.params.expression.toString());
+    assertEquals(
+        "[equals([R294.a, 1([])])]", transformed.source.get(0).params.expression.toString());
   }
 
   public void testEagerSelectProject1() throws OperatorException {
@@ -95,6 +112,14 @@ public class PreoptTest extends TestCase {
     JoinOperator j1 = new JoinOperator(createNaturalJoin(r, s), createScan(r), createScan(s));
     JoinOperator j2 = new JoinOperator(createNaturalJoin(s, t), createScan(t), j1);
     JoinOperator j3 = new JoinOperator(createNaturalJoin(r, q), createScan(q), j2);
+    // JoinOperator([
+    //   TableAccessOperator([R302.a, R302.f, R302.g]),
+    //   JoinOperator([
+    //     TableAccessOperator([R201.d, R201.e]),
+    //     JoinOperator([
+    //       TableAccessOperator([R294.a, R294.b, R294.c]),
+    //       TableAccessOperator([R297.b, R297.c, R297.d])])])])
+    System.out.println(j3.toString());
 
     Expression e =
         new Expression(
@@ -103,14 +128,26 @@ public class PreoptTest extends TestCase {
             new Expression(Expression.EQUALS, s.get("b").getExpression(), new Expression("2")));
 
     OperatorParameters gb_params = new OperatorParameters(e.getExpressionList());
+    // SELECT *
+    // FROM R, S, T, Q
+    // WHERE R.a = 1 AND S.b = 2 AND <join conditions>
     Operator sel = new SelectOperator(gb_params, j3);
 
+    // Break "Select(a = 1, b = 2)" into two singleton Selects.
     CascadedSelect o1 = new CascadedSelect();
+    // Push down the two singleton Selects.
     EagerSelectProject o2 = new EagerSelectProject();
 
+    // JoinOperator([
+    //   TableAccessOperator([R302.a, R302.f, R302.g]),
+    //   JoinOperator([
+    //     TableAccessOperator([R201.d, R201.e]),
+    //     JoinOperator([
+    //       SelectOperator([TableAccessOperator([R294.a, R294.b, R294.c])]),
+    //       SelectOperator([TableAccessOperator([R297.b, R297.c, R297.d])])])])])
     assertEquals(
-        o2.apply(o1.apply(sel)).toString(),
-        "JoinOperator([TableAccessOperator([R302.a, R302.f, R302.g]), JoinOperator([TableAccessOperator([R201.d, R201.e]), JoinOperator([SelectOperator([TableAccessOperator([R294.a, R294.b, R294.c])]), SelectOperator([TableAccessOperator([R297.b, R297.c, R297.d])])])])])");
+        "JoinOperator([TableAccessOperator([R302.a, R302.f, R302.g]), JoinOperator([TableAccessOperator([R201.d, R201.e]), JoinOperator([SelectOperator([TableAccessOperator([R294.a, R294.b, R294.c])]), SelectOperator([TableAccessOperator([R297.b, R297.c, R297.d])])])])])",
+        o2.apply(o1.apply(sel)).toString());
   }
 
   public void testEagerSelectProject2() throws OperatorException {
