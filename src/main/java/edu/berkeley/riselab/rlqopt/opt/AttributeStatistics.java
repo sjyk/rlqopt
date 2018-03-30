@@ -27,11 +27,15 @@ public class AttributeStatistics{
 
 	}
 
-	//returns -1 if you can't estimate
+	private double clip10(double val){
+		return Math.max(Math.min(val, 1.0),0.0);
+	}
+
+	//returns error if you can't estimate
 	public double estimateReductionFactor(Expression e) throws CannotEstimateException{
 
 		if (e.op.equals(Expression.EQUALS)){
-			return 1.0/distinctValues;
+			return clip10(1.0/distinctValues);
 		}
 		else if (isNumber){
 
@@ -45,7 +49,7 @@ public class AttributeStatistics{
 					if (child.isLiteral())
 					{
 						double val = Double.parseDouble(child.op);
-						return (maxVal-val)/(maxVal - minVal);
+						return clip10((maxVal-val)/(maxVal - minVal));
 					}
 					else{
 
@@ -67,7 +71,7 @@ public class AttributeStatistics{
 					if (child.isLiteral())
 					{
 						double val = Double.parseDouble(child.op);
-						return (val-minVal)/(maxVal - minVal);
+						return clip10((val-minVal)/(maxVal - minVal));
 					}
 					else{
 
@@ -80,23 +84,22 @@ public class AttributeStatistics{
 			}
 
 		}
-		
 
 		if (e.op.equals(Expression.NOT)){
 
-			return 1.0 - estimateReductionFactor(e.children.get(0));
+			return clip10(1.0 - estimateReductionFactor(e.children.get(0)));
 		}
 		else if (e.op.equals(Expression.OR)){
 			double total = 0.0;
 			for (Expression c : e.children)
 				total += estimateReductionFactor(c);
-			return total;
+			return clip10(total);
 		}
 		else if (e.op.equals(Expression.AND)){
 			double total = 1.0;
 			for (Expression c : e.children)
 				total *= estimateReductionFactor(c);
-			return total;
+			return clip10(total);
 		}
 		else{
 			throw new CannotEstimateException(e);
