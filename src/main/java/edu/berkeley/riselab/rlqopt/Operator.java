@@ -1,12 +1,15 @@
 package edu.berkeley.riselab.rlqopt;
 
-import edu.berkeley.riselab.rlqopt.relalg.*;
+import edu.berkeley.riselab.rlqopt.relalg.GroupByOperator;
+import edu.berkeley.riselab.rlqopt.relalg.ProjectOperator;
+import edu.berkeley.riselab.rlqopt.relalg.TableAccessOperator;
 import java.util.LinkedList;
+import java.util.List;
 
 /** Operator class- this class defines an abstract relational operator */
 public abstract class Operator {
 
-  public LinkedList<Operator> source; // data structure that holds the source
+  public List<Operator> source; // data structure that holds the source
   public OperatorParameters params;
 
   /** An operator takes as input a number of source operators. Throws an OperatorException */
@@ -16,7 +19,6 @@ public abstract class Operator {
 
     // init the operator
     this.source = new LinkedList<Operator>();
-
     for (Operator o : source) this.source.add(o);
 
     this.params = params;

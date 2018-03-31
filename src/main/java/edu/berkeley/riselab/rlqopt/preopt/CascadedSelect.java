@@ -4,9 +4,14 @@ import edu.berkeley.riselab.rlqopt.Expression;
 import edu.berkeley.riselab.rlqopt.Operator;
 import edu.berkeley.riselab.rlqopt.OperatorException;
 import edu.berkeley.riselab.rlqopt.OperatorParameters;
-import edu.berkeley.riselab.rlqopt.relalg.*;
-import java.util.LinkedList;
+import edu.berkeley.riselab.rlqopt.relalg.SelectOperator;
 
+/**
+ * Transforms Select(a AND b AND ...) into a series of singleton selects, Select(a, Select(b, ...)).
+ *
+ * <p>This could be useful when the attributes reference different relations; after the
+ * transformation, the filters have the opportunity to be pushed down.
+ */
 public class CascadedSelect implements PreOptimizationRewrite {
 
   public CascadedSelect() {}
@@ -38,12 +43,7 @@ public class CascadedSelect implements PreOptimizationRewrite {
       return in;
     }
 
-    LinkedList<Operator> children = new LinkedList();
-
-    for (Operator child : in.source) children.add(apply(child));
-
-    in.source = children;
-
+    in.source = Utils.map(in.source, this::apply);
     return in;
   }
 }

@@ -4,7 +4,8 @@ import edu.berkeley.riselab.rlqopt.ExpressionList;
 import edu.berkeley.riselab.rlqopt.Operator;
 import edu.berkeley.riselab.rlqopt.OperatorException;
 import edu.berkeley.riselab.rlqopt.OperatorParameters;
-import edu.berkeley.riselab.rlqopt.relalg.*;
+import edu.berkeley.riselab.rlqopt.relalg.JoinOperator;
+import edu.berkeley.riselab.rlqopt.relalg.KWayJoinOperator;
 import java.util.LinkedList;
 
 public class FlattenJoin implements PreOptimizationRewrite {
@@ -64,12 +65,7 @@ public class FlattenJoin implements PreOptimizationRewrite {
       return in;
     }
 
-    LinkedList<Operator> children = new LinkedList();
-
-    for (Operator child : flattened.source) children.add(apply(child));
-
-    flattened.source = children;
-
+    flattened.source = Utils.map(flattened.source, this::apply);
     return flattened;
   }
 }

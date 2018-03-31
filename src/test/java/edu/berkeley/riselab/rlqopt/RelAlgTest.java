@@ -1,6 +1,8 @@
 package edu.berkeley.riselab.rlqopt;
 
-import edu.berkeley.riselab.rlqopt.relalg.*;
+import edu.berkeley.riselab.rlqopt.relalg.JoinOperator;
+import edu.berkeley.riselab.rlqopt.relalg.ProjectOperator;
+import edu.berkeley.riselab.rlqopt.relalg.TableAccessOperator;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
