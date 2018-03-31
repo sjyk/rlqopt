@@ -1,8 +1,16 @@
 package edu.berkeley.riselab.rlqopt;
 
 import edu.berkeley.riselab.rlqopt.opt.Planner;
-import edu.berkeley.riselab.rlqopt.preopt.*;
-import edu.berkeley.riselab.rlqopt.relalg.*;
+import edu.berkeley.riselab.rlqopt.preopt.CascadedSelect;
+import edu.berkeley.riselab.rlqopt.preopt.EagerSelectProject;
+import edu.berkeley.riselab.rlqopt.preopt.ExposeProjection;
+import edu.berkeley.riselab.rlqopt.preopt.FlattenJoin;
+import edu.berkeley.riselab.rlqopt.preopt.InitRewrite;
+import edu.berkeley.riselab.rlqopt.preopt.PreOptimizationRewrite;
+import edu.berkeley.riselab.rlqopt.relalg.GroupByOperator;
+import edu.berkeley.riselab.rlqopt.relalg.JoinOperator;
+import edu.berkeley.riselab.rlqopt.relalg.SelectOperator;
+import edu.berkeley.riselab.rlqopt.relalg.TableAccessOperator;
 import java.util.LinkedList;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -233,7 +241,7 @@ public class PreoptTest extends TestCase {
     return scan_r;
   }
 
-  private OperatorParameters createNaturalJoin(Relation r, Relation s) throws OperatorException {
+  private OperatorParameters createNaturalJoin(Relation r, Relation s) {
     Expression conjunction = null;
 
     for (Expression er : r.getExpressionList()) {

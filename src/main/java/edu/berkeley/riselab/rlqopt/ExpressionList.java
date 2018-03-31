@@ -2,7 +2,7 @@ package edu.berkeley.riselab.rlqopt;
 
 import java.util.LinkedList;
 
-/** An expression is a tree with a operator and a sequence of other expressions */
+/** Convenience class to represent a list of expressions. */
 public class ExpressionList extends LinkedList<Expression> {
 
   // create it explicitly named
