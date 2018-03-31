@@ -1,8 +1,7 @@
 package edu.berkeley.riselab.rlqopt;
 
-import edu.berkeley.riselab.rlqopt.opt.*;
-import edu.berkeley.riselab.rlqopt.preopt.*;
-import edu.berkeley.riselab.rlqopt.relalg.*;
+import edu.berkeley.riselab.rlqopt.opt.AttributeStatistics;
+import edu.berkeley.riselab.rlqopt.opt.CannotEstimateException;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;

@@ -19,4 +19,11 @@ public class OperatorParameters {
     this.expression = expression;
     this.secondary_expression = secondary_expression;
   }
+
+  @Override
+  public String toString() {
+    String s = expression.toString();
+    if (secondary_expression != null) s += " " + secondary_expression.toString();
+    return s + ";";
+  }
 }
