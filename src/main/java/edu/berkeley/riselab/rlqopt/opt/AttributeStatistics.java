@@ -29,7 +29,6 @@ public class AttributeStatistics {
 
   // returns error if you can't estimate
   public double estimateReductionFactor(Expression e) throws CannotEstimateException {
-
     if (e.op.equals(Expression.EQUALS)) {
       return clip10(1.0 / distinctValues);
     } else if (isNumber) {

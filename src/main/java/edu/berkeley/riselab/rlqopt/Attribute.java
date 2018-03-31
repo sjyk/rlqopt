@@ -25,4 +25,18 @@ public class Attribute {
   public String toString() {
     return "R" + relation.hashCode() + "." + attribute;
   }
+
+  public int hashCode() {
+    return relation.hashCode() * attribute.hashCode();
+  }
+
+  public boolean equals(Object obj) {
+
+    if (!(obj instanceof Attribute)) return false;
+
+    Attribute other = (Attribute) obj;
+
+    return (relation.hashCode() == other.relation.hashCode())
+        && (attribute.equals(other.attribute));
+  }
 }

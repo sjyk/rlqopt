@@ -4,10 +4,11 @@ import edu.berkeley.riselab.rlqopt.Attribute;
 import edu.berkeley.riselab.rlqopt.ExpressionList;
 import edu.berkeley.riselab.rlqopt.Operator;
 import edu.berkeley.riselab.rlqopt.Relation;
+import edu.berkeley.riselab.rlqopt.relalg.*;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-public class TableStatisticsModel extends HashMap<Attribute, LinkedList<AttributeStatistics>>
+public class TableStatisticsModel extends HashMap<Integer, LinkedList<AttributeStatistics>>
     implements CostModel {
 
   private double defaultSelectivity = 0.1;
@@ -25,7 +26,7 @@ public class TableStatisticsModel extends HashMap<Attribute, LinkedList<Attribut
 
       LinkedList<AttributeStatistics> hist = new LinkedList();
       hist.add(s);
-      this.put(a, hist);
+      this.put(a.hashCode(), hist);
     }
   }
 
@@ -35,13 +36,17 @@ public class TableStatisticsModel extends HashMap<Attribute, LinkedList<Attribut
   }
 
   private long cardinalityEstimate(Iterable<Attribute> list) {
-
     long card = 0;
     for (Attribute a : list) {
       long sum = 0;
-      if (containsKey(a)) {
-        for (AttributeStatistics s : get(a)) sum += s.distinctValues;
+
+      if (containsKey(a.hashCode())) {
+        for (AttributeStatistics s : get(a.hashCode())) sum += s.distinctValues;
       }
+
+      // System.out.println(a + " : " + sum);
+      // for(Attribute b: this.keySet())
+      //  System.out.println(b);
 
       card = Math.max(card, sum);
     }
@@ -92,8 +97,8 @@ public class TableStatisticsModel extends HashMap<Attribute, LinkedList<Attribut
 
       double sum = 0;
       try {
-        if (containsKey(a)) {
-          LinkedList<AttributeStatistics> aslist = get(a);
+        if (containsKey(a.hashCode())) {
+          LinkedList<AttributeStatistics> aslist = get(a.hashCode());
 
           for (AttributeStatistics s : aslist)
             sum += s.estimateReductionFactor(in.params.expression.get(0));
@@ -113,7 +118,7 @@ public class TableStatisticsModel extends HashMap<Attribute, LinkedList<Attribut
     return new Cost(costIn.operatorIOcost, (long) (costIn.resultCardinality * reduction), 0);
   }
 
-  public Cost joinOperator(Operator lop, Operator rop, Cost l, Cost r) {
+  public Cost joinOperator(Cost l, Cost r) {
 
     long cartesian = l.resultCardinality * r.resultCardinality;
     long result = (long) (cartesian / Math.max(l.resultCardinality, r.resultCardinality));
@@ -124,6 +129,22 @@ public class TableStatisticsModel extends HashMap<Attribute, LinkedList<Attribut
   public Cost estimate(Operator in) {
 
     Cost runningCost = new Cost(0, 0, 0);
+
+    if (in instanceof TableAccessOperator) return tableAccessOperator(in);
+
+    if (in instanceof ProjectOperator)
+      return projectOperator(in, estimate(in.source.get(0))).plus(estimate(in.source.get(0)));
+
+    if (in instanceof SelectOperator)
+      return selectOperator(in, estimate(in.source.get(0))).plus(estimate(in.source.get(0)));
+
+    if (in instanceof GroupByOperator)
+      return groupByOperator(in, estimate(in.source.get(0))).plus(estimate(in.source.get(0)));
+
+    if (in instanceof JoinOperator)
+      return joinOperator(estimate(in.source.get(0)), estimate(in.source.get(1)))
+          .plus(estimate(in.source.get(0)))
+          .plus(estimate(in.source.get(1)));
 
     return runningCost;
   }

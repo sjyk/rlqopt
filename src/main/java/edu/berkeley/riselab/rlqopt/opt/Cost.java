@@ -18,10 +18,27 @@ public class Cost {
     this.operatorCPUcost = operatorCPUcost;
   }
 
+  public Cost plus(Cost other) {
+    return new Cost(
+        this.operatorIOcost + other.operatorIOcost,
+        this.resultCardinality,
+        other.operatorCPUcost + this.operatorCPUcost);
+  }
+
+  public boolean equals(Object obj) {
+    if (!(obj instanceof Cost)) return false;
+
+    Cost other = (Cost) obj;
+
+    return (other.operatorCPUcost == operatorCPUcost)
+        && (other.operatorIOcost == operatorIOcost)
+        && (other.resultCardinality == resultCardinality);
+  }
+
   public String toString() {
     return "Cost: {IO:"
         + operatorIOcost
-        + ", CPU"
+        + ", CPU: "
         + operatorCPUcost
         + ", Cardinality: "
         + resultCardinality
