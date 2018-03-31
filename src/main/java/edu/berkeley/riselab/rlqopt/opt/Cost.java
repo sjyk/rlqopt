@@ -17,4 +17,14 @@ public class Cost {
     this.resultCardinality = resultCardinality;
     this.operatorCPUcost = operatorCPUcost;
   }
+
+  public String toString() {
+    return "Cost: {IO:"
+        + operatorIOcost
+        + ", CPU"
+        + operatorCPUcost
+        + ", Cardinality: "
+        + resultCardinality
+        + "}";
+  }
 }
