@@ -4,6 +4,7 @@ import edu.berkeley.riselab.rlqopt.opt.AttributeStatistics;
 import edu.berkeley.riselab.rlqopt.opt.CannotEstimateException;
 import edu.berkeley.riselab.rlqopt.opt.Cost;
 import edu.berkeley.riselab.rlqopt.opt.TableStatisticsModel;
+import edu.berkeley.riselab.rlqopt.preopt.*;
 import edu.berkeley.riselab.rlqopt.relalg.*;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -29,7 +30,7 @@ public class CostTest extends TestCase {
     Relation r = new Relation("a", "b", "c");
     AttributeStatistics a = new AttributeStatistics(10, 10, 0, 10);
     TableStatisticsModel t = new TableStatisticsModel();
-    t.putStats(r.get("a"),a);
+    t.putStats(r.get("a"), a);
     // Operator scan = createScan(r);
 
     Expression e1 =
@@ -104,46 +105,65 @@ public class CostTest extends TestCase {
     Relation t = new Relation("e", "d");
     Relation q = new Relation("a", "f", "g");
 
-    JoinOperator j1 = new JoinOperator(createNaturalJoin(r, s), createScan(r), createScan(s));
+    /*   JoinOperator j1 = new JoinOperator(createNaturalJoin(r, q), createScan(r), createScan(q));
     JoinOperator j2 = new JoinOperator(createNaturalJoin(s, t), createScan(t), j1);
+    JoinOperator j3 = new JoinOperator(createNaturalJoin(s, r), createScan(s), j2);*/
+
+    JoinOperator j1 = new JoinOperator(createNaturalJoin(s, t), createScan(s), createScan(t));
+    JoinOperator j2 = new JoinOperator(createNaturalJoin(r, s), createScan(r), j1);
     JoinOperator j3 = new JoinOperator(createNaturalJoin(r, q), createScan(q), j2);
 
     Expression ex =
         new Expression(
             Expression.AND,
             new Expression(Expression.EQUALS, r.get("a").getExpression(), new Expression("1")),
-            new Expression(Expression.EQUALS, s.get("b").getExpression(), new Expression("2")));
+            new Expression(
+                Expression.LESS_THAN_EQUALS, s.get("b").getExpression(), new Expression("2")));
 
     OperatorParameters sel_params = new OperatorParameters(ex.getExpressionList());
     Operator sel = new SelectOperator(sel_params, j3);
 
-    AttributeStatistics a = new AttributeStatistics(10,1000, 0, 10);
-    AttributeStatistics b = new AttributeStatistics(10, 1600, 0, 10);
-    AttributeStatistics c = new AttributeStatistics(10, 1900, 0, 10);
-    AttributeStatistics d = new AttributeStatistics(10, 1600, 0, 10);
-    AttributeStatistics e = new AttributeStatistics(10, 1900, 0, 10);
-    AttributeStatistics f = new AttributeStatistics(10, 1600, 0, 10);
-    AttributeStatistics g = new AttributeStatistics(10, 1900, 0, 10);
+    AttributeStatistics ra = new AttributeStatistics(10, 1000, 0, 10);
+    AttributeStatistics rb = new AttributeStatistics(100, 1000, 0, 100);
+    AttributeStatistics rc = new AttributeStatistics(10, 1000, 0, 10);
+
+    AttributeStatistics sb = new AttributeStatistics(100, 1600, 0, 100);
+    AttributeStatistics sc = new AttributeStatistics(10, 1600, 0, 10);
+    AttributeStatistics sd = new AttributeStatistics(10, 1600, 0, 10);
+
+    AttributeStatistics te = new AttributeStatistics(10, 1900, 0, 10);
+    AttributeStatistics td = new AttributeStatistics(10, 1900, 0, 10);
+
+    AttributeStatistics qa = new AttributeStatistics(10, 4400, 0, 10);
+    AttributeStatistics qf = new AttributeStatistics(10, 4400, 0, 10);
+    AttributeStatistics qg = new AttributeStatistics(10, 4400, 0, 10);
 
     TableStatisticsModel ts = new TableStatisticsModel();
-    ts.putStats(r.get("a"), a);
-    ts.putStats(r.get("b"), b);
-    ts.putStats(r.get("c"), c);
-    ts.putStats(s.get("b"), b);
-    ts.putStats(s.get("c"), c);
-    ts.putStats(s.get("d"), d);
-    ts.putStats(t.get("e"), e);
-    ts.putStats(t.get("d"), d);
-    ts.putStats(q.get("a"), a);
-    ts.putStats(q.get("f"), f);
-    ts.putStats(q.get("g"), g);
+    ts.putStats(r.get("a"), ra);
+    ts.putStats(r.get("b"), rb);
+    ts.putStats(r.get("c"), rc);
+    ts.putStats(s.get("b"), sb);
+    ts.putStats(s.get("c"), sc);
+    ts.putStats(s.get("d"), sd);
+    ts.putStats(t.get("e"), te);
+    ts.putStats(t.get("d"), td);
+    ts.putStats(q.get("a"), qa);
+    ts.putStats(q.get("f"), qf);
+    ts.putStats(q.get("g"), qg);
 
-    System.out.println(ts.estimate(sel));
+    PreOptimizationRewrite o1 = new CascadedSelect();
+    PreOptimizationRewrite o2 = new CorrespondAttributes(r, s, t, q);
+
+    System.out.println(ts.estimate(o2.apply(o1.apply(sel))));
+
+    InitRewrite o = new EagerSelectProject();
+    System.out.println(ts.estimate(o.apply(o2.apply(o1.apply(sel)))));
+
+    // System.out.println(ts.estimate(sel));
 
     // assertEquals(t.estimate(gb), new Cost(38,10,0));
 
   }
-
 
   private Operator createScan(Relation r) throws OperatorException {
     OperatorParameters scan_params = new OperatorParameters(r.getExpressionList());

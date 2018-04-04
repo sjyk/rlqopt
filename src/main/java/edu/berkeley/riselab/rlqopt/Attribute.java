@@ -27,7 +27,7 @@ public class Attribute {
   }
 
   public int hashCode() {
-    return relation.hashCode() * attribute.hashCode();
+    return (relation.toString() + attribute.toString()).hashCode();
   }
 
   public boolean equals(Object obj) {

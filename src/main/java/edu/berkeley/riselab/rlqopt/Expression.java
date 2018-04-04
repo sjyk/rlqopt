@@ -1,7 +1,7 @@
 package edu.berkeley.riselab.rlqopt;
 
-import java.util.LinkedList;
 import java.util.HashSet;
+import java.util.LinkedList;
 
 /** An expression is a tree with a operator and a sequence of other expressions */
 public class Expression {
@@ -26,6 +26,21 @@ public class Expression {
     this.children = new LinkedList<Expression>();
 
     for (Expression e : args) this.children.add(e);
+  }
+
+  // deep copy constructor
+  public Expression(Expression e) {
+    this.op = e.op;
+
+    if (e.children == null) {
+      this.children = null;
+      this.noop = e.noop;
+    } else {
+
+      this.children = new LinkedList<Expression>();
+
+      for (Expression child : e.children) this.children.add(new Expression(child));
+    }
   }
 
   // noop loading an attribute
@@ -53,8 +68,6 @@ public class Expression {
     return visibleAttrs;
   }
 
-
-
   public HashSet<Attribute> getVisibleAttributeSet() {
     HashSet<Attribute> visibleAttrs = new HashSet<Attribute>();
 
@@ -67,6 +80,23 @@ public class Expression {
     for (Expression e : children) visibleAttrs.addAll(e.getVisibleAttributes());
 
     return visibleAttrs;
+  }
+
+  private boolean isEquality(Expression e) {
+
+    if (e.op.equals(NOT)) return false;
+    else if (e.op.equals(OR)) return false;
+    else if (e.op.equals(Expression.GREATER_THAN) || e.op.equals(Expression.GREATER_THAN_EQUALS)) {
+      return false;
+    } else if (e.op.equals(Expression.LESS_THAN) || e.op.equals(Expression.LESS_THAN_EQUALS)) {
+      return false;
+    } else if (e.op.equals(AND))
+      return isEquality(e.children.get(0)) && isEquality(e.children.get(1));
+    else return true;
+  }
+
+  public boolean isEquality() {
+    return isEquality(this);
   }
 
   public String toString() {

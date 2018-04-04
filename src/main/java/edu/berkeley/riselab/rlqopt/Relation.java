@@ -40,4 +40,15 @@ public class Relation extends HashSet<String> {
 
     return this.contains(attr.attribute);
   }
+
+  public boolean containsAll(HashSet<Attribute> attrs) {
+
+    boolean rtn = true;
+
+    for (Attribute attr : attrs) {
+      if (!contains(attr)) return false;
+    }
+
+    return rtn;
+  }
 }
