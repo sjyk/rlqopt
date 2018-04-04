@@ -27,26 +27,28 @@ public class CostTest extends TestCase {
 
   public void testReductionFactors() throws CannotEstimateException {
     Relation r = new Relation("a", "b", "c");
-    AttributeStatistics a = new AttributeStatistics(10, 0, 10);
+    AttributeStatistics a = new AttributeStatistics(10, 10, 0, 10);
+    TableStatisticsModel t = new TableStatisticsModel();
+    t.putStats(r.get("a"),a);
     // Operator scan = createScan(r);
 
     Expression e1 =
         new Expression(Expression.EQUALS, r.get("a").getExpression(), new Expression("1"));
 
-    assertEquals(0.1, a.estimateReductionFactor(e1), 1e-6);
+    assertEquals(0.1, t.estimateReductionFactor(e1), 1e-6);
 
     Expression e2 = new Expression(Expression.NOT, e1);
 
-    assertEquals(0.9, a.estimateReductionFactor(e2), 1e-6);
+    assertEquals(0.9, t.estimateReductionFactor(e2), 1e-6);
 
     Expression e3 = new Expression(Expression.OR, e1, e2);
 
-    assertEquals(1.0, a.estimateReductionFactor(e3), 1e-6);
+    assertEquals(1.0, t.estimateReductionFactor(e3), 1e-6);
 
     Expression e4 =
         new Expression(
             Expression.GREATER_THAN_EQUALS, r.get("a").getExpression(), new Expression("3"));
-    assertEquals(0.7, a.estimateReductionFactor(e4), 1e-6);
+    assertEquals(0.7, t.estimateReductionFactor(e4), 1e-6);
 
     // System.out.println(a.estimateReductionFactor(e));
     // assertEquals(f.apply(j3).params.expression.toString(), "[equals([R294.a, R302.a]),
@@ -55,9 +57,9 @@ public class CostTest extends TestCase {
 
   public void testStatisticalCostEstimates1() throws OperatorException {
     Relation r = new Relation("a", "b", "c");
-    AttributeStatistics a = new AttributeStatistics(10, 0, 10);
-    AttributeStatistics b = new AttributeStatistics(16, 0, 10);
-    AttributeStatistics c = new AttributeStatistics(19, 0, 10);
+    AttributeStatistics a = new AttributeStatistics(10, 10, 0, 10);
+    AttributeStatistics b = new AttributeStatistics(10, 16, 0, 10);
+    AttributeStatistics c = new AttributeStatistics(10, 19, 0, 10);
 
     TableStatisticsModel t = new TableStatisticsModel();
     t.putStats(r.get("a"), a);
@@ -73,9 +75,9 @@ public class CostTest extends TestCase {
 
   public void testStatisticalCostEstimates2() throws OperatorException {
     Relation r = new Relation("a", "b", "c");
-    AttributeStatistics a = new AttributeStatistics(10, 0, 10);
-    AttributeStatistics b = new AttributeStatistics(16, 0, 10);
-    AttributeStatistics c = new AttributeStatistics(19, 0, 10);
+    AttributeStatistics a = new AttributeStatistics(10, 10, 0, 10);
+    AttributeStatistics b = new AttributeStatistics(10, 16, 0, 10);
+    AttributeStatistics c = new AttributeStatistics(10, 19, 0, 10);
 
     TableStatisticsModel t = new TableStatisticsModel();
     t.putStats(r.get("a"), a);
@@ -98,33 +100,74 @@ public class CostTest extends TestCase {
 
   public void testStatisticalCostEstimates3() throws OperatorException {
     Relation r = new Relation("a", "b", "c");
-    AttributeStatistics a = new AttributeStatistics(10, 0, 10);
-    AttributeStatistics b = new AttributeStatistics(16, 0, 10);
-    AttributeStatistics c = new AttributeStatistics(19, 0, 10);
+    Relation s = new Relation("b", "c", "d");
+    Relation t = new Relation("e", "d");
+    Relation q = new Relation("a", "f", "g");
 
-    TableStatisticsModel t = new TableStatisticsModel();
-    t.putStats(r.get("a"), a);
-    t.putStats(r.get("b"), b);
-    t.putStats(r.get("c"), c);
+    JoinOperator j1 = new JoinOperator(createNaturalJoin(r, s), createScan(r), createScan(s));
+    JoinOperator j2 = new JoinOperator(createNaturalJoin(s, t), createScan(t), j1);
+    JoinOperator j3 = new JoinOperator(createNaturalJoin(r, q), createScan(q), j2);
 
-    Expression e =
+    Expression ex =
         new Expression(
-            Expression.GREATER_THAN_EQUALS, r.get("a").getExpression(), new Expression("2"));
+            Expression.AND,
+            new Expression(Expression.EQUALS, r.get("a").getExpression(), new Expression("1")),
+            new Expression(Expression.EQUALS, s.get("b").getExpression(), new Expression("2")));
 
-    ExpressionList el = e.getExpressionList();
-    OperatorParameters params = new OperatorParameters(el);
+    OperatorParameters sel_params = new OperatorParameters(ex.getExpressionList());
+    Operator sel = new SelectOperator(sel_params, j3);
 
-    Operator sel = new SelectOperator(params, createScan(r));
+    AttributeStatistics a = new AttributeStatistics(10,1000, 0, 10);
+    AttributeStatistics b = new AttributeStatistics(10, 1600, 0, 10);
+    AttributeStatistics c = new AttributeStatistics(10, 1900, 0, 10);
+    AttributeStatistics d = new AttributeStatistics(10, 1600, 0, 10);
+    AttributeStatistics e = new AttributeStatistics(10, 1900, 0, 10);
+    AttributeStatistics f = new AttributeStatistics(10, 1600, 0, 10);
+    AttributeStatistics g = new AttributeStatistics(10, 1900, 0, 10);
 
-    System.out.println(t.estimate(sel));
+    TableStatisticsModel ts = new TableStatisticsModel();
+    ts.putStats(r.get("a"), a);
+    ts.putStats(r.get("b"), b);
+    ts.putStats(r.get("c"), c);
+    ts.putStats(s.get("b"), b);
+    ts.putStats(s.get("c"), c);
+    ts.putStats(s.get("d"), d);
+    ts.putStats(t.get("e"), e);
+    ts.putStats(t.get("d"), d);
+    ts.putStats(q.get("a"), a);
+    ts.putStats(q.get("f"), f);
+    ts.putStats(q.get("g"), g);
+
+    System.out.println(ts.estimate(sel));
 
     // assertEquals(t.estimate(gb), new Cost(38,10,0));
 
   }
 
+
   private Operator createScan(Relation r) throws OperatorException {
     OperatorParameters scan_params = new OperatorParameters(r.getExpressionList());
     TableAccessOperator scan_r = new TableAccessOperator(scan_params);
     return scan_r;
+  }
+
+  private OperatorParameters createNaturalJoin(Relation r, Relation s) {
+    Expression conjunction = null;
+
+    for (Expression er : r.getExpressionList()) {
+
+      for (Expression es : s.getExpressionList()) {
+
+        if (er.noop.attribute.equals(es.noop.attribute)) {
+
+          Expression clause = new Expression(Expression.EQUALS, er, es);
+
+          if (conjunction == null) conjunction = clause;
+          else conjunction = new Expression(Expression.AND, clause, conjunction);
+        }
+      }
+    }
+
+    return new OperatorParameters(conjunction.getExpressionList());
   }
 }

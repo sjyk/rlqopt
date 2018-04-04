@@ -1,6 +1,7 @@
 package edu.berkeley.riselab.rlqopt;
 
 import java.util.LinkedList;
+import java.util.HashSet;
 
 /** An expression is a tree with a operator and a sequence of other expressions */
 public class Expression {
@@ -40,6 +41,22 @@ public class Expression {
 
   public LinkedList<Attribute> getVisibleAttributes() {
     LinkedList<Attribute> visibleAttrs = new LinkedList<Attribute>();
+
+    // base case
+    if (this.op == null) {
+      visibleAttrs.add(this.noop);
+      return visibleAttrs;
+    }
+
+    for (Expression e : children) visibleAttrs.addAll(e.getVisibleAttributes());
+
+    return visibleAttrs;
+  }
+
+
+
+  public HashSet<Attribute> getVisibleAttributeSet() {
+    HashSet<Attribute> visibleAttrs = new HashSet<Attribute>();
 
     // base case
     if (this.op == null) {
