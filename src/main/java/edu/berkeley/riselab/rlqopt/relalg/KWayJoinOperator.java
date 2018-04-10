@@ -17,4 +17,5 @@ public class KWayJoinOperator extends DummyOperator {
 
     return true;
   }
+
 }

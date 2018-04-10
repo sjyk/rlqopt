@@ -104,7 +104,7 @@ public class LeftDeepJoinReorder implements PlanningModule {
       costMap.put(singleton, child);
     }
 
-    System.out.println(costMap);
+    //System.out.println(costMap);
 
     for (int i = 0; i < in.source.size() - 1; i++) {
       try {
