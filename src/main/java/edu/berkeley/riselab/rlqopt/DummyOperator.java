@@ -7,5 +7,4 @@ public abstract class DummyOperator extends Operator {
   public DummyOperator(OperatorParameters params, Operator... source) throws OperatorException {
     super(params, source);
   }
-
 }

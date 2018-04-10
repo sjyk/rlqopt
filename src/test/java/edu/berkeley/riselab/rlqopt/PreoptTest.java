@@ -231,8 +231,8 @@ public class PreoptTest extends TestCase {
     LinkedList<InitRewrite> l2 = new LinkedList();
     l2.add(o4);
 
-    Planner p = new Planner(l1, l2);
-    p.plan(gb);
+    Planner p = new Planner(l1, l2, new LinkedList());
+    p.plan(gb, null);
   }
 
   private Operator createScan(Relation r) throws OperatorException {

@@ -24,7 +24,6 @@ public abstract class Operator {
     this.params = params;
   }
 
-  
   public LinkedList<Attribute> getVisibleAttributes() {
 
     LinkedList<Attribute> visibleAttrs = new LinkedList<Attribute>();

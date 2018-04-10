@@ -1,10 +1,8 @@
 package edu.berkeley.riselab.rlqopt;
 
 import edu.berkeley.riselab.rlqopt.opt.AttributeStatistics;
-import edu.berkeley.riselab.rlqopt.opt.CannotEstimateException;
-import edu.berkeley.riselab.rlqopt.opt.Cost;
 import edu.berkeley.riselab.rlqopt.opt.TableStatisticsModel;
-import edu.berkeley.riselab.rlqopt.opt.LeftDeepJoinReorder;
+import edu.berkeley.riselab.rlqopt.opt.postgres.PostgresPlanner;
 import edu.berkeley.riselab.rlqopt.preopt.*;
 import edu.berkeley.riselab.rlqopt.relalg.*;
 import junit.framework.Test;
@@ -41,7 +39,6 @@ public class PlanTest extends TestCase {
     JoinOperator j2 = new JoinOperator(createNaturalJoin(r, s), createScan(r), j1);
     JoinOperator j3 = new JoinOperator(createNaturalJoin(r, q), createScan(q), j2);
 
-
     AttributeStatistics ra = new AttributeStatistics(10, 1000, 0, 10);
     AttributeStatistics rb = new AttributeStatistics(100, 1000, 0, 100);
     AttributeStatistics rc = new AttributeStatistics(10, 1000, 0, 10);
@@ -70,14 +67,9 @@ public class PlanTest extends TestCase {
     ts.putStats(q.get("f"), qf);
     ts.putStats(q.get("g"), qg);
 
-    FlattenJoin f = new FlattenJoin();
-    LeftDeepJoinReorder l = new LeftDeepJoinReorder(false);
-    Operator optimized = f.apply(j3);
-
-    System.out.println(ts.estimate(l.apply(optimized, ts)));
-    System.out.println(ts.estimate(j3));
-
-
+    PostgresPlanner p = new PostgresPlanner();
+    p.plan(j3, ts);
+    System.out.println(p.getLastPlanStats());
   }
 
   private Operator createScan(Relation r) throws OperatorException {
