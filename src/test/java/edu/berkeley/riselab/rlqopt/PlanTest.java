@@ -25,7 +25,7 @@ public class PlanTest extends TestCase {
     return new TestSuite(PlanTest.class);
   }
 
-  public void testStatisticalCostEstimates3() throws OperatorException {
+  public void test1() throws OperatorException {
     Relation r = new Relation("a", "b", "c");
     Relation s = new Relation("b", "c", "d");
     Relation t = new Relation("e", "d");
@@ -71,6 +71,69 @@ public class PlanTest extends TestCase {
     p.plan(j3, ts);
     System.out.println(p.getLastPlanStats());
   }
+
+
+  public void test2() throws OperatorException {
+    Relation r = new Relation("a", "b", "c");
+    Relation s = new Relation("b", "c", "d");
+    Relation t = new Relation("e", "d");
+    Relation q = new Relation("a", "f", "g");
+
+    JoinOperator j1 = new JoinOperator(createNaturalJoin(s, t), createScan(s), createScan(t));
+    JoinOperator j2 = new JoinOperator(createNaturalJoin(r, s), createScan(r), j1);
+    JoinOperator j3 = new JoinOperator(createNaturalJoin(r, q), createScan(q), j2);
+
+    Expression e =
+        new Expression(
+            Expression.AND,
+            new Expression(Expression.EQUALS, r.get("a").getExpression(), new Expression("1")),
+            new Expression(Expression.EQUALS, s.get("b").getExpression(), new Expression("2")));
+
+    OperatorParameters sel_params = new OperatorParameters(e.getExpressionList());
+    Operator sel = new SelectOperator(sel_params, j3);
+
+    ExpressionList ea = q.get("g").getExpression().getExpressionList();
+    ExpressionList agg = new ExpressionList(new Expression("sum", q.get("f").getExpression()));
+    OperatorParameters gb_params = new OperatorParameters(agg, ea);
+
+    Operator gb = new GroupByOperator(gb_params, sel);
+
+
+    AttributeStatistics ra = new AttributeStatistics(10, 1000, 0, 10);
+    AttributeStatistics rb = new AttributeStatistics(100, 1000, 0, 100);
+    AttributeStatistics rc = new AttributeStatistics(10, 1000, 0, 10);
+
+    AttributeStatistics sb = new AttributeStatistics(100, 1600, 0, 100);
+    AttributeStatistics sc = new AttributeStatistics(10, 1600, 0, 10);
+    AttributeStatistics sd = new AttributeStatistics(10, 1600, 0, 10);
+
+    AttributeStatistics te = new AttributeStatistics(10, 1900, 0, 10);
+    AttributeStatistics td = new AttributeStatistics(10, 1900, 0, 10);
+
+    AttributeStatistics qa = new AttributeStatistics(10, 4400, 0, 10);
+    AttributeStatistics qf = new AttributeStatistics(10, 4400, 0, 10);
+    AttributeStatistics qg = new AttributeStatistics(10, 4400, 0, 10);
+
+    TableStatisticsModel ts = new TableStatisticsModel();
+    ts.putStats(r.get("a"), ra);
+    ts.putStats(r.get("b"), rb);
+    ts.putStats(r.get("c"), rc);
+    ts.putStats(s.get("b"), sb);
+    ts.putStats(s.get("c"), sc);
+    ts.putStats(s.get("d"), sd);
+    ts.putStats(t.get("e"), te);
+    ts.putStats(t.get("d"), td);
+    ts.putStats(q.get("a"), qa);
+    ts.putStats(q.get("f"), qf);
+    ts.putStats(q.get("g"), qg);
+
+    PostgresPlanner p = new PostgresPlanner();
+    p.plan(gb, ts);
+    System.out.println(p.getLastPlanStats());
+  }
+
+
+
 
   private Operator createScan(Relation r) throws OperatorException {
     OperatorParameters scan_params = new OperatorParameters(r.getExpressionList());
