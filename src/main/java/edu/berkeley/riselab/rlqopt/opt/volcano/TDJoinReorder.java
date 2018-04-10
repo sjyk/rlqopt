@@ -95,7 +95,7 @@ public class TDJoinReorder implements PlanningModule {
       try {
         relations = TDMerge(relations, c, in);
         
-        System.out.println(relations.size());
+        //System.out.println(relations.size());
 
       } catch (OperatorException opex) {
         continue;

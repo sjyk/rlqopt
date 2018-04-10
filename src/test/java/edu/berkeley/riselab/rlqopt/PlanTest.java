@@ -4,6 +4,7 @@ import edu.berkeley.riselab.rlqopt.opt.AttributeStatistics;
 import edu.berkeley.riselab.rlqopt.opt.TableStatisticsModel;
 import edu.berkeley.riselab.rlqopt.opt.postgres.PostgresPlanner;
 import edu.berkeley.riselab.rlqopt.opt.volcano.VolcanoPlanner;
+import edu.berkeley.riselab.rlqopt.opt.learning.LearningPlanner;
 import edu.berkeley.riselab.rlqopt.preopt.*;
 import edu.berkeley.riselab.rlqopt.relalg.*;
 import junit.framework.Test;
@@ -132,9 +133,11 @@ public class PlanTest extends TestCase {
     p.plan(gb, ts);
     System.out.println(p.getLastPlanStats());*/
 
-    VolcanoPlanner p2 = new VolcanoPlanner();
+    LearningPlanner p2 = new LearningPlanner();
     p2.plan(gb, ts);
-    System.out.println(p2.getLastPlanStats());
+    p2.plan(gb, ts);
+    p2.plan(gb, ts);
+    System.out.println(p2.getTrainingData());
   }
 
 
