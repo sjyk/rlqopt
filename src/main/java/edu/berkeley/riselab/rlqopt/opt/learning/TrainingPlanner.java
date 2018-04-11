@@ -5,9 +5,9 @@ import edu.berkeley.riselab.rlqopt.preopt.*;
 import java.util.LinkedList;
 
 // the main planner class
-public class LearningPlanner extends Planner {
+public class TrainingPlanner extends Planner {
 
-  public LearningPlanner() {
+  public TrainingPlanner() {
     super(new LinkedList(), new LinkedList(), new LinkedList());
     // this.preopt.add(new ExposeProjection());
     this.preopt.add(new CascadedSelect());

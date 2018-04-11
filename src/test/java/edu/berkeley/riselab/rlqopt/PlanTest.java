@@ -2,7 +2,7 @@ package edu.berkeley.riselab.rlqopt;
 
 import edu.berkeley.riselab.rlqopt.opt.AttributeStatistics;
 import edu.berkeley.riselab.rlqopt.opt.TableStatisticsModel;
-import edu.berkeley.riselab.rlqopt.opt.learning.LearningPlanner;
+import edu.berkeley.riselab.rlqopt.opt.learning.TrainingPlanner;
 import edu.berkeley.riselab.rlqopt.opt.learning.ModelTrainer;
 import edu.berkeley.riselab.rlqopt.opt.learning.TrainingDataGenerator;
 import edu.berkeley.riselab.rlqopt.opt.postgres.PostgresPlanner;
@@ -187,7 +187,7 @@ public class PlanTest extends TestCase {
     ts.putStats(q.get("f"), qf);
     ts.putStats(q.get("g"), qg);
 
-    LearningPlanner p2 = new LearningPlanner();
+    TrainingPlanner p2 = new TrainingPlanner();
     LinkedList<Relation> rl = new LinkedList();
     rl.add(r);
     rl.add(s);

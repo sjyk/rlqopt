@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.LinkedList;
 import edu.berkeley.riselab.rlqopt.Relation;
 import edu.berkeley.riselab.rlqopt.opt.CostModel;
-import edu.berkeley.riselab.rlqopt.opt.learning.LearningPlanner;
 import java.io.*;
 import java.util.Arrays;
 import edu.berkeley.riselab.rlqopt.Operator;
@@ -20,9 +19,9 @@ public class TrainingDataGenerator {
 	LinkedList<Relation> allRelations;
 	String output;
 	CostModel c;
-	LearningPlanner planner;
+	TrainingPlanner planner;
 
-	public TrainingDataGenerator(LinkedList<Relation> allRelations, String output, CostModel c, LearningPlanner planner)
+	public TrainingDataGenerator(LinkedList<Relation> allRelations, String output, CostModel c, TrainingPlanner planner)
 	{
 		this.output = output;
 		this.allRelations = allRelations;

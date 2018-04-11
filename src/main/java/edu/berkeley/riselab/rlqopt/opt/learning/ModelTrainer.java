@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.LinkedList;
 import edu.berkeley.riselab.rlqopt.Relation;
 import edu.berkeley.riselab.rlqopt.opt.CostModel;
-import edu.berkeley.riselab.rlqopt.opt.learning.LearningPlanner;
 import java.io.*;
 import java.util.Arrays;
 import edu.berkeley.riselab.rlqopt.Operator;
@@ -35,7 +34,7 @@ public class ModelTrainer {
 	{   
 		//todo fix
 		int numInput = 22;
-		
+
         int numOutputs = 1;
         int nHidden = 10;
         double learningRate = 0.01;
