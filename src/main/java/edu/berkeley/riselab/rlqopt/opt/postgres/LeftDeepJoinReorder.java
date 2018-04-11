@@ -79,19 +79,16 @@ public class LeftDeepJoinReorder implements PlanningModule {
 
   // takes an operator returns an equivalent operator
 
-  public Operator apply(Operator in, CostModel c){
+  public Operator apply(Operator in, CostModel c) {
 
     LinkedList<Operator> newChildren = new LinkedList();
 
-    for(Operator child: in.source)
-      newChildren.add(apply(child,c));
+    for (Operator child : in.source) newChildren.add(apply(child, c));
 
     in.source = newChildren;
 
-    if (in instanceof KWayJoinOperator)
-      return reorderJoin(in,c);
-    else
-      return in;
+    if (in instanceof KWayJoinOperator) return reorderJoin(in, c);
+    else return in;
   }
 
   public Operator reorderJoin(Operator in, CostModel c) {
@@ -104,7 +101,7 @@ public class LeftDeepJoinReorder implements PlanningModule {
       costMap.put(singleton, child);
     }
 
-    //System.out.println(costMap);
+    // System.out.println(costMap);
 
     for (int i = 0; i < in.source.size() - 1; i++) {
       try {

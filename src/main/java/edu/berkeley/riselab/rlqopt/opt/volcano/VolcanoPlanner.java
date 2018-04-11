@@ -9,7 +9,7 @@ public class VolcanoPlanner extends Planner {
 
   public VolcanoPlanner() {
     super(new LinkedList(), new LinkedList(), new LinkedList());
-    //this.preopt.add(new ExposeProjection()); 
+    // this.preopt.add(new ExposeProjection());
     this.preopt.add(new CascadedSelect());
     this.preopt.add(new CorrespondAttributes());
     this.preopt.add(new FlattenJoin());
