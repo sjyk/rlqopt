@@ -21,6 +21,31 @@
       <version>0.8.0</version>
   </dependency>
 
+  <dependency>
+    <groupId>org.nd4j</groupId>
+    <artifactId>nd4j-native</artifactId>
+    <version>0.8.0</version>
+  </dependency>
+
+        <dependency>
+            <groupId>org.jblas</groupId>
+            <artifactId>jblas</artifactId>
+            <version>1.2.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.nd4j</groupId>
+            <artifactId>nd4j-api</artifactId>
+            <version>0.8.0</version>
+        </dependency>
+  
+        <dependency>
+            <groupId>org.nd4j</groupId>
+            <artifactId>nd4j-api</artifactId>
+            <version>0.8.0</version>
+            <type>test-jar</type>
+            <scope>test</scope> 
+        </dependency>
+
   </dependencies>
   <properties>
     <maven.compiler.source>1.8</maven.compiler.source>

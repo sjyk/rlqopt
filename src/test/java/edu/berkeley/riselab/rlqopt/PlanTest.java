@@ -3,6 +3,7 @@ package edu.berkeley.riselab.rlqopt;
 import edu.berkeley.riselab.rlqopt.opt.AttributeStatistics;
 import edu.berkeley.riselab.rlqopt.opt.TableStatisticsModel;
 import edu.berkeley.riselab.rlqopt.opt.learning.LearningPlanner;
+import edu.berkeley.riselab.rlqopt.opt.learning.ModelTrainer;
 import edu.berkeley.riselab.rlqopt.opt.learning.TrainingDataGenerator;
 import edu.berkeley.riselab.rlqopt.opt.postgres.PostgresPlanner;
 import edu.berkeley.riselab.rlqopt.preopt.*;
@@ -194,7 +195,10 @@ public class PlanTest extends TestCase {
     rl.add(q);
     
     TrainingDataGenerator tgen = new TrainingDataGenerator(rl, "output.csv", ts, p2);
-    //tgen.generate(gb,100);
+    ModelTrainer m = new ModelTrainer();
+    tgen.generateDataSetIterator(gb,100);
+    //m.train();
+    //tgen.generateFile(gb,100);
   
   }
 

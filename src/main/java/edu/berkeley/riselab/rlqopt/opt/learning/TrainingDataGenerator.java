@@ -1,5 +1,6 @@
 package edu.berkeley.riselab.rlqopt.opt.learning;
 
+import java.util.List;
 import java.util.LinkedList;
 import edu.berkeley.riselab.rlqopt.Relation;
 import edu.berkeley.riselab.rlqopt.opt.CostModel;
@@ -11,6 +12,8 @@ import edu.berkeley.riselab.rlqopt.Operator;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
+import org.deeplearning4j.datasets.iterator.impl.ListDataSetIterator;
 
 public class TrainingDataGenerator {
 
@@ -76,6 +79,22 @@ public class TrainingDataGenerator {
 		return new DataSet(Nd4j.create(trainingExamples, new int []{n,p-1}), Nd4j.create(reward, new int []{n,1}));
 
 	}
+
+
+	public DataSetIterator generateDataSetIterator(LinkedList<Operator> workload, int t){
+
+		DataSet dataSet = generateDataSet(workload, t);
+		List<DataSet> listDs = dataSet.asList();
+        return new ListDataSetIterator(listDs,100); //todo hyperparameter
+
+	}
+
+	public DataSetIterator generateDataSetIterator(Operator query, int t){
+		LinkedList<Operator> workload = new LinkedList();
+		workload.add(query);
+		return generateDataSetIterator(workload,t);
+	}
+
 
 	public void generateFile(Operator query, int t){
 
