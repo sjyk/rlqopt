@@ -194,7 +194,7 @@ public class PlanTest extends TestCase {
     rl.add(q);
     
     TrainingDataGenerator tgen = new TrainingDataGenerator(rl, "output.csv", ts, p2);
-    tgen.generate(gb,100);
+    //tgen.generate(gb,100);
   
   }
 
