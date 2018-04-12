@@ -67,7 +67,12 @@ public class TrainingDataGenerator {
 			p = vector.length;
 
 			float [] xBuffer = new float[p-1];
+
+			for (int ind=0; ind<vector.length - 1; ind++)
+				xBuffer[ind] = vector[ind].floatValue();
+
 			float [] yBuffer = new float[1];
+			yBuffer[0] = (float) (vector[vector.length - 1].floatValue()/10000.0); //todo fix
 
 			trainingExamples.add(Nd4j.create(xBuffer,new int[]{1,p-1}));						
 			reward.add(Nd4j.create(yBuffer,new int[]{1,1}));

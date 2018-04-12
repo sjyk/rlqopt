@@ -38,6 +38,8 @@ public class Planner {
 
   public Operator plan(Operator nominal, CostModel c) {
 
+    //Operator nominal = in.clone();
+
     if (c != null) planStats.initialCost = c.estimate(nominal).operatorIOcost;
 
     nominal = initialize(nominal);

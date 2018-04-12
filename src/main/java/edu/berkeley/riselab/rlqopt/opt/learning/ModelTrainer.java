@@ -22,7 +22,9 @@ import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.factory.Nd4j;
-//import org.nd4j.linalg.learning.config.Nesterovs;
+
+import org.nd4j.linalg.learning.config.Nesterovs;
+
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 
@@ -37,11 +39,12 @@ public class ModelTrainer {
 
         int numOutputs = 1;
         int nHidden = 10;
-        double learningRate = 0.01;
+        double learningRate = 1e-6;
 
         this.net = new MultiLayerNetwork(new NeuralNetConfiguration.Builder()
                 .seed(12345)
                 .weightInit(WeightInit.XAVIER)
+                .updater(new Nesterovs(learningRate, 0.1))
                 .list()
                 .layer(0, new DenseLayer.Builder().nIn(numInput).nOut(nHidden)
                         .activation(Activation.TANH)

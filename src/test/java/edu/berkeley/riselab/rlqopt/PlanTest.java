@@ -2,7 +2,10 @@ package edu.berkeley.riselab.rlqopt;
 
 import edu.berkeley.riselab.rlqopt.opt.AttributeStatistics;
 import edu.berkeley.riselab.rlqopt.opt.TableStatisticsModel;
+
 import edu.berkeley.riselab.rlqopt.opt.learning.TrainingPlanner;
+import edu.berkeley.riselab.rlqopt.opt.learning.LearningPlanner;
+
 import edu.berkeley.riselab.rlqopt.opt.learning.ModelTrainer;
 import edu.berkeley.riselab.rlqopt.opt.learning.TrainingDataGenerator;
 import edu.berkeley.riselab.rlqopt.opt.postgres.PostgresPlanner;
@@ -12,6 +15,8 @@ import java.util.LinkedList;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+
+import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 
 /** Unit test for simple App. */
 public class PlanTest extends TestCase {
@@ -196,8 +201,14 @@ public class PlanTest extends TestCase {
     
     TrainingDataGenerator tgen = new TrainingDataGenerator(rl, "output.csv", ts, p2);
     ModelTrainer m = new ModelTrainer();
-    tgen.generateDataSetIterator(gb,100);
-    //m.train();
+    MultiLayerNetwork net = m.train(tgen.generateDataSetIterator(gb,1000));
+
+    LearningPlanner p3 = new LearningPlanner(rl);
+    p3.setNetwork(net);
+    p3.plan(gb, ts);
+    
+    System.out.println(p3.getLastPlanStats());
+    
     //tgen.generateFile(gb,100);
   
   }

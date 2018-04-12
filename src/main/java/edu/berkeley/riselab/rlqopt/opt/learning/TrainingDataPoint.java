@@ -7,6 +7,9 @@ import edu.berkeley.riselab.rlqopt.opt.CostModel;
 import java.util.Arrays;
 import java.util.LinkedList;
 
+import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.api.ndarray.INDArray;
+
 public class TrainingDataPoint {
 
   public Operator[] oplist;
@@ -40,4 +43,17 @@ public class TrainingDataPoint {
 
     return vector;
   }
+
+  public INDArray featurizeND4j(LinkedList<Relation> allRelations, CostModel c) {
+    Double [] vector = featurize(allRelations, c);
+    int p = vector.length;
+
+    float [] xBuffer = new float[p-1];
+
+    for (int ind=0; ind<vector.length - 1; ind++)
+        xBuffer[ind] = vector[ind].floatValue();
+
+    return Nd4j.create(xBuffer,new int[]{1,p-1});
+  }
+
 }
