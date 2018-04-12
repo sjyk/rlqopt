@@ -18,6 +18,7 @@ public class ModelTrainer {
 
   public ModelTrainer(Database db) {
     int numInput = db.getNumAttributes() * 3;
+
     int numOutputs = 1;
     int nHidden = 64;
     double learningRate = 1e-5;

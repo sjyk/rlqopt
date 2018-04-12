@@ -11,7 +11,10 @@ import edu.berkeley.riselab.rlqopt.relalg.GroupByOperator;
 import edu.berkeley.riselab.rlqopt.relalg.JoinOperator;
 import edu.berkeley.riselab.rlqopt.relalg.SelectOperator;
 import edu.berkeley.riselab.rlqopt.relalg.TableAccessOperator;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -125,9 +128,9 @@ public class PreoptTest extends TestCase {
     //   JoinOperator([
     //     TableAccessOperator([R201.d, R201.e]),
     //     JoinOperator([
-    //       TableAccessOperator([R294.a, R294.b, R294.c]),
-    //       TableAccessOperator([R297.b, R297.c, R297.d])])])])
-    System.out.println(j3.toString());
+    //       TableAccessOperator([R294.a, R294.b, R294.c]),       // R.
+    //       TableAccessOperator([R297.b, R297.c, R297.d])])])])  // S.
+    //    System.out.println(j3.toString());
 
     Expression e =
         new Expression(
@@ -151,11 +154,12 @@ public class PreoptTest extends TestCase {
     //   JoinOperator([
     //     TableAccessOperator([R201.d, R201.e]),
     //     JoinOperator([
-    //       SelectOperator([TableAccessOperator([R294.a, R294.b, R294.c])]),
-    //       SelectOperator([TableAccessOperator([R297.b, R297.c, R297.d])])])])])
+    //       SelectOperator([TableAccessOperator([R294.a, R294.b, R294.c])]),       // R.a = 1
+    //       SelectOperator([TableAccessOperator([R297.b, R297.c, R297.d])])])])])  // S.b = 2
+    Operator transformed = o2.apply(o1.apply(sel));
     assertEquals(
         "JoinOperator([TableAccessOperator([R302.a, R302.f, R302.g]), JoinOperator([TableAccessOperator([R201.d, R201.e]), JoinOperator([SelectOperator([TableAccessOperator([R294.a, R294.b, R294.c])]), SelectOperator([TableAccessOperator([R297.b, R297.c, R297.d])])])])])",
-        o2.apply(o1.apply(sel)).toString());
+        transformed.toString());
   }
 
   public void testEagerSelectProject2() throws OperatorException {
@@ -181,15 +185,45 @@ public class PreoptTest extends TestCase {
     ExpressionList agg = new ExpressionList(new Expression("sum", q.get("f").getExpression()));
     OperatorParameters gb_params = new OperatorParameters(agg, ea);
 
+    // SELECT SUM(Q.f)
+    // FROM R, S, T, Q
+    // WHERE R.a = 1 AND S.b = 2 AND <join conditions>
+    // GROUP BY Q.g
     Operator gb = new GroupByOperator(gb_params, sel);
 
     CascadedSelect o1 = new CascadedSelect();
     ExposeProjection o2 = new ExposeProjection();
     EagerSelectProject o3 = new EagerSelectProject();
 
+    // Cascaded Select -> Expose Projection
+    // GroupByOperator([
+    //   ProjectOperator([  // Only references Q.f, Q.g.
+    //     SelectOperator([
+    //       SelectOperator([
+    //         JoinOperator([
+    //           TableAccessOperator([R302.a, R302.f, R302.g]),
+    //           JoinOperator([
+    //             TableAccessOperator([R201.d, R201.e]),
+    //             JoinOperator([
+    //               TableAccessOperator([R294.a, R294.b, R294.c]),
+    //               TableAccessOperator([R297.b, R297.c, R297.d])])])])])])])])
+    //    System.out.println(o2.apply(o1.apply(gb)).toString());
+
+    // Cascaded Select -> Expose Projection -> Eager Select Project
+    // GroupByOperator([
+    //   JoinOperator([
+    //     ProjectOperator([TableAccessOperator([R302.a, R302.f, R302.g])]),  //  f, g
+    //     JoinOperator([
+    //       TableAccessOperator([R201.d, R201.e]),
+    //       JoinOperator([
+    //         SelectOperator([TableAccessOperator([R294.a, R294.b, R294.c])]),
+    //         SelectOperator([TableAccessOperator([R297.b, R297.c, R297.d])])])])])])
+    Operator transformed = o3.apply(o2.apply(o1.apply(gb)));
+    System.out.println(transformed);
+    System.out.println(transformed.source.get(0).source.get(0).params.toString());
     assertEquals(
-        o3.apply(o2.apply(o1.apply(gb))).toString(),
-        "GroupByOperator([JoinOperator([ProjectOperator([TableAccessOperator([R302.a, R302.f, R302.g])]), JoinOperator([TableAccessOperator([R201.d, R201.e]), JoinOperator([SelectOperator([TableAccessOperator([R294.a, R294.b, R294.c])]), SelectOperator([TableAccessOperator([R297.b, R297.c, R297.d])])])])])])");
+        "GroupByOperator([JoinOperator([ProjectOperator([TableAccessOperator([R302.a, R302.f, R302.g])]), JoinOperator([TableAccessOperator([R201.d, R201.e]), JoinOperator([SelectOperator([TableAccessOperator([R294.a, R294.b, R294.c])]), SelectOperator([TableAccessOperator([R297.b, R297.c, R297.d])])])])])])",
+        transformed.toString());
   }
 
   public void testPlannerInit() throws OperatorException {
@@ -216,31 +250,26 @@ public class PreoptTest extends TestCase {
     OperatorParameters gb_params = new OperatorParameters(agg, ea);
 
     Operator gb = new GroupByOperator(gb_params, sel);
+    String originalPlan = gb.toString();
 
-    PreOptimizationRewrite o1 = new CascadedSelect();
-    PreOptimizationRewrite o2 = new ExposeProjection();
-    PreOptimizationRewrite o3 = new FlattenJoin();
-
-    LinkedList<PreOptimizationRewrite> l1 = new LinkedList();
-    l1.add(o1);
-    l1.add(o2);
-    l1.add(o3);
-
-    InitRewrite o4 = new EagerSelectProject();
-
-    LinkedList<InitRewrite> l2 = new LinkedList();
-    l2.add(o4);
+    List<PreOptimizationRewrite> l1 =
+        Arrays.asList(new CascadedSelect(), new ExposeProjection(), new FlattenJoin());
+    List<InitRewrite> l2 = Collections.singletonList(new EagerSelectProject());
 
     Planner p = new Planner(l1, l2, new LinkedList());
     p.plan(gb, null);
+
+    // NOTE(zongheng): currently the transformation rules are side-effectful, so we save the
+    // original plan's string representation for comparison.
+    //    assertTrue(!originalPlan.equals(planned.toString()));
   }
 
   private Operator createScan(Relation r) throws OperatorException {
     OperatorParameters scan_params = new OperatorParameters(r.getExpressionList());
-    TableAccessOperator scan_r = new TableAccessOperator(scan_params);
-    return scan_r;
+    return new TableAccessOperator(scan_params);
   }
 
+  /** Conjunct all attributes that "r" and "s" have in common. */
   private OperatorParameters createNaturalJoin(Relation r, Relation s) {
     Expression conjunction = null;
 
@@ -249,11 +278,13 @@ public class PreoptTest extends TestCase {
       for (Expression es : s.getExpressionList()) {
 
         if (er.noop.attribute.equals(es.noop.attribute)) {
-
           Expression clause = new Expression(Expression.EQUALS, er, es);
 
-          if (conjunction == null) conjunction = clause;
-          else conjunction = new Expression(Expression.AND, clause, conjunction);
+          if (conjunction == null) {
+            conjunction = clause;
+          } else {
+            conjunction = new Expression(Expression.AND, clause, conjunction);
+          }
         }
       }
     }

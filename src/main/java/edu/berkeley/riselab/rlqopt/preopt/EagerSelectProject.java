@@ -8,6 +8,7 @@ import edu.berkeley.riselab.rlqopt.relalg.TableAccessOperator;
 import java.util.LinkedList;
 import java.util.List;
 
+/** Push Select and Project nodes down to their respective table scans. */
 public class EagerSelectProject implements InitRewrite {
 
   private List<Operator> gatherSelectProject(Operator in) {
@@ -23,6 +24,13 @@ public class EagerSelectProject implements InitRewrite {
     return in;
   }
 
+  /**
+   * Returns true iff "in" is a table scan; "probe" is a project, or a select; all attributes that
+   * the two operators refer to come from the same relation.
+   *
+   * <p>Intuitively, returns whether "probe" (a select or a project) solely refers to the "in"
+   * relation.
+   */
   private boolean eligible(Operator in, Operator probe) {
     if (!(in instanceof TableAccessOperator)
         || (!((probe instanceof SelectOperator) || (probe instanceof ProjectOperator)))) {
@@ -31,23 +39,25 @@ public class EagerSelectProject implements InitRewrite {
 
     LinkedList<Attribute> s_attrList = in.params.expression.getAllVisibleAttributes();
     LinkedList<Attribute> t_attrList = probe.params.expression.getAllVisibleAttributes();
-
     for (Attribute s : s_attrList) {
       for (Attribute t : t_attrList) {
         if (!s.relation.equals(t.relation)) return false;
       }
     }
-
     return true;
   }
 
-  private Operator eagerEligible(Operator in, List<Operator> probe) {
+  /**
+   * Pushes "probes" (selects, projects) down to the "in" scan, if eligible. Returns an operator
+   * with the pushed down selects/projects wrapped around the scan.
+   */
+  private Operator eagerEligible(Operator in, List<Operator> probes) {
     if (!(in instanceof TableAccessOperator)) {
       return in;
     }
 
     Operator prev = in;
-    for (Operator p : probe) {
+    for (Operator p : probes) {
       if (eligible(in, p)) {
         p.source.clear();
         p.source.add(prev);
@@ -58,6 +68,7 @@ public class EagerSelectProject implements InitRewrite {
     return prev;
   }
 
+  /** Pushes "probes" down into any eligible table scan node under "rtn". */
   private Operator applyRecurse(Operator rtn, List<Operator> probes) {
     if (rtn instanceof TableAccessOperator) return eagerEligible(rtn, probes);
     LinkedList<Operator> children = new LinkedList<>();
