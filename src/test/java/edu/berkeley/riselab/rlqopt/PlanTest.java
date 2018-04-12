@@ -11,6 +11,7 @@ import edu.berkeley.riselab.rlqopt.opt.learning.TrainingDataGenerator;
 import edu.berkeley.riselab.rlqopt.opt.postgres.PostgresPlanner;
 import edu.berkeley.riselab.rlqopt.preopt.*;
 import edu.berkeley.riselab.rlqopt.relalg.*;
+import edu.berkeley.riselab.rlqopt.Database;
 import java.util.LinkedList;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -193,11 +194,7 @@ public class PlanTest extends TestCase {
     ts.putStats(q.get("g"), qg);
 
     TrainingPlanner p2 = new TrainingPlanner();
-    LinkedList<Relation> rl = new LinkedList();
-    rl.add(r);
-    rl.add(s);
-    rl.add(t);
-    rl.add(q);
+    Database rl = new Database(r,s,q,t);
     
     TrainingDataGenerator tgen = new TrainingDataGenerator(rl, "output.csv", ts, p2);
     ModelTrainer m = new ModelTrainer();

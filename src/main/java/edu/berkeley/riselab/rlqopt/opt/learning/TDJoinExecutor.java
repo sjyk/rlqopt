@@ -1,6 +1,7 @@
 package edu.berkeley.riselab.rlqopt.opt.learning;
 
 import edu.berkeley.riselab.rlqopt.Attribute;
+import edu.berkeley.riselab.rlqopt.Database;
 import edu.berkeley.riselab.rlqopt.Expression;
 import edu.berkeley.riselab.rlqopt.ExpressionList;
 import edu.berkeley.riselab.rlqopt.Operator;
@@ -28,13 +29,13 @@ public class TDJoinExecutor implements PlanningModule {
   LinkedList<TrainingDataPoint> trainingData;
   LinkedList<TrainingDataPoint> localData;
   MultiLayerNetwork net;
-  LinkedList<Relation> allRelations;
+  Database db;
 
-  public TDJoinExecutor(LinkedList<Relation> allRelations) {
+  public TDJoinExecutor(Database db) {
 
     this.rand = new Random();
     this.alpha = alpha;
-    this.allRelations = allRelations;
+    this.db = db;
     trainingData = new LinkedList();
   }
 
@@ -167,7 +168,7 @@ public class TDJoinExecutor implements PlanningModule {
 
         TrainingDataPoint tpd = new TrainingDataPoint(currentPair, new Double(0));
 
-        INDArray input = tpd.featurizeND4j(allRelations,c);
+        INDArray input = tpd.featurizeND4j(db,c);
         double cost;
         
         if (net != null)

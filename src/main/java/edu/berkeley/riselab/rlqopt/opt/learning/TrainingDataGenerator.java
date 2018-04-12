@@ -3,6 +3,7 @@ package edu.berkeley.riselab.rlqopt.opt.learning;
 import java.util.List;
 import java.util.LinkedList;
 import edu.berkeley.riselab.rlqopt.Relation;
+import edu.berkeley.riselab.rlqopt.Database;
 import edu.berkeley.riselab.rlqopt.opt.CostModel;
 import java.io.*;
 import java.util.Arrays;
@@ -16,15 +17,15 @@ import org.deeplearning4j.datasets.iterator.impl.ListDataSetIterator;
 
 public class TrainingDataGenerator {
 
-	LinkedList<Relation> allRelations;
+	Database db;
 	String output;
 	CostModel c;
 	TrainingPlanner planner;
 
-	public TrainingDataGenerator(LinkedList<Relation> allRelations, String output, CostModel c, TrainingPlanner planner)
+	public TrainingDataGenerator(Database db, String output, CostModel c, TrainingPlanner planner)
 	{
 		this.output = output;
-		this.allRelations = allRelations;
+		this.db = db;
 		this.c = c;
 		this.planner = planner;
 
@@ -41,7 +42,7 @@ public class TrainingDataGenerator {
 
 		for (TrainingDataPoint tr : planner.getTrainingData()) 
 		{
-			writer.write(Arrays.toString(tr.featurize(allRelations, c)).replace("[","").replace("]","")+"\n");
+			writer.write(Arrays.toString(tr.featurize(db, c)).replace("[","").replace("]","")+"\n");
 		}
 
     	writer.close();
@@ -63,7 +64,7 @@ public class TrainingDataGenerator {
 
 		for (TrainingDataPoint tr : planner.getTrainingData()) 
 		{
-			Double [] vector = tr.featurize(allRelations, c);
+			Double [] vector = tr.featurize(db, c);
 			p = vector.length;
 
 			float [] xBuffer = new float[p-1];

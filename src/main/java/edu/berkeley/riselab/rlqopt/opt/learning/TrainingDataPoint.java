@@ -1,6 +1,7 @@
 package edu.berkeley.riselab.rlqopt.opt.learning;
 
 import edu.berkeley.riselab.rlqopt.Attribute;
+import edu.berkeley.riselab.rlqopt.Database;
 import edu.berkeley.riselab.rlqopt.Operator;
 import edu.berkeley.riselab.rlqopt.Relation;
 import edu.berkeley.riselab.rlqopt.opt.CostModel;
@@ -25,10 +26,9 @@ public class TrainingDataPoint {
     return Arrays.toString(oplist) + " => " + cost;
   }
 
-  public Double[] featurize(LinkedList<Relation> allRelations, CostModel c) {
+  public Double[] featurize(Database db, CostModel c) {
 
-    LinkedList<Attribute> allAttributes = new LinkedList();
-    for (Relation r : allRelations) allAttributes.addAll(r.attributes());
+    LinkedList<Attribute> allAttributes = db.getAllAttributes();
 
     int n = allAttributes.size();
 
@@ -39,13 +39,13 @@ public class TrainingDataPoint {
 
     for (Attribute a : oplist[1].getVisibleAttributes()) vector[allAttributes.indexOf(a) + n] = 1.0;
 
-    vector[2*n] = cost/allRelations.size();
+    vector[2*n] = cost/db.size();
 
     return vector;
   }
 
-  public INDArray featurizeND4j(LinkedList<Relation> allRelations, CostModel c) {
-    Double [] vector = featurize(allRelations, c);
+  public INDArray featurizeND4j(Database db, CostModel c) {
+    Double [] vector = featurize(db, c);
     int p = vector.length;
 
     float [] xBuffer = new float[p-1];
