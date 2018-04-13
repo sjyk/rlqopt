@@ -3,6 +3,7 @@ package edu.berkeley.riselab.rlqopt.opt.learning;
 import java.util.List;
 import java.util.LinkedList;
 import edu.berkeley.riselab.rlqopt.Relation;
+import edu.berkeley.riselab.rlqopt.Database;
 import edu.berkeley.riselab.rlqopt.opt.CostModel;
 import java.io.*;
 import java.util.Arrays;
@@ -32,11 +33,9 @@ public class ModelTrainer {
 
 	MultiLayerNetwork net;
 
-	public ModelTrainer() 
+	public ModelTrainer(Database db) 
 	{   
-		//todo fix
-		int numInput = 22;
-
+		int numInput = db.getNumAttributes()*2;
         int numOutputs = 1;
         int nHidden = 10;
         double learningRate = 1e-6;

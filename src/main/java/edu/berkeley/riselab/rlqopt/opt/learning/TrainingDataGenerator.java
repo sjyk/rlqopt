@@ -21,13 +21,15 @@ public class TrainingDataGenerator {
 	String output;
 	CostModel c;
 	TrainingPlanner planner;
+	double scaling;
 
-	public TrainingDataGenerator(Database db, String output, CostModel c, TrainingPlanner planner)
+	public TrainingDataGenerator(Database db, String output, CostModel c, TrainingPlanner planner, double scaling)
 	{
 		this.output = output;
 		this.db = db;
 		this.c = c;
 		this.planner = planner;
+		this.scaling = scaling;
 
 	}
 
@@ -73,7 +75,7 @@ public class TrainingDataGenerator {
 				xBuffer[ind] = vector[ind].floatValue();
 
 			float [] yBuffer = new float[1];
-			yBuffer[0] = (float) (vector[vector.length - 1].floatValue()/10000.0); //todo fix
+			yBuffer[0] = (float) (vector[vector.length - 1].floatValue()/scaling); //todo fix
 
 			trainingExamples.add(Nd4j.create(xBuffer,new int[]{1,p-1}));						
 			reward.add(Nd4j.create(yBuffer,new int[]{1,1}));

@@ -196,8 +196,8 @@ public class PlanTest extends TestCase {
     TrainingPlanner p2 = new TrainingPlanner();
     Database rl = new Database(r,s,q,t);
     
-    TrainingDataGenerator tgen = new TrainingDataGenerator(rl, "output.csv", ts, p2);
-    ModelTrainer m = new ModelTrainer();
+    TrainingDataGenerator tgen = new TrainingDataGenerator(rl, "output.csv", ts, p2,10000.0);
+    ModelTrainer m = new ModelTrainer(rl);
     MultiLayerNetwork net = m.train(tgen.generateDataSetIterator(gb,1000));
 
     LearningPlanner p3 = new LearningPlanner(rl);
