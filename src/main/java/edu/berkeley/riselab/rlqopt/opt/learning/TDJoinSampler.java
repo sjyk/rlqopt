@@ -48,6 +48,8 @@ public class TDJoinSampler implements PlanningModule {
     }
 
     LinkedList<Attribute>[] rtn = new LinkedList[2];
+    rtn[0] = new LinkedList();
+    rtn[1] = new LinkedList();
 
     int count = 0;
     for (Relation r : leftAndRight.keySet()) {

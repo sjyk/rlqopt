@@ -54,6 +54,8 @@ public class TDJoinExecutor implements PlanningModule {
     }
 
     LinkedList<Attribute>[] rtn = new LinkedList[2];
+    rtn[0] = new LinkedList();
+    rtn[1] = new LinkedList();
 
     int count = 0;
     for (Relation r : leftAndRight.keySet()) {
@@ -121,7 +123,6 @@ public class TDJoinExecutor implements PlanningModule {
   }
 
   private Expression findJoinExpression(ExpressionList e, Operator i, Operator j) {
-
     LinkedList<Attribute> leftAttributes = i.getVisibleAttributes();
     LinkedList<Attribute> rightAttributes = j.getVisibleAttributes();
 
@@ -151,6 +152,9 @@ public class TDJoinExecutor implements PlanningModule {
 
         // don't join with self
         if (i == j) continue;
+
+        // don't join with self fix
+        if (i == null || j == null) continue;
 
         Expression e = findJoinExpression(in.params.expression, i, j);
 
