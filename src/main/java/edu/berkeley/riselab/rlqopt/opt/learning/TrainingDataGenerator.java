@@ -1,114 +1,99 @@
 package edu.berkeley.riselab.rlqopt.opt.learning;
 
-import java.util.List;
-import java.util.LinkedList;
-import edu.berkeley.riselab.rlqopt.Relation;
 import edu.berkeley.riselab.rlqopt.Database;
+import edu.berkeley.riselab.rlqopt.Operator;
 import edu.berkeley.riselab.rlqopt.opt.CostModel;
 import java.io.*;
 import java.util.Arrays;
-import edu.berkeley.riselab.rlqopt.Operator;
-
-import org.nd4j.linalg.dataset.DataSet;
-import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
+import java.util.LinkedList;
+import java.util.List;
 import org.deeplearning4j.datasets.iterator.impl.ListDataSetIterator;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.dataset.DataSet;
+import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
+import org.nd4j.linalg.factory.Nd4j;
 
 public class TrainingDataGenerator {
 
-	Database db;
-	String output;
-	CostModel c;
-	TrainingPlanner planner;
-	double scaling;
+  Database db;
+  String output;
+  CostModel c;
+  TrainingPlanner planner;
+  double scaling;
 
-	public TrainingDataGenerator(Database db, String output, CostModel c, TrainingPlanner planner, double scaling)
-	{
-		this.output = output;
-		this.db = db;
-		this.c = c;
-		this.planner = planner;
-		this.scaling = scaling;
+  public TrainingDataGenerator(
+      Database db, String output, CostModel c, TrainingPlanner planner, double scaling) {
+    this.output = output;
+    this.db = db;
+    this.c = c;
+    this.planner = planner;
+    this.scaling = scaling;
+  }
 
-	}
+  public void generateFile(LinkedList<Operator> workload, int t) {
 
-	public void generateFile(LinkedList<Operator> workload, int t){
+    try {
+      BufferedWriter writer = new BufferedWriter(new FileWriter(output));
 
-		try{
-		BufferedWriter writer = new BufferedWriter(new FileWriter(output));
+      for (int i = 0; i < t; i++) for (Operator query : workload) planner.plan(query, c);
 
-		for (int i=0; i< t; i++)
-			for(Operator query: workload)
-				planner.plan(query, c);
+      for (TrainingDataPoint tr : planner.getTrainingData()) {
+        writer.write(Arrays.toString(tr.featurize(db, c)).replace("[", "").replace("]", "") + "\n");
+      }
 
-		for (TrainingDataPoint tr : planner.getTrainingData()) 
-		{
-			writer.write(Arrays.toString(tr.featurize(db, c)).replace("[","").replace("]","")+"\n");
-		}
+      writer.close();
+    } catch (IOException ex) {
+    }
+    ;
+  }
 
-    	writer.close();
-    	}
-    	catch(IOException ex){};
+  public DataSet generateDataSet(LinkedList<Operator> workload, int t) {
 
-	}
+    for (int i = 0; i < t; i++) for (Operator query : workload) planner.plan(query, c);
 
-	public DataSet generateDataSet(LinkedList<Operator> workload, int t){
+    LinkedList<INDArray> trainingExamples = new LinkedList();
+    LinkedList<INDArray> reward = new LinkedList();
 
-		for (int i=0; i< t; i++)
-			for(Operator query: workload)
-				planner.plan(query, c);
+    int p = 0;
 
-		LinkedList<INDArray>  trainingExamples = new LinkedList();
-		LinkedList<INDArray>  reward = new LinkedList();
+    for (TrainingDataPoint tr : planner.getTrainingData()) {
+      Double[] vector = tr.featurize(db, c);
+      p = vector.length;
 
-		int p = 0;
+      float[] xBuffer = new float[p - 1];
 
-		for (TrainingDataPoint tr : planner.getTrainingData()) 
-		{
-			Double [] vector = tr.featurize(db, c);
-			p = vector.length;
+      for (int ind = 0; ind < vector.length - 1; ind++) xBuffer[ind] = vector[ind].floatValue();
 
-			float [] xBuffer = new float[p-1];
+      float[] yBuffer = new float[1];
+      yBuffer[0] = (float) (vector[vector.length - 1].floatValue() / scaling); // todo fix
 
-			for (int ind=0; ind<vector.length - 1; ind++)
-				xBuffer[ind] = vector[ind].floatValue();
+      trainingExamples.add(Nd4j.create(xBuffer, new int[] {1, p - 1}));
+      reward.add(Nd4j.create(yBuffer, new int[] {1, 1}));
+    }
 
-			float [] yBuffer = new float[1];
-			yBuffer[0] = (float) (vector[vector.length - 1].floatValue()/scaling); //todo fix
+    int n = trainingExamples.size();
 
-			trainingExamples.add(Nd4j.create(xBuffer,new int[]{1,p-1}));						
-			reward.add(Nd4j.create(yBuffer,new int[]{1,1}));
-		}
+    return new DataSet(
+        Nd4j.create(trainingExamples, new int[] {n, p - 1}), Nd4j.create(reward, new int[] {n, 1}));
+  }
 
-		int n = trainingExamples.size();
+  public DataSetIterator generateDataSetIterator(LinkedList<Operator> workload, int t) {
 
-		return new DataSet(Nd4j.create(trainingExamples, new int []{n,p-1}), Nd4j.create(reward, new int []{n,1}));
+    DataSet dataSet = generateDataSet(workload, t);
+    List<DataSet> listDs = dataSet.asList();
+    return new ListDataSetIterator(listDs, 100); // todo hyperparameter
+  }
 
-	}
+  public DataSetIterator generateDataSetIterator(Operator query, int t) {
+    LinkedList<Operator> workload = new LinkedList();
+    workload.add(query);
+    return generateDataSetIterator(workload, t);
+  }
 
+  public void generateFile(Operator query, int t) {
 
-	public DataSetIterator generateDataSetIterator(LinkedList<Operator> workload, int t){
-
-		DataSet dataSet = generateDataSet(workload, t);
-		List<DataSet> listDs = dataSet.asList();
-        return new ListDataSetIterator(listDs,100); //todo hyperparameter
-
-	}
-
-	public DataSetIterator generateDataSetIterator(Operator query, int t){
-		LinkedList<Operator> workload = new LinkedList();
-		workload.add(query);
-		return generateDataSetIterator(workload,t);
-	}
-
-
-	public void generateFile(Operator query, int t){
-
-		LinkedList<Operator> workload = new LinkedList();
-		workload.add(query);
-		generateFile(workload,t);
-	}
-
-
+    LinkedList<Operator> workload = new LinkedList();
+    workload.add(query);
+    generateFile(workload, t);
+  }
 }

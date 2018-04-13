@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Random;
-
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
@@ -168,15 +167,13 @@ public class TDJoinExecutor implements PlanningModule {
 
         TrainingDataPoint tpd = new TrainingDataPoint(currentPair, new Double(0));
 
-        INDArray input = tpd.featurizeND4j(db,c);
+        INDArray input = tpd.featurizeND4j(db, c);
         double cost;
-        
-        if (net != null)
-        {
+
+        if (net != null) {
           INDArray out = net.output(input, false);
           cost = out.getDouble(0);
-        }
-        else{
+        } else {
           cost = c.estimate(cjv).operatorIOcost;
         }
 

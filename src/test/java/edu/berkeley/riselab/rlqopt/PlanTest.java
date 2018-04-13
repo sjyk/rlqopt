@@ -2,21 +2,16 @@ package edu.berkeley.riselab.rlqopt;
 
 import edu.berkeley.riselab.rlqopt.opt.AttributeStatistics;
 import edu.berkeley.riselab.rlqopt.opt.TableStatisticsModel;
-
-import edu.berkeley.riselab.rlqopt.opt.learning.TrainingPlanner;
 import edu.berkeley.riselab.rlqopt.opt.learning.LearningPlanner;
-
 import edu.berkeley.riselab.rlqopt.opt.learning.ModelTrainer;
 import edu.berkeley.riselab.rlqopt.opt.learning.TrainingDataGenerator;
+import edu.berkeley.riselab.rlqopt.opt.learning.TrainingPlanner;
 import edu.berkeley.riselab.rlqopt.opt.postgres.PostgresPlanner;
 import edu.berkeley.riselab.rlqopt.preopt.*;
 import edu.berkeley.riselab.rlqopt.relalg.*;
-import edu.berkeley.riselab.rlqopt.Database;
-import java.util.LinkedList;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 
 /** Unit test for simple App. */
@@ -140,7 +135,7 @@ public class PlanTest extends TestCase {
     System.out.println(p.getLastPlanStats());
   }
 
-   public void test3() throws OperatorException {
+  public void test3() throws OperatorException {
     Relation r = new Relation("a", "b", "c");
     Relation s = new Relation("b", "c", "d");
     Relation t = new Relation("e", "d");
@@ -194,22 +189,21 @@ public class PlanTest extends TestCase {
     ts.putStats(q.get("g"), qg);
 
     TrainingPlanner p2 = new TrainingPlanner();
-    Database rl = new Database(r,s,q,t);
-    
-    TrainingDataGenerator tgen = new TrainingDataGenerator(rl, "output.csv", ts, p2,10000.0);
+    Database rl = new Database(r, s, q, t);
+
+    TrainingDataGenerator tgen = new TrainingDataGenerator(rl, "output.csv", ts, p2, 10000.0);
     ModelTrainer m = new ModelTrainer(rl);
-    MultiLayerNetwork net = m.train(tgen.generateDataSetIterator(gb,1000));
+    MultiLayerNetwork net = m.train(tgen.generateDataSetIterator(gb, 1000));
 
     LearningPlanner p3 = new LearningPlanner(rl);
     p3.setNetwork(net);
     p3.plan(gb, ts);
-    
-    System.out.println(p3.getLastPlanStats());
-    
-    //tgen.generateFile(gb,100);
-  
-  }
 
+    System.out.println(p3.getLastPlanStats());
+
+    // tgen.generateFile(gb,100);
+
+  }
 
   private Operator createScan(Relation r) throws OperatorException {
     OperatorParameters scan_params = new OperatorParameters(r.getExpressionList());

@@ -1,8 +1,7 @@
 package edu.berkeley.riselab.rlqopt.opt.learning;
 
-import edu.berkeley.riselab.rlqopt.opt.*;
-import edu.berkeley.riselab.rlqopt.Relation;
 import edu.berkeley.riselab.rlqopt.Database;
+import edu.berkeley.riselab.rlqopt.opt.*;
 import edu.berkeley.riselab.rlqopt.preopt.*;
 import java.util.LinkedList;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;

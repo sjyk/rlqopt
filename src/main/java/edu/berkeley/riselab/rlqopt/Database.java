@@ -2,24 +2,23 @@ package edu.berkeley.riselab.rlqopt;
 
 import java.util.LinkedList;
 
-public class Database extends LinkedList<Relation>{
+public class Database extends LinkedList<Relation> {
 
-	public Database(Relation... args) {
+  public Database(Relation... args) {
 
-	    super();
+    super();
 
-	    // initialize with the input list
-	    for (Relation arg : args) this.add(arg);
-	}
+    // initialize with the input list
+    for (Relation arg : args) this.add(arg);
+  }
 
-	public LinkedList<Attribute> getAllAttributes(){
-		LinkedList<Attribute> allAttributes = new LinkedList();
-    	for (Relation r : this) allAttributes.addAll(r.attributes());
-    	return allAttributes;
-	}
+  public LinkedList<Attribute> getAllAttributes() {
+    LinkedList<Attribute> allAttributes = new LinkedList();
+    for (Relation r : this) allAttributes.addAll(r.attributes());
+    return allAttributes;
+  }
 
-	public int getNumAttributes(){
-		return getAllAttributes().size();
-	}
-
+  public int getNumAttributes() {
+    return getAllAttributes().size();
+  }
 }
