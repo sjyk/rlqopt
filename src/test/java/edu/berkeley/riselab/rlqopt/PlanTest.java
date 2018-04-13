@@ -9,6 +9,7 @@ import edu.berkeley.riselab.rlqopt.opt.learning.TrainingPlanner;
 import edu.berkeley.riselab.rlqopt.opt.postgres.PostgresPlanner;
 import edu.berkeley.riselab.rlqopt.preopt.*;
 import edu.berkeley.riselab.rlqopt.relalg.*;
+import edu.berkeley.riselab.rlqopt.workload.WorkloadGenerator;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -203,6 +204,12 @@ public class PlanTest extends TestCase {
 
     // tgen.generateFile(gb,100);
 
+  }
+
+  public void test4() throws OperatorException {
+
+    WorkloadGenerator w = new WorkloadGenerator(7, 10, 4);
+    System.out.println(w.generateWorkload(100));
   }
 
   private Operator createScan(Relation r) throws OperatorException {
