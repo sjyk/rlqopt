@@ -73,7 +73,7 @@ public class TrainingDataPoint {
           cardMap.get(a) / c.estimate(oplist[0]).resultCardinality;
     }
 
-    vector[2 * n] = cost / db.size();
+    vector[2 * n] = cost;
 
     return vector;
   }

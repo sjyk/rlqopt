@@ -62,7 +62,7 @@ public class TableStatisticsModel extends HashMap<Attribute, LinkedList<Attribut
     ExpressionList el = in.params.expression;
     LinkedList<Attribute> al = el.getAllVisibleAttributes();
     long estimate = cardinalityEstimate(al);
-    return new Cost(estimate, estimate, 0);
+    return new Cost(0, estimate, 0);
   }
 
   public Cost projectOperator(Operator in, Cost costIn) {
@@ -127,12 +127,35 @@ public class TableStatisticsModel extends HashMap<Attribute, LinkedList<Attribut
     }
   }
 
+  public double estimateJoinReductionFactor(Expression e) {
+    if (e.op.equals(Expression.AND))
+      return estimateJoinReductionFactor(e.children.get(0))
+          * estimateJoinReductionFactor(e.children.get(1));
+
+    HashSet<Attribute> attrSet = e.getVisibleAttributeSet();
+    Iterator<Attribute> attrSetIter = attrSet.iterator();
+    Attribute a1 = attrSetIter.next();
+    Attribute a2 = attrSetIter.next();
+
+    try {
+
+      double rf = 0;
+      rf = estimateReductionFactorDouble(e, get(a1).get(0), get(a2).get(0));
+
+      return rf;
+    } catch (Exception ex) {
+      return defaultSelectivity;
+    }
+  }
+
   private double estimateReductionFactorDouble(
       Expression e, AttributeStatistics a1, AttributeStatistics a2) throws CannotEstimateException {
 
     if (e.op.equals(Expression.EQUALS)) {
 
-      return clip10(1.0 / Math.max(a1.distinctValues, a2.distinctValues));
+      return clip10(
+          (Math.min(a1.distinctValues, a2.distinctValues) + 0.0)
+              / Math.max(a1.distinctValues, a2.distinctValues));
 
     } else if (e.op.equals(Expression.GREATER_THAN)
         || e.op.equals(Expression.GREATER_THAN_EQUALS)) {
@@ -154,36 +177,62 @@ public class TableStatisticsModel extends HashMap<Attribute, LinkedList<Attribut
 
     if (in.params.expression.get(0).isEquality()) {
 
-      // long cartesian = l.resultCardinality * r.resultCardinality;
-      // System.out.println(l.resultCardinality + " " + r.resultCardinality);
-      long result = (long) (Math.min(l.resultCardinality, r.resultCardinality));
+      double jrf = estimateJoinReductionFactor(in.params.expression.get(0));
+      long result = Math.max((long) (Math.max(l.resultCardinality, r.resultCardinality) * jrf), 1);
+      // System.out.println(Math.max(l.resultCardinality, r.resultCardinality) + " " + result*jrf);
+
       // System.out.println(result + " " + l.resultCardinality + " " + r.resultCardinality);
 
       return new Cost(2 * l.resultCardinality + 2 * r.resultCardinality, result, 0);
+
     } else
       return new Cost(
           l.resultCardinality * r.resultCardinality, l.resultCardinality * r.resultCardinality, 0);
   }
 
-  public Cost estimate(Operator in) {
+  public Cost cartesianOperator(Operator in, Cost l, Cost r) {
+
+    return new Cost(
+        l.resultCardinality * r.resultCardinality, l.resultCardinality * r.resultCardinality, 0);
+  }
+
+  private Cost doEstimate(Operator in) {
 
     Cost runningCost = new Cost(0, 0, 0);
 
     if (in instanceof TableAccessOperator) return tableAccessOperator(in);
 
     if (in instanceof ProjectOperator)
-      return projectOperator(in, estimate(in.source.get(0))).plus(estimate(in.source.get(0)));
+      return projectOperator(in, doEstimate(in.source.get(0))).plus(doEstimate(in.source.get(0)));
 
     if (in instanceof SelectOperator)
-      return selectOperator(in, estimate(in.source.get(0))).plus(estimate(in.source.get(0)));
+      return selectOperator(in, doEstimate(in.source.get(0))).plus(doEstimate(in.source.get(0)));
 
     if (in instanceof GroupByOperator)
-      return groupByOperator(in, estimate(in.source.get(0))).plus(estimate(in.source.get(0)));
+      return groupByOperator(in, estimate(in.source.get(0))).plus(doEstimate(in.source.get(0)));
 
     if (in instanceof JoinOperator)
-      return joinOperator(in, estimate(in.source.get(0)), estimate(in.source.get(1)))
+      return joinOperator(in, doEstimate(in.source.get(0)), doEstimate(in.source.get(1)))
           .plus(estimate(in.source.get(0)))
           .plus(estimate(in.source.get(1)));
+
+    if (in instanceof CartesianOperator)
+      return cartesianOperator(in, doEstimate(in.source.get(0)), doEstimate(in.source.get(1)))
+          .plus(estimate(in.source.get(0)))
+          .plus(estimate(in.source.get(1)));
+
+    return runningCost;
+  }
+
+  public Cost estimate(Operator in) {
+    Cost runningCost = new Cost(0, 0, 0);
+    runningCost = doEstimate(in);
+
+    if (runningCost.operatorIOcost < 0) runningCost.operatorIOcost = Long.MAX_VALUE;
+
+    if (runningCost.operatorCPUcost < 0) runningCost.operatorCPUcost = Long.MAX_VALUE;
+
+    if (runningCost.resultCardinality < 0) runningCost.resultCardinality = Long.MAX_VALUE;
 
     return runningCost;
   }

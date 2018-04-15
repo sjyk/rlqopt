@@ -114,6 +114,11 @@ public class TDJoinSampler implements PlanningModule {
     Operator rtn = (Operator) relations.toArray()[0];
     double cost = c.estimate(rtn).operatorIOcost;
 
+    /*if (rtn instanceof CartesianOperator)
+      System.out.println("C:" + cost);
+    else
+      System.out.println("J:" + cost);*/
+
     for (TrainingDataPoint t : localData) {
       t.cost = cost;
       trainingData.add(t);
@@ -139,12 +144,53 @@ public class TDJoinSampler implements PlanningModule {
     return null;
   }
 
+  private Operator[] randomJoin(HashSet<Operator> relations, Operator in) throws OperatorException {
+    Operator[] pairToJoin = new Operator[3];
+
+    Operator[] relArray = relations.toArray(new Operator[relations.size()]);
+
+    int ind1 = rand.nextInt(relArray.length);
+    int ind2 = rand.nextInt(relArray.length);
+
+    while (ind1 == ind2) ind2 = rand.nextInt(relArray.length);
+
+    Operator cjv = getJoinOperator(relArray[ind1], relArray[ind2], in);
+    pairToJoin[0] = relArray[ind1];
+    pairToJoin[1] = relArray[ind2];
+    pairToJoin[2] = cjv;
+    return pairToJoin;
+  }
+
+  private Operator getJoinOperator(Operator i, Operator j, Operator in) throws OperatorException {
+
+    Expression e = findJoinExpression(in.params.expression, i, j);
+
+    Operator cjv;
+
+    if (e == null) {
+      OperatorParameters params = new OperatorParameters(new ExpressionList());
+      cjv = new CartesianOperator(params, i, j);
+
+    } else {
+      OperatorParameters params = new OperatorParameters(e.getExpressionList());
+      cjv = new JoinOperator(params, i, j);
+    }
+
+    return cjv;
+  }
+
   public HashSet<Operator> TDMerge(HashSet<Operator> relations, CostModel c, Operator in)
       throws OperatorException {
 
     double minCost = Double.MAX_VALUE;
     Operator[] pairToJoin = new Operator[3];
     HashSet<Operator> rtn = (HashSet) relations.clone();
+
+    boolean egreedy = false;
+    if (rand.nextDouble() < alpha) {
+      egreedy = true;
+      pairToJoin = randomJoin(relations, in);
+    }
 
     // for all pairs of operators
     for (Operator i : relations) {
@@ -154,18 +200,13 @@ public class TDJoinSampler implements PlanningModule {
         // don't join with self
         if (i == j) continue;
 
-        Expression e = findJoinExpression(in.params.expression, i, j);
-
-        if (e == null) continue;
-
-        OperatorParameters params = new OperatorParameters(e.getExpressionList());
-        JoinOperator cjv = new JoinOperator(params, i, j);
+        Operator cjv = getJoinOperator(i, j, in);
 
         // exploration
         // System.out.println(rand.nextGaussian());
-        double cost = c.estimate(cjv).operatorIOcost + alpha * rand.nextGaussian();
+        double cost = c.estimate(cjv).operatorIOcost;
 
-        if (cost < minCost) {
+        if ((cost < minCost) && !egreedy) {
           minCost = cost;
           pairToJoin[0] = i;
           pairToJoin[1] = j;

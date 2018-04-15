@@ -20,8 +20,8 @@ public class ModelTrainer {
   public ModelTrainer(Database db) {
     int numInput = db.getNumAttributes() * 2;
     int numOutputs = 1;
-    int nHidden = 10;
-    double learningRate = 1e-6;
+    int nHidden = 32;
+    double learningRate = 1e-4;
 
     this.net =
         new MultiLayerNetwork(
@@ -55,7 +55,7 @@ public class ModelTrainer {
     net.setListeners(new ScoreIterationListener(1));
 
     // Train the network on the full data set, and evaluate in periodically
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 1000; i++) {
       iterator.reset();
       net.fit(iterator);
     }

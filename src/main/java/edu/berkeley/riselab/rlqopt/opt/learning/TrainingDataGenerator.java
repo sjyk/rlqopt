@@ -21,13 +21,12 @@ public class TrainingDataGenerator {
   TrainingPlanner planner;
   double scaling;
 
-  public TrainingDataGenerator(
-      Database db, String output, CostModel c, TrainingPlanner planner, double scaling) {
+  public TrainingDataGenerator(Database db, String output, CostModel c, TrainingPlanner planner) {
     this.output = output;
     this.db = db;
     this.c = c;
     this.planner = planner;
-    this.scaling = scaling;
+    // this.scaling = scaling;
   }
 
   public void generateFile(LinkedList<Operator> workload, int t) {
@@ -65,7 +64,7 @@ public class TrainingDataGenerator {
       for (int ind = 0; ind < vector.length - 1; ind++) xBuffer[ind] = vector[ind].floatValue();
 
       float[] yBuffer = new float[1];
-      yBuffer[0] = (float) (vector[vector.length - 1].floatValue() / scaling); // todo fix
+      yBuffer[0] = (float) Math.log(vector[vector.length - 1].floatValue()); // todo fix scaling
 
       trainingExamples.add(Nd4j.create(xBuffer, new int[] {1, p - 1}));
       reward.add(Nd4j.create(yBuffer, new int[] {1, 1}));

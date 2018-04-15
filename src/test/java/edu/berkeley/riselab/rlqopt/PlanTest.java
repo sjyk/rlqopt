@@ -10,11 +10,11 @@ import edu.berkeley.riselab.rlqopt.opt.postgres.PostgresPlanner;
 import edu.berkeley.riselab.rlqopt.preopt.*;
 import edu.berkeley.riselab.rlqopt.relalg.*;
 import edu.berkeley.riselab.rlqopt.workload.WorkloadGenerator;
+import java.util.LinkedList;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
-import java.util.LinkedList;
 
 /** Unit test for simple App. */
 public class PlanTest extends TestCase {
@@ -193,7 +193,7 @@ public class PlanTest extends TestCase {
     TrainingPlanner p2 = new TrainingPlanner();
     Database rl = new Database(r, s, q, t);
 
-    TrainingDataGenerator tgen = new TrainingDataGenerator(rl, "output.csv", ts, p2, 10000.0);
+    TrainingDataGenerator tgen = new TrainingDataGenerator(rl, "output.csv", ts, p2);
     ModelTrainer m = new ModelTrainer(rl);
     MultiLayerNetwork net = m.train(tgen.generateDataSetIterator(gb, 1000));
 
@@ -208,23 +208,27 @@ public class PlanTest extends TestCase {
   }
 
   public void test4() throws OperatorException {
-    WorkloadGenerator w = new WorkloadGenerator(7, 10, 4);
-    LinkedList<Operator> training = w.generateWorkload(100);
+    WorkloadGenerator w = new WorkloadGenerator(7, 20, 3);
+    LinkedList<Operator> training = w.generateWorkload(500);
 
     TrainingPlanner p2 = new TrainingPlanner();
-    TrainingDataGenerator tgen = new TrainingDataGenerator(w.getDatabase(), "output.csv", w.getStatsModel(), p2, 1000000.0);
+    TrainingDataGenerator tgen =
+        new TrainingDataGenerator(w.getDatabase(), "output.csv", w.getStatsModel(), p2);
     ModelTrainer m = new ModelTrainer(w.getDatabase());
     MultiLayerNetwork net = m.train(tgen.generateDataSetIterator(training, 10));
 
     LearningPlanner p3 = new LearningPlanner(w.getDatabase());
     p3.setNetwork(net);
 
-    LinkedList<Operator> test = w.generateWorkload(100);
-    for (Operator op: test){
-        p3.plan(op, w.getStatsModel());
-        System.out.println(p3.getLastPlanStats());
-    }
+    PostgresPlanner p4 = new PostgresPlanner();
 
+    LinkedList<Operator> test = w.generateWorkload(100);
+    for (Operator op : test) {
+      System.out.println(op);
+      op = p3.plan(op, w.getStatsModel());
+      System.out.println(op);
+      System.out.println(p3.getLastPlanStats());
+    }
   }
 
   private Operator createScan(Relation r) throws OperatorException {

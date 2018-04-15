@@ -31,19 +31,22 @@ public class WorkloadGenerator {
       int numAttributesInRel = rand.nextInt(numAttributes) + 1;
 
       HashSet<String> attributes = new HashSet();
+      long[] sizes = new long[] {5, 50, 500, 5000, 50000, 500000};
 
-      int size = (int) Math.abs(Math.pow(10, rand.nextInt(oom)) + rand.nextInt());
+      long size = sizes[rand.nextInt(5)];
+      // int size = (int) Math.abs(Math.pow(rand.nextInt(oom), 10) + rand.nextInt());
 
       for (int j = 0; j < numAttributesInRel; j++) {
         attributes.add(rand.nextInt(numAttributes) + "");
       }
 
       Relation r = new Relation(attributes.toArray(new String[attributes.size()]));
+
       db.add(r);
 
       for (Attribute a : r.attributes()) {
-        int range = rand.nextInt(size);
-        AttributeStatistics stats = new AttributeStatistics(range, size, 0, range);
+        long range = size;
+        AttributeStatistics stats = new AttributeStatistics(size, size, 0, size);
         ts.putStats(a, stats);
       }
     }
@@ -136,7 +139,7 @@ public class WorkloadGenerator {
       }
     }
 
-    if (conjunction == null) conjunction = new Expression("TRUE");
+    if (conjunction == null) return null;
 
     return new OperatorParameters(conjunction.getExpressionList());
   }
@@ -161,7 +164,12 @@ public class WorkloadGenerator {
         prev = r;
       } else {
         OperatorParameters params = createNaturalJoin(r, prev);
-        rtn = new JoinOperator(params, createScan(r), rtn);
+
+        if (params == null)
+          rtn =
+              new CartesianOperator(
+                  new OperatorParameters(new ExpressionList()), createScan(r), rtn);
+        else rtn = new JoinOperator(params, createScan(r), rtn);
       }
     }
 
@@ -182,14 +190,14 @@ public class WorkloadGenerator {
 
     LinkedList<Operator> workload = new LinkedList();
     for (int i = 0; i < n; i++) {
-      int k = rand.nextInt(6);
+      int k = rand.nextInt(3);
 
-      if (k == 0) workload.add(generateSingleSelection());
-      else if (k == 1) workload.add(generateSingleGroupBy());
-      else if (k == 2) workload.add(generateSelGroupBy());
-      else if (k == 3) workload.add(generateJoin());
-      else if (k == 4) workload.add(generateJoinSel());
-      else if (k == 5) workload.add(generateJoinSelGb());
+      // if (k == 0) workload.add(generateSingleSelection());
+      // else if (k == 1) workload.add(generateSingleGroupBy());
+      // else if (k == 2) workload.add(generateSelGroupBy());
+      if (k == 0) workload.add(generateJoin());
+      else if (k == 1) workload.add(generateJoinSel());
+      else if (k == 2) workload.add(generateJoinSelGb());
     }
 
     return workload;

@@ -67,7 +67,7 @@ public class CostTest extends TestCase {
     t.putStats(r.get("b"), b);
     t.putStats(r.get("c"), c);
 
-    assertEquals(t.estimate(createScan(r)), new Cost(19, 19, 0));
+    assertEquals(t.estimate(createScan(r)), new Cost(0, 19, 0));
 
     // System.out.println(a.estimateReductionFactor(e));
     // assertEquals(f.apply(j3).params.expression.toString(), "[equals([R294.a, R302.a]),
@@ -96,7 +96,7 @@ public class CostTest extends TestCase {
 
     // System.out.println(t.estimate(gb));
 
-    assertEquals(t.estimate(gb), new Cost(38, 10, 0));
+    assertEquals(t.estimate(gb), new Cost(19, 10, 0));
   }
 
   public void testStatisticalCostEstimates3() throws OperatorException {

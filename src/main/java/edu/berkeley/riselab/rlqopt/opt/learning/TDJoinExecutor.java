@@ -96,6 +96,15 @@ public class TDJoinExecutor implements PlanningModule {
 
   public Operator reorderJoin(Operator in, CostModel c) {
 
+    if (in.source.size() == 2) {
+      try {
+        OperatorParameters params = new OperatorParameters(in.params.expression);
+        return new JoinOperator(params, in.source.get(0), in.source.get(1));
+      } catch (OperatorException opex) {
+        return in;
+      }
+    }
+
     HashSet<Operator> relations = new HashSet();
 
     localData = new LinkedList();
@@ -110,14 +119,16 @@ public class TDJoinExecutor implements PlanningModule {
       try {
         relations = TDMerge(relations, c, in);
 
-        // System.out.println(relations.size());
-
       } catch (OperatorException opex) {
         continue;
       }
     }
 
     Operator rtn = (Operator) relations.toArray()[0];
+    double cost = c.estimate(rtn).operatorIOcost;
+
+    if (!(rtn instanceof JoinOperator) || relations.size() > 1)
+      System.out.println("___!!!!___" + relations);
 
     return rtn;
   }
@@ -153,15 +164,18 @@ public class TDJoinExecutor implements PlanningModule {
         // don't join with self
         if (i == j) continue;
 
-        // don't join with self fix
-        if (i == null || j == null) continue;
-
         Expression e = findJoinExpression(in.params.expression, i, j);
 
-        if (e == null) continue;
+        Operator cjv;
 
-        OperatorParameters params = new OperatorParameters(e.getExpressionList());
-        JoinOperator cjv = new JoinOperator(params, i, j);
+        if (e == null) {
+          // OperatorParameters params = new OperatorParameters(new ExpressionList());
+          // cjv = new CartesianOperator(params, i, j);
+          continue;
+        } else {
+          OperatorParameters params = new OperatorParameters(e.getExpressionList());
+          cjv = new JoinOperator(params, i, j);
+        }
 
         // exploration
         Operator[] currentPair = new Operator[3];
@@ -177,9 +191,12 @@ public class TDJoinExecutor implements PlanningModule {
         if (net != null) {
           INDArray out = net.output(input, false);
           cost = out.getDouble(0);
+          System.out.println(cost + " " + Math.log(c.estimate(cjv).operatorIOcost));
         } else {
           cost = c.estimate(cjv).operatorIOcost;
         }
+
+        if (Double.isNaN(cost)) cost = c.estimate(cjv).operatorIOcost;
 
         if (cost < minCost) {
           minCost = cost;
