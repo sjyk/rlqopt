@@ -31,7 +31,7 @@ public class WorkloadGenerator {
       int numAttributesInRel = rand.nextInt(numAttributes) + 1;
 
       HashSet<String> attributes = new HashSet();
-      long[] sizes = new long[] {5, 50, 500, 5000, 50000, 500000};
+      long[] sizes = new long[] {5, 500, 50000, 500000, 500000000};
 
       long size = sizes[rand.nextInt(5)];
       // int size = (int) Math.abs(Math.pow(rand.nextInt(oom), 10) + rand.nextInt());
@@ -196,8 +196,8 @@ public class WorkloadGenerator {
       // else if (k == 1) workload.add(generateSingleGroupBy());
       // else if (k == 2) workload.add(generateSelGroupBy());
       if (k == 0) workload.add(generateJoin());
-      else if (k == 1) workload.add(generateJoinSel());
-      else if (k == 2) workload.add(generateJoinSelGb());
+      //else if (k == 1) workload.add(generateJoinSel());
+      //else if (k == 2) workload.add(generateJoinSelGb());
     }
 
     return workload;

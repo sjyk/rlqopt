@@ -149,6 +149,12 @@ public class TDJoinExecutor implements PlanningModule {
     return null;
   }
 
+  private Operator getRemainingOperators(HashSet<Operator> relations) throws OperatorException{
+    Operator [] relArray = relations.toArray(new Operator [relations.size()]);
+    OperatorParameters params = new OperatorParameters(new ExpressionList());
+    return new KWayJoinOperator(params, relArray);
+  }
+
   public HashSet<Operator> TDMerge(HashSet<Operator> relations, CostModel c, Operator in)
       throws OperatorException {
 
@@ -169,19 +175,21 @@ public class TDJoinExecutor implements PlanningModule {
         Operator cjv;
 
         if (e == null) {
-          // OperatorParameters params = new OperatorParameters(new ExpressionList());
-          // cjv = new CartesianOperator(params, i, j);
+          //OperatorParameters params = new OperatorParameters(new ExpressionList());
+          //cjv = new CartesianOperator(params, i, j);
           continue;
+
         } else {
           OperatorParameters params = new OperatorParameters(e.getExpressionList());
           cjv = new JoinOperator(params, i, j);
         }
 
         // exploration
-        Operator[] currentPair = new Operator[3];
+        Operator[] currentPair = new Operator[4];
         currentPair[0] = i;
         currentPair[1] = j;
         currentPair[2] = cjv;
+        currentPair[3] = getRemainingOperators(relations);
 
         TrainingDataPoint tpd = new TrainingDataPoint(currentPair, new Double(0));
 

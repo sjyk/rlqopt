@@ -18,10 +18,10 @@ public class ModelTrainer {
   MultiLayerNetwork net;
 
   public ModelTrainer(Database db) {
-    int numInput = db.getNumAttributes() * 2;
+    int numInput = db.getNumAttributes() * 3;
     int numOutputs = 1;
-    int nHidden = 32;
-    double learningRate = 1e-4;
+    int nHidden = 64;
+    double learningRate = 1e-5;
 
     this.net =
         new MultiLayerNetwork(
@@ -35,7 +35,7 @@ public class ModelTrainer {
                     new DenseLayer.Builder()
                         .nIn(numInput)
                         .nOut(nHidden)
-                        .activation(Activation.TANH)
+                        .activation(Activation.SIGMOID)
                         .build())
                 .layer(
                     1,
@@ -49,10 +49,10 @@ public class ModelTrainer {
                 .build());
   }
 
-  public MultiLayerNetwork train(DataSetIterator iterator) {
+
+ public MultiLayerNetwork train(DataSetIterator iterator) {
 
     net.init();
-    net.setListeners(new ScoreIterationListener(1));
 
     // Train the network on the full data set, and evaluate in periodically
     for (int i = 0; i < 1000; i++) {

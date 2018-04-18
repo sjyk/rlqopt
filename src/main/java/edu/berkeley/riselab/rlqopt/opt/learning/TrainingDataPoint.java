@@ -59,21 +59,29 @@ public class TrainingDataPoint {
 
     int n = allAttributes.size();
 
-    Double[] vector = new Double[n * 2 + 1];
-    for (int i = 0; i < n * 2; i++) vector[i] = 0.0;
+    Double[] vector = new Double[n * 3 + 1];
+    for (int i = 0; i < n * 3; i++) vector[i] = 0.0;
 
     for (Attribute a : oplist[0].getVisibleAttributes()) {
 
-      vector[allAttributes.indexOf(a)] = cardMap.get(a) / c.estimate(oplist[0]).resultCardinality;
+      vector[allAttributes.indexOf(a)] = 1.0;//cardMap.get(a) / c.estimate(oplist[0]).resultCardinality;
     }
 
     for (Attribute a : oplist[1].getVisibleAttributes()) {
 
-      vector[allAttributes.indexOf(a) + n] =
-          cardMap.get(a) / c.estimate(oplist[0]).resultCardinality;
+      vector[allAttributes.indexOf(a) + n] = 1.0;
+          //cardMap.get(a) / c.estimate(oplist[1]).resultCardinality;
     }
 
-    vector[2 * n] = cost;
+    //System.out.println(oplist[3].getVisibleAttributes() + " " + oplist[3]);
+
+    for (Attribute a : oplist[3].getVisibleAttributes()) {
+
+      vector[allAttributes.indexOf(a) + 2*n] = 1.0;
+    }
+
+
+    vector[3 * n] = cost;
 
     return vector;
   }

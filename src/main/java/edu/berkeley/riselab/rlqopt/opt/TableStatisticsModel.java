@@ -173,16 +173,10 @@ public class TableStatisticsModel extends HashMap<Attribute, LinkedList<Attribut
 
   public Cost joinOperator(Operator in, Cost l, Cost r) {
 
-    // System.out.println(in);
-
     if (in.params.expression.get(0).isEquality()) {
 
       double jrf = estimateJoinReductionFactor(in.params.expression.get(0));
       long result = Math.max((long) (Math.max(l.resultCardinality, r.resultCardinality) * jrf), 1);
-      // System.out.println(Math.max(l.resultCardinality, r.resultCardinality) + " " + result*jrf);
-
-      // System.out.println(result + " " + l.resultCardinality + " " + r.resultCardinality);
-
       return new Cost(2 * l.resultCardinality + 2 * r.resultCardinality, result, 0);
 
     } else

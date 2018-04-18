@@ -64,7 +64,8 @@ public class TrainingDataGenerator {
       for (int ind = 0; ind < vector.length - 1; ind++) xBuffer[ind] = vector[ind].floatValue();
 
       float[] yBuffer = new float[1];
-      yBuffer[0] = (float) Math.log(vector[vector.length - 1].floatValue()); // todo fix scaling
+      yBuffer[0] = (float) (Math.log(vector[vector.length - 1].floatValue())); // todo fix scaling
+      System.out.println(yBuffer[0]);
 
       trainingExamples.add(Nd4j.create(xBuffer, new int[] {1, p - 1}));
       reward.add(Nd4j.create(yBuffer, new int[] {1, 1}));
@@ -80,7 +81,7 @@ public class TrainingDataGenerator {
 
     DataSet dataSet = generateDataSet(workload, t);
     List<DataSet> listDs = dataSet.asList();
-    return new ListDataSetIterator(listDs, 100); // todo hyperparameter
+    return new ListDataSetIterator(listDs, 1000); // todo hyperparameter
   }
 
   public DataSetIterator generateDataSetIterator(Operator query, int t) {

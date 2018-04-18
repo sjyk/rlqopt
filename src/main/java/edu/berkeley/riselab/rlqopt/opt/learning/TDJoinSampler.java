@@ -24,12 +24,14 @@ public class TDJoinSampler implements PlanningModule {
   double alpha;
   LinkedList<TrainingDataPoint> trainingData;
   LinkedList<TrainingDataPoint> localData;
+  BaselineLeftDeep lfdb;
 
   public TDJoinSampler(double alpha) {
 
     this.rand = new Random();
     this.alpha = alpha;
     trainingData = new LinkedList();
+    lfdb = new BaselineLeftDeep();
   }
 
   private LinkedList<Attribute>[] getLeftRightAttributes(Expression e) {
@@ -112,6 +114,7 @@ public class TDJoinSampler implements PlanningModule {
     }
 
     Operator rtn = (Operator) relations.toArray()[0];
+    System.out.println(rtn);
     double cost = c.estimate(rtn).operatorIOcost;
 
     /*if (rtn instanceof CartesianOperator)
@@ -120,7 +123,9 @@ public class TDJoinSampler implements PlanningModule {
       System.out.println("J:" + cost);*/
 
     for (TrainingDataPoint t : localData) {
-      t.cost = cost;
+      //
+      t.cost = cost; //- t.cost;
+      //System.out.println(rtn);
       trainingData.add(t);
     }
 
@@ -145,7 +150,7 @@ public class TDJoinSampler implements PlanningModule {
   }
 
   private Operator[] randomJoin(HashSet<Operator> relations, Operator in) throws OperatorException {
-    Operator[] pairToJoin = new Operator[3];
+    Operator[] pairToJoin = new Operator[4];
 
     Operator[] relArray = relations.toArray(new Operator[relations.size()]);
 
@@ -158,6 +163,8 @@ public class TDJoinSampler implements PlanningModule {
     pairToJoin[0] = relArray[ind1];
     pairToJoin[1] = relArray[ind2];
     pairToJoin[2] = cjv;
+    pairToJoin[3] = getRemainingOperators(relations, in);
+
     return pairToJoin;
   }
 
@@ -179,11 +186,18 @@ public class TDJoinSampler implements PlanningModule {
     return cjv;
   }
 
+  private Operator getRemainingOperators(HashSet<Operator> relations, Operator in) throws OperatorException{
+    Operator [] relArray = relations.toArray(new Operator [relations.size()]);
+    OperatorParameters params = new OperatorParameters(in.params.expression);
+    return new KWayJoinOperator(params, relArray);
+  }
+
+
   public HashSet<Operator> TDMerge(HashSet<Operator> relations, CostModel c, Operator in)
       throws OperatorException {
 
     double minCost = Double.MAX_VALUE;
-    Operator[] pairToJoin = new Operator[3];
+    Operator[] pairToJoin = new Operator[4];
     HashSet<Operator> rtn = (HashSet) relations.clone();
 
     boolean egreedy = false;
@@ -202,15 +216,28 @@ public class TDJoinSampler implements PlanningModule {
 
         Operator cjv = getJoinOperator(i, j, in);
 
+        if (cjv instanceof CartesianOperator)
+          continue;
+
+        HashSet<Operator> local = (HashSet) rtn.clone();
+        local.remove(i);
+        local.remove(j);
+        local.add(cjv);
+        Operator baseline = lfdb.reorderJoin(getRemainingOperators(local, in),c);
+
         // exploration
         // System.out.println(rand.nextGaussian());
-        double cost = c.estimate(cjv).operatorIOcost;
+        double cost = c.estimate(baseline).operatorIOcost;
+
+        //System.out.println(cost);
+
 
         if ((cost < minCost) && !egreedy) {
           minCost = cost;
           pairToJoin[0] = i;
           pairToJoin[1] = j;
           pairToJoin[2] = cjv;
+          pairToJoin[3] = getRemainingOperators(relations, in); 
         }
       }
     }
@@ -219,7 +246,7 @@ public class TDJoinSampler implements PlanningModule {
     rtn.remove(pairToJoin[1]);
     rtn.add(pairToJoin[2]);
 
-    localData.add(new TrainingDataPoint(pairToJoin, new Double(0)));
+    localData.add(new TrainingDataPoint(pairToJoin, 0.0));
 
     return rtn;
   }

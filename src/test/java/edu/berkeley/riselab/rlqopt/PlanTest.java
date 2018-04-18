@@ -16,6 +16,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 
+
 /** Unit test for simple App. */
 public class PlanTest extends TestCase {
   /**
@@ -209,12 +210,13 @@ public class PlanTest extends TestCase {
 
   public void test4() throws OperatorException {
     WorkloadGenerator w = new WorkloadGenerator(7, 20, 3);
-    LinkedList<Operator> training = w.generateWorkload(500);
+    LinkedList<Operator> training = w.generateWorkload(5000);
 
     TrainingPlanner p2 = new TrainingPlanner();
     TrainingDataGenerator tgen =
         new TrainingDataGenerator(w.getDatabase(), "output.csv", w.getStatsModel(), p2);
     ModelTrainer m = new ModelTrainer(w.getDatabase());
+
     MultiLayerNetwork net = m.train(tgen.generateDataSetIterator(training, 10));
 
     LearningPlanner p3 = new LearningPlanner(w.getDatabase());
@@ -222,7 +224,7 @@ public class PlanTest extends TestCase {
 
     PostgresPlanner p4 = new PostgresPlanner();
 
-    LinkedList<Operator> test = w.generateWorkload(100);
+    LinkedList<Operator> test = w.generateWorkload(1000);
     for (Operator op : test) {
       System.out.println(op);
       op = p3.plan(op, w.getStatsModel());
