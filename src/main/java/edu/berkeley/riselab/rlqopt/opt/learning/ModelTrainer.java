@@ -55,7 +55,7 @@ public class ModelTrainer {
     net.init();
 
     // Train the network on the full data set, and evaluate in periodically
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < 5000; i++) {
       iterator.reset();
       net.fit(iterator);
     }

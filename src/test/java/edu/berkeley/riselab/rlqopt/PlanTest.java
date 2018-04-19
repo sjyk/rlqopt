@@ -217,7 +217,7 @@ public class PlanTest extends TestCase {
         new TrainingDataGenerator(w.getDatabase(), "output.csv", w.getStatsModel(), p2);
     ModelTrainer m = new ModelTrainer(w.getDatabase());
 
-    MultiLayerNetwork net = m.train(tgen.generateDataSetIterator(training, 10));
+    MultiLayerNetwork net = m.train(tgen.generateDataSetIterator(training, 1));
 
     LearningPlanner p3 = new LearningPlanner(w.getDatabase());
     p3.setNetwork(net);
@@ -226,12 +226,17 @@ public class PlanTest extends TestCase {
 
     LinkedList<Operator> test = w.generateWorkload(1000);
     for (Operator op : test) {
-      System.out.println(op);
       Operator p3op = p3.plan(op.copy(), w.getStatsModel());
       Operator p4op = p4.plan(op.copy(), w.getStatsModel());
       //System.out.println(p3op);
-      System.out.println(p3.getLastPlanStats());
-      System.out.println(p4.getLastPlanStats());
+
+      if (p3.getLastPlanStats().finalCost < p4.getLastPlanStats().finalCost){
+            System.out.println(p3op.copy());
+            System.out.println(p4op.copy());
+            System.out.println(p3.getLastPlanStats());
+            System.out.println(p4.getLastPlanStats());
+      }
+ 
     }
   }
 

@@ -91,7 +91,6 @@ public class TrainingDataGenerator {
   }
 
   public void generateFile(Operator query, int t) {
-
     LinkedList<Operator> workload = new LinkedList();
     workload.add(query);
     generateFile(workload, t);

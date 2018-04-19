@@ -63,30 +63,4 @@ public class Planner {
     planStats.name = name;
   }
 
-  private class PlanningStatistics {
-
-    double preprocessing = 0;
-    double planning = 0;
-    double initialCost = 0;
-    double finalCost;
-    String name;
-
-    public String toString() {
-      return "{'name': "
-          + name
-          + ",\n"
-          + "'preproc': "
-          + (preprocessing / 1e6)
-          + ",\n"
-          + "'planning: '"
-          + (planning / 1e6)
-          + ",\n"
-          + "'initial: '"
-          + initialCost
-          + ",\n"
-          + "'final: '"
-          + finalCost
-          + "}";
-    }
-  }
 }
