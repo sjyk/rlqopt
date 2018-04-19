@@ -176,7 +176,9 @@ public class TableStatisticsModel extends HashMap<Attribute, LinkedList<Attribut
     if (in.params.expression.get(0).isEquality()) {
 
       double jrf = estimateJoinReductionFactor(in.params.expression.get(0));
+      
       long result = Math.max((long) (Math.max(l.resultCardinality, r.resultCardinality) * jrf), 1);
+
       return new Cost(2 * l.resultCardinality + 2 * r.resultCardinality, result, 0);
 
     } else

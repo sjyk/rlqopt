@@ -210,7 +210,7 @@ public class PlanTest extends TestCase {
 
   public void test4() throws OperatorException {
     WorkloadGenerator w = new WorkloadGenerator(7, 20, 3);
-    LinkedList<Operator> training = w.generateWorkload(5000);
+    LinkedList<Operator> training = w.generateWorkload(100);
 
     TrainingPlanner p2 = new TrainingPlanner();
     TrainingDataGenerator tgen =
@@ -224,12 +224,14 @@ public class PlanTest extends TestCase {
 
     PostgresPlanner p4 = new PostgresPlanner();
 
-    LinkedList<Operator> test = w.generateWorkload(1000);
+    LinkedList<Operator> test = w.generateWorkload(100);
     for (Operator op : test) {
       System.out.println(op);
-      op = p3.plan(op, w.getStatsModel());
-      System.out.println(op);
+      Operator p3op = p3.plan(op.copy(), w.getStatsModel());
+      Operator p4op = p4.plan(op.copy(), w.getStatsModel());
+      //System.out.println(p3op);
       System.out.println(p3.getLastPlanStats());
+      System.out.println(p4.getLastPlanStats());
     }
   }
 

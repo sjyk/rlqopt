@@ -64,13 +64,12 @@ public class TrainingDataPoint {
 
     for (Attribute a : oplist[0].getVisibleAttributes()) {
 
-      vector[allAttributes.indexOf(a)] = 1.0;//cardMap.get(a) / c.estimate(oplist[0]).resultCardinality;
+      vector[allAttributes.indexOf(a)] = Math.log(cardMap.get(a) / c.estimate(oplist[0]).resultCardinality);
     }
 
     for (Attribute a : oplist[1].getVisibleAttributes()) {
 
-      vector[allAttributes.indexOf(a) + n] = 1.0;
-          //cardMap.get(a) / c.estimate(oplist[1]).resultCardinality;
+      vector[allAttributes.indexOf(a) + n] = Math.log(cardMap.get(a) / c.estimate(oplist[1]).resultCardinality);
     }
 
     //System.out.println(oplist[3].getVisibleAttributes() + " " + oplist[3]);

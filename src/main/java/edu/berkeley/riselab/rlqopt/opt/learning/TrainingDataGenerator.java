@@ -81,7 +81,7 @@ public class TrainingDataGenerator {
 
     DataSet dataSet = generateDataSet(workload, t);
     List<DataSet> listDs = dataSet.asList();
-    return new ListDataSetIterator(listDs, 1000); // todo hyperparameter
+    return new ListDataSetIterator(listDs, 100); // todo hyperparameter
   }
 
   public DataSetIterator generateDataSetIterator(Operator query, int t) {
