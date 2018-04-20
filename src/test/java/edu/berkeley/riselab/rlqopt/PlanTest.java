@@ -14,7 +14,7 @@ import edu.berkeley.riselab.rlqopt.opt.learning.RLQOpt;
 import edu.berkeley.riselab.rlqopt.experiments.Experiment;
 import edu.berkeley.riselab.rlqopt.preopt.*;
 import edu.berkeley.riselab.rlqopt.relalg.*;
-import edu.berkeley.riselab.rlqopt.workload.WorkloadGenerator;
+import edu.berkeley.riselab.rlqopt.workload.WorkloadGeneratorBushy;
 import java.util.LinkedList;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -213,7 +213,10 @@ public class PlanTest extends TestCase {
   }
 
   public void test4() throws OperatorException {
-    WorkloadGenerator w = new WorkloadGenerator(7, 20, 3);
+    
+    //WorkloadGeneratorEasy w = new WorkloadGeneratorEasy(7, 20, 3);
+    WorkloadGeneratorBushy w = new WorkloadGeneratorBushy(7, 20, 3);
+
     LinkedList<Planner> planners = new LinkedList();
     
     planners.add(new RLQOpt(w));

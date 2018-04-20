@@ -62,6 +62,8 @@ public class Experiment {
             LinkedList<PlanningStatistics> stats = finalCost.get(p);
             stats.add(p.getLastPlanStats());
             finalCost.put(p, stats);
+
+            baseline.plan(op.copy(), workload.getStatsModel());
         }
 
      }

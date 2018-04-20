@@ -199,7 +199,7 @@ public class TDJoinExecutor implements PlanningModule {
         if (net != null) {
           INDArray out = net.output(input, false);
           cost = out.getDouble(0);
-          System.out.println(cost + " " + Math.log(c.estimate(cjv).operatorIOcost));
+          //System.out.println(cost + " " + Math.log(c.estimate(cjv).operatorIOcost));
         } else {
           cost = c.estimate(cjv).operatorIOcost;
         }
