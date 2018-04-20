@@ -176,22 +176,22 @@ public class TableStatisticsModel extends HashMap<Attribute, LinkedList<Attribut
     if (in.params.expression.get(0).isEquality()) {
 
       double jrf = estimateJoinReductionFactor(in.params.expression.get(0));
-      
-      boolean factDimJoin = (((l.resultCardinality + 0.0)/r.resultCardinality) > 100 || ((r.resultCardinality + 0.0)/l.resultCardinality) > 100);
 
+      boolean factDimJoin =
+          (((l.resultCardinality + 0.0) / r.resultCardinality) > 100
+              || ((r.resultCardinality + 0.0) / l.resultCardinality) > 100);
 
       long result;
 
       if (factDimJoin)
         result = Math.max((long) (Math.max(l.resultCardinality, r.resultCardinality) * jrf), 1);
-      else
-        result = Math.max((long) (Math.min(l.resultCardinality, r.resultCardinality) * jrf), 1);
-
+      else result = Math.max((long) (Math.min(l.resultCardinality, r.resultCardinality) * jrf), 1);
 
       return new Cost(2 * l.resultCardinality + 2 * r.resultCardinality, result, 0);
 
     } else
-      return new Cost(l.resultCardinality * r.resultCardinality, l.resultCardinality * r.resultCardinality, 0);
+      return new Cost(
+          l.resultCardinality * r.resultCardinality, l.resultCardinality * r.resultCardinality, 0);
   }
 
   public Cost cartesianOperator(Operator in, Cost l, Cost r) {

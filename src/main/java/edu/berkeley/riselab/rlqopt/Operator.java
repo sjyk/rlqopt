@@ -3,9 +3,9 @@ package edu.berkeley.riselab.rlqopt;
 import edu.berkeley.riselab.rlqopt.relalg.GroupByOperator;
 import edu.berkeley.riselab.rlqopt.relalg.ProjectOperator;
 import edu.berkeley.riselab.rlqopt.relalg.TableAccessOperator;
+import java.lang.reflect.InvocationTargetException;
 import java.util.LinkedList;
 import java.util.List;
-import java.lang.reflect.InvocationTargetException;
 
 /** Operator class- this class defines an abstract relational operator */
 public abstract class Operator {
@@ -24,7 +24,6 @@ public abstract class Operator {
 
     this.params = params;
   }
-
 
   public LinkedList<Attribute> getVisibleAttributes() {
 
@@ -56,35 +55,36 @@ public abstract class Operator {
   public Operator copy() throws OperatorException {
 
     Operator op = null;
-     try{
-          op = this.getClass().getDeclaredConstructor(OperatorParameters.class, Operator[].class).newInstance(this.params, this.source.toArray(new Operator [this.source.size()]));
-     }
-     catch (InstantiationException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+    try {
+      op =
+          this.getClass()
+              .getDeclaredConstructor(OperatorParameters.class, Operator[].class)
+              .newInstance(this.params, this.source.toArray(new Operator[this.source.size()]));
+    } catch (InstantiationException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     } catch (IllegalAccessException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     } catch (IllegalArgumentException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     } catch (SecurityException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     } catch (InvocationTargetException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     } catch (NoSuchMethodException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     }
 
     op.source = new LinkedList();
 
-     for (Operator child: this.source)
-        op.source.add(child.copy());
-     
-     return op;
+    for (Operator child : this.source) op.source.add(child.copy());
+
+    return op;
   }
 
   // override

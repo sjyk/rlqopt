@@ -199,15 +199,12 @@ public class WorkloadGenerator {
     return workload;
   }
 
-  public LinkedList<Operator> copyWorkload(LinkedList<Operator> w) throws OperatorException{
+  public LinkedList<Operator> copyWorkload(LinkedList<Operator> w) throws OperatorException {
 
-       LinkedList<Operator> workload = new LinkedList();
+    LinkedList<Operator> workload = new LinkedList();
 
-       for (Operator op: w)
-         workload.add(op.copy());
+    for (Operator op : w) workload.add(op.copy());
 
-       return workload;
-
+    return workload;
   }
-
 }

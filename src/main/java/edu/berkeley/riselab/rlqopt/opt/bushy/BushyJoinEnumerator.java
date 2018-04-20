@@ -1,7 +1,6 @@
-package edu.berkeley.riselab.rlqopt.opt.learning;
+package edu.berkeley.riselab.rlqopt.opt.bushy;
 
 import edu.berkeley.riselab.rlqopt.Attribute;
-import edu.berkeley.riselab.rlqopt.Database;
 import edu.berkeley.riselab.rlqopt.Expression;
 import edu.berkeley.riselab.rlqopt.ExpressionList;
 import edu.berkeley.riselab.rlqopt.Operator;
@@ -11,31 +10,22 @@ import edu.berkeley.riselab.rlqopt.Relation;
 import edu.berkeley.riselab.rlqopt.opt.CostModel;
 import edu.berkeley.riselab.rlqopt.opt.PlanningModule;
 import edu.berkeley.riselab.rlqopt.relalg.*;
+import edu.berkeley.riselab.rlqopt.opt.learning.BaselineLeftDeep;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.Random;
-import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
-import org.nd4j.linalg.api.ndarray.INDArray;
 
 // this implements one transformation
 // of the plan match, discount
-public class TDJoinExecutor implements PlanningModule {
+public class BushyJoinEnumerator implements PlanningModule {
 
   boolean resetPerSession;
-  Random rand;
   double alpha;
-  LinkedList<TrainingDataPoint> trainingData;
-  LinkedList<TrainingDataPoint> localData;
-  MultiLayerNetwork net;
-  Database db;
+  BaselineLeftDeep lfdb;
 
-  public TDJoinExecutor(Database db) {
+  public BushyJoinEnumerator() {
 
-    this.rand = new Random();
-    this.alpha = alpha;
-    this.db = db;
-    trainingData = new LinkedList();
+    lfdb = new BaselineLeftDeep();
   }
 
   private LinkedList<Attribute>[] getLeftRightAttributes(Expression e) {
@@ -96,18 +86,7 @@ public class TDJoinExecutor implements PlanningModule {
 
   public Operator reorderJoin(Operator in, CostModel c) {
 
-    if (in.source.size() == 2) {
-      try {
-        OperatorParameters params = new OperatorParameters(in.params.expression);
-        return new JoinOperator(params, in.source.get(0), in.source.get(1));
-      } catch (OperatorException opex) {
-        return in;
-      }
-    }
-
     HashSet<Operator> relations = new HashSet();
-
-    localData = new LinkedList();
 
     for (Operator child : in.source) {
       relations.add(child);
@@ -119,21 +98,22 @@ public class TDJoinExecutor implements PlanningModule {
       try {
         relations = TDMerge(relations, c, in);
 
+        // System.out.println(relations.size());
+
       } catch (OperatorException opex) {
         continue;
       }
     }
 
     Operator rtn = (Operator) relations.toArray()[0];
+    System.out.println(rtn);
     double cost = c.estimate(rtn).operatorIOcost;
-
-    if (!(rtn instanceof JoinOperator) || relations.size() > 1)
-      System.out.println("___!!!!___" + relations);
 
     return rtn;
   }
 
   private Expression findJoinExpression(ExpressionList e, Operator i, Operator j) {
+
     LinkedList<Attribute> leftAttributes = i.getVisibleAttributes();
     LinkedList<Attribute> rightAttributes = j.getVisibleAttributes();
 
@@ -149,9 +129,28 @@ public class TDJoinExecutor implements PlanningModule {
     return null;
   }
 
-  private Operator getRemainingOperators(HashSet<Operator> relations) throws OperatorException {
+  private Operator getJoinOperator(Operator i, Operator j, Operator in) throws OperatorException {
+
+    Expression e = findJoinExpression(in.params.expression, i, j);
+
+    Operator cjv;
+
+    if (e == null) {
+      OperatorParameters params = new OperatorParameters(new ExpressionList());
+      cjv = new CartesianOperator(params, i, j);
+
+    } else {
+      OperatorParameters params = new OperatorParameters(e.getExpressionList());
+      cjv = new JoinOperator(params, i, j);
+    }
+
+    return cjv;
+  }
+
+  private Operator getRemainingOperators(HashSet<Operator> relations, Operator in)
+      throws OperatorException {
     Operator[] relArray = relations.toArray(new Operator[relations.size()]);
-    OperatorParameters params = new OperatorParameters(new ExpressionList());
+    OperatorParameters params = new OperatorParameters(in.params.expression);
     return new KWayJoinOperator(params, relArray);
   }
 
@@ -159,7 +158,7 @@ public class TDJoinExecutor implements PlanningModule {
       throws OperatorException {
 
     double minCost = Double.MAX_VALUE;
-    Operator[] pairToJoin = new Operator[3];
+    Operator[] pairToJoin = new Operator[4];
     HashSet<Operator> rtn = (HashSet) relations.clone();
 
     // for all pairs of operators
@@ -170,47 +169,28 @@ public class TDJoinExecutor implements PlanningModule {
         // don't join with self
         if (i == j) continue;
 
-        Expression e = findJoinExpression(in.params.expression, i, j);
+        Operator cjv = getJoinOperator(i, j, in);
 
-        Operator cjv;
+        if (cjv instanceof CartesianOperator) continue;
 
-        if (e == null) {
-          // OperatorParameters params = new OperatorParameters(new ExpressionList());
-          // cjv = new CartesianOperator(params, i, j);
-          continue;
-
-        } else {
-          OperatorParameters params = new OperatorParameters(e.getExpressionList());
-          cjv = new JoinOperator(params, i, j);
-        }
+        HashSet<Operator> local = (HashSet) rtn.clone();
+        local.remove(i);
+        local.remove(j);
+        local.add(cjv);
+        Operator baseline = lfdb.reorderJoin(getRemainingOperators(local, in), c);
 
         // exploration
-        Operator[] currentPair = new Operator[4];
-        currentPair[0] = i;
-        currentPair[1] = j;
-        currentPair[2] = cjv;
-        currentPair[3] = getRemainingOperators(relations);
+        // System.out.println(rand.nextGaussian());
+        double cost = c.estimate(baseline).operatorIOcost;
 
-        TrainingDataPoint tpd = new TrainingDataPoint(currentPair, new Double(0));
+        // System.out.println(cost);
 
-        INDArray input = tpd.featurizeND4j(db, c);
-        double cost;
-
-        if (net != null) {
-          INDArray out = net.output(input, false);
-          cost = out.getDouble(0);
-          System.out.println(cost + " " + Math.log(c.estimate(cjv).operatorIOcost));
-        } else {
-          cost = c.estimate(cjv).operatorIOcost;
-        }
-
-        if (Double.isNaN(cost)) cost = c.estimate(cjv).operatorIOcost;
-
-        if (cost < minCost) {
+        if ((cost < minCost)) {
           minCost = cost;
           pairToJoin[0] = i;
           pairToJoin[1] = j;
           pairToJoin[2] = cjv;
+          pairToJoin[3] = getRemainingOperators(relations, in);
         }
       }
     }
@@ -222,7 +202,4 @@ public class TDJoinExecutor implements PlanningModule {
     return rtn;
   }
 
-  public LinkedList<TrainingDataPoint> getTrainingData() {
-    return trainingData;
-  }
 }

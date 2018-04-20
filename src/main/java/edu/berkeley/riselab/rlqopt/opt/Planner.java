@@ -11,16 +11,16 @@ public class Planner {
   protected List<PreOptimizationRewrite> preopt;
   protected List<InitRewrite> init;
   protected List<PlanningModule> planners;
+  String name;
 
   PlanningStatistics planStats;
 
   public Planner(
-      List<PreOptimizationRewrite> preopt, List<InitRewrite> init, List<PlanningModule> planners) {
+    List<PreOptimizationRewrite> preopt, List<InitRewrite> init, List<PlanningModule> planners) {
 
     this.preopt = preopt;
     this.init = init;
     this.planners = planners;
-    this.planStats = new PlanningStatistics();
   }
 
   private Operator initialize(Operator nominal) {
@@ -37,6 +37,9 @@ public class Planner {
   }
 
   public Operator plan(Operator nominal, CostModel c) {
+
+    this.planStats = new PlanningStatistics();
+    planStats.name = this.name;
 
     // Operator nominal = in.clone();
 
@@ -60,7 +63,6 @@ public class Planner {
   }
 
   protected void setPlannerName(String name) {
-    planStats.name = name;
+    this.name = name;
   }
-
 }

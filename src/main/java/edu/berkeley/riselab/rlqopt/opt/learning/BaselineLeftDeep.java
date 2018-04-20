@@ -7,7 +7,6 @@ import edu.berkeley.riselab.rlqopt.OperatorException;
 import edu.berkeley.riselab.rlqopt.OperatorParameters;
 import edu.berkeley.riselab.rlqopt.Relation;
 import edu.berkeley.riselab.rlqopt.opt.CostModel;
-import edu.berkeley.riselab.rlqopt.opt.PlanningModule;
 import edu.berkeley.riselab.rlqopt.relalg.*;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,7 +14,7 @@ import java.util.LinkedList;
 
 // this implements one transformation
 // of the plan match
-public class BaselineLeftDeep  {
+public class BaselineLeftDeep {
 
   boolean resetPerSession;
 
@@ -101,7 +100,7 @@ public class BaselineLeftDeep  {
       costMap.put(singleton, child);
     }
 
-    //System.out.println(costMap);
+    // System.out.println(costMap);
 
     for (int i = 0; i < in.source.size() - 1; i++) {
       try {

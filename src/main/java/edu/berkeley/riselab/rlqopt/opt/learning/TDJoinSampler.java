@@ -124,8 +124,8 @@ public class TDJoinSampler implements PlanningModule {
 
     for (TrainingDataPoint t : localData) {
       //
-      t.cost = cost; //- t.cost;
-      //System.out.println(rtn);
+      t.cost = cost; // - t.cost;
+      // System.out.println(rtn);
       trainingData.add(t);
     }
 
@@ -186,12 +186,12 @@ public class TDJoinSampler implements PlanningModule {
     return cjv;
   }
 
-  private Operator getRemainingOperators(HashSet<Operator> relations, Operator in) throws OperatorException{
-    Operator [] relArray = relations.toArray(new Operator [relations.size()]);
+  private Operator getRemainingOperators(HashSet<Operator> relations, Operator in)
+      throws OperatorException {
+    Operator[] relArray = relations.toArray(new Operator[relations.size()]);
     OperatorParameters params = new OperatorParameters(in.params.expression);
     return new KWayJoinOperator(params, relArray);
   }
-
 
   public HashSet<Operator> TDMerge(HashSet<Operator> relations, CostModel c, Operator in)
       throws OperatorException {
@@ -216,28 +216,26 @@ public class TDJoinSampler implements PlanningModule {
 
         Operator cjv = getJoinOperator(i, j, in);
 
-        if (cjv instanceof CartesianOperator)
-          continue;
+        if (cjv instanceof CartesianOperator) continue;
 
         HashSet<Operator> local = (HashSet) rtn.clone();
         local.remove(i);
         local.remove(j);
         local.add(cjv);
-        Operator baseline = lfdb.reorderJoin(getRemainingOperators(local, in),c);
+        Operator baseline = lfdb.reorderJoin(getRemainingOperators(local, in), c);
 
         // exploration
         // System.out.println(rand.nextGaussian());
         double cost = c.estimate(baseline).operatorIOcost;
 
-        //System.out.println(cost);
-
+        // System.out.println(cost);
 
         if ((cost < minCost) && !egreedy) {
           minCost = cost;
           pairToJoin[0] = i;
           pairToJoin[1] = j;
           pairToJoin[2] = cjv;
-          pairToJoin[3] = getRemainingOperators(relations, in); 
+          pairToJoin[3] = getRemainingOperators(relations, in);
         }
       }
     }

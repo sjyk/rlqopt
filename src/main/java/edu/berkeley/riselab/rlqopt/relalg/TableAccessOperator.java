@@ -7,7 +7,8 @@ import edu.berkeley.riselab.rlqopt.OperatorParameters;
 // implements a project operator
 public class TableAccessOperator extends Operator {
 
-  public TableAccessOperator(OperatorParameters params, Operator... source) throws OperatorException {
+  public TableAccessOperator(OperatorParameters params, Operator... source)
+      throws OperatorException {
     super(params);
   }
 
