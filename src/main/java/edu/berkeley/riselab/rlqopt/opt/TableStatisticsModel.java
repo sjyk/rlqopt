@@ -70,7 +70,6 @@ public class TableStatisticsModel extends HashMap<Attribute, LinkedList<Attribut
   }
 
   public Cost groupByOperator(Operator in, Cost costIn) {
-
     LinkedList<Attribute> al = in.params.secondary_expression.getAllVisibleAttributes();
     long estimate = cardinalityEstimate(al);
 
