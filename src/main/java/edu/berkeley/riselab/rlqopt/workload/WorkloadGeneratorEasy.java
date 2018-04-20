@@ -200,5 +200,4 @@ public class WorkloadGeneratorEasy extends WorkloadGenerator {
 
     return workload;
   }
-
 }

@@ -16,7 +16,7 @@ public class Planner {
   PlanningStatistics planStats;
 
   public Planner(
-    List<PreOptimizationRewrite> preopt, List<InitRewrite> init, List<PlanningModule> planners) {
+      List<PreOptimizationRewrite> preopt, List<InitRewrite> init, List<PlanningModule> planners) {
 
     this.preopt = preopt;
     this.init = init;
@@ -37,23 +37,27 @@ public class Planner {
   }
 
   public Operator plan(Operator nominal, CostModel c) {
+    return this.plan(nominal, c, c);
+  }
+
+  public Operator plan(Operator nominal, CostModel internal, CostModel actual) {
 
     this.planStats = new PlanningStatistics();
     planStats.name = this.name;
 
     // Operator nominal = in.clone();
 
-    if (c != null) planStats.initialCost = c.estimate(nominal).operatorIOcost;
+    if (actual != null) planStats.initialCost = actual.estimate(nominal).operatorIOcost;
 
     nominal = initialize(nominal);
 
     long now = System.nanoTime();
 
-    for (PlanningModule p : planners) nominal = p.apply(nominal, c);
+    for (PlanningModule p : planners) nominal = p.apply(nominal, internal);
 
     planStats.planning = System.nanoTime() - now;
 
-    if (c != null) planStats.finalCost = c.estimate(nominal).operatorIOcost;
+    if (actual != null) planStats.finalCost = actual.estimate(nominal).operatorIOcost;
 
     return nominal;
   }

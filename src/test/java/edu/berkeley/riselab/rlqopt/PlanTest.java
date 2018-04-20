@@ -1,20 +1,20 @@
 package edu.berkeley.riselab.rlqopt;
 
+import edu.berkeley.riselab.rlqopt.experiments.Experiment;
 import edu.berkeley.riselab.rlqopt.opt.AttributeStatistics;
+import edu.berkeley.riselab.rlqopt.opt.Planner;
 import edu.berkeley.riselab.rlqopt.opt.TableStatisticsModel;
+import edu.berkeley.riselab.rlqopt.opt.bushy.PostgresBushyPlanner;
 import edu.berkeley.riselab.rlqopt.opt.learning.LearningPlanner;
 import edu.berkeley.riselab.rlqopt.opt.learning.ModelTrainer;
+import edu.berkeley.riselab.rlqopt.opt.learning.RLQOpt;
 import edu.berkeley.riselab.rlqopt.opt.learning.TrainingDataGenerator;
 import edu.berkeley.riselab.rlqopt.opt.learning.TrainingPlanner;
 import edu.berkeley.riselab.rlqopt.opt.postgres.PostgresPlanner;
-import edu.berkeley.riselab.rlqopt.opt.bushy.PostgresBushyPlanner;
 import edu.berkeley.riselab.rlqopt.opt.volcano.VolcanoPlanner;
-import edu.berkeley.riselab.rlqopt.opt.Planner;
-import edu.berkeley.riselab.rlqopt.opt.learning.RLQOpt;
-import edu.berkeley.riselab.rlqopt.experiments.Experiment;
 import edu.berkeley.riselab.rlqopt.preopt.*;
 import edu.berkeley.riselab.rlqopt.relalg.*;
-import edu.berkeley.riselab.rlqopt.workload.WorkloadGeneratorBushy;
+import edu.berkeley.riselab.rlqopt.workload.WorkloadGeneratorEasyNoisy;
 import java.util.LinkedList;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -213,24 +213,22 @@ public class PlanTest extends TestCase {
   }
 
   public void test4() throws OperatorException {
-    
-    //WorkloadGeneratorEasy w = new WorkloadGeneratorEasy(7, 20, 3);
-    WorkloadGeneratorBushy w = new WorkloadGeneratorBushy(7, 20, 3);
+
+    // WorkloadGeneratorEasy w = new WorkloadGeneratorEasy(7, 20, 3);
+    WorkloadGeneratorEasyNoisy w = new WorkloadGeneratorEasyNoisy(7, 20, 3, 0);
 
     LinkedList<Planner> planners = new LinkedList();
-    
+
     planners.add(new RLQOpt(w));
     planners.add(new PostgresPlanner());
     planners.add(new VolcanoPlanner());
     planners.add(new PostgresBushyPlanner());
 
-    
-    Experiment e = new Experiment(w, 5000,1000, planners);
+    Experiment e = new Experiment(w, 5000, 1000, planners);
     e.train();
     e.run();
     System.out.println(e.getBaselineImprovement());
     System.out.println(e.getBaselineLatency());
-
   }
 
   private Operator createScan(Relation r) throws OperatorException {

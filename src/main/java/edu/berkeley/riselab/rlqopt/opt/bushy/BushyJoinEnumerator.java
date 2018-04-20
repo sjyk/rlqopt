@@ -9,8 +9,8 @@ import edu.berkeley.riselab.rlqopt.OperatorParameters;
 import edu.berkeley.riselab.rlqopt.Relation;
 import edu.berkeley.riselab.rlqopt.opt.CostModel;
 import edu.berkeley.riselab.rlqopt.opt.PlanningModule;
-import edu.berkeley.riselab.rlqopt.relalg.*;
 import edu.berkeley.riselab.rlqopt.opt.learning.BaselineLeftDeep;
+import edu.berkeley.riselab.rlqopt.relalg.*;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -106,7 +106,7 @@ public class BushyJoinEnumerator implements PlanningModule {
     }
 
     Operator rtn = (Operator) relations.toArray()[0];
-    //System.out.println(rtn);
+    // System.out.println(rtn);
     double cost = c.estimate(rtn).operatorIOcost;
 
     return rtn;
@@ -201,5 +201,4 @@ public class BushyJoinEnumerator implements PlanningModule {
 
     return rtn;
   }
-
 }

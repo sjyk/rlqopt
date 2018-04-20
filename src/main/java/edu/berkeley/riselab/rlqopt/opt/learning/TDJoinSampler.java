@@ -114,7 +114,7 @@ public class TDJoinSampler implements PlanningModule {
     }
 
     Operator rtn = (Operator) relations.toArray()[0];
-    //System.out.println(rtn);
+    // System.out.println(rtn);
     double cost = c.estimate(rtn).operatorIOcost;
 
     /*if (rtn instanceof CartesianOperator)

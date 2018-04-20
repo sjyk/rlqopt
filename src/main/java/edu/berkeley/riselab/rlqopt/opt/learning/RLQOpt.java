@@ -1,44 +1,41 @@
 package edu.berkeley.riselab.rlqopt.opt.learning;
 
-import edu.berkeley.riselab.rlqopt.opt.*;
 import edu.berkeley.riselab.rlqopt.Operator;
+import edu.berkeley.riselab.rlqopt.opt.*;
 import edu.berkeley.riselab.rlqopt.preopt.*;
+import edu.berkeley.riselab.rlqopt.workload.WorkloadGenerator;
 import java.util.LinkedList;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
-import edu.berkeley.riselab.rlqopt.workload.WorkloadGenerator;
-import edu.berkeley.riselab.rlqopt.opt.learning.ModelTrainer;
-import edu.berkeley.riselab.rlqopt.opt.learning.TrainingDataGenerator;
 
 // the main planner class
 public class RLQOpt extends Planner implements Trainable {
 
-	TrainingPlanner trainer;
-	LearningPlanner learner;
-	MultiLayerNetwork net;
-	TrainingDataGenerator tgen;
-	ModelTrainer model;
+  TrainingPlanner trainer;
+  LearningPlanner learner;
+  MultiLayerNetwork net;
+  TrainingDataGenerator tgen;
+  ModelTrainer model;
 
-	public RLQOpt(WorkloadGenerator w) {
-		
-		super(new LinkedList(), new LinkedList(), new LinkedList());
+  public RLQOpt(WorkloadGenerator w) {
 
-		trainer = new TrainingPlanner();
-		learner = new LearningPlanner(w.getDatabase());
-		tgen = new TrainingDataGenerator(w.getDatabase(), "output.csv", w.getStatsModel(), trainer);
-    	model = new ModelTrainer(w.getDatabase());
-	}
+    super(new LinkedList(), new LinkedList(), new LinkedList());
 
-	public void train(LinkedList<Operator> training) {
-		net = model.train(tgen.generateDataSetIterator(training, 1));
-		learner.setNetwork(net);
-  	}
+    trainer = new TrainingPlanner();
+    learner = new LearningPlanner(w.getDatabase());
+    tgen = new TrainingDataGenerator(w.getDatabase(), "output.csv", w.getStatsModel(), trainer);
+    model = new ModelTrainer(w.getDatabase());
+  }
 
-	public Operator plan(Operator nominal, CostModel c) {
-		return learner.plan(nominal, c);
-  	}
+  public void train(LinkedList<Operator> training) {
+    net = model.train(tgen.generateDataSetIterator(training, 1));
+    learner.setNetwork(net);
+  }
 
-  	public PlanningStatistics getLastPlanStats() {
-    	return learner.getLastPlanStats();
-    }
+  public Operator plan(Operator nominal, CostModel internal, CostModel actual) {
+    return learner.plan(nominal, internal, actual);
+  }
 
+  public PlanningStatistics getLastPlanStats() {
+    return learner.getLastPlanStats();
+  }
 }

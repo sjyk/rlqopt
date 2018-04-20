@@ -39,12 +39,9 @@ public class WorkloadGeneratorBushy extends WorkloadGenerator {
       // int size = (int) Math.abs(Math.pow(rand.nextInt(oom), 10) + rand.nextInt());
 
       for (int j = 0; j < numAttributesInRel; j++) {
-        
-        if (i < numRelations/2)
-          attributes.add(rand.nextInt(numAttributes/2) + "");
-        else
-          attributes.add((rand.nextInt(numAttributes/2)+numAttributes/2) + "");
 
+        if (i < numRelations / 2) attributes.add(rand.nextInt(numAttributes / 2) + "");
+        else attributes.add((rand.nextInt(numAttributes / 2) + numAttributes / 2) + "");
       }
 
       Relation r = new Relation(attributes.toArray(new String[attributes.size()]));
@@ -183,7 +180,6 @@ public class WorkloadGeneratorBushy extends WorkloadGenerator {
     return rtn;
   }
 
-
   public Operator generateJoinSelGb() throws OperatorException {
     Operator in = generateSelectOp(generateJoin());
     OperatorParameters params = generateGroupBy(in);
@@ -199,5 +195,4 @@ public class WorkloadGeneratorBushy extends WorkloadGenerator {
 
     return workload;
   }
-
 }
