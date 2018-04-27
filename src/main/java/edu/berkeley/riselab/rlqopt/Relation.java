@@ -29,6 +29,13 @@ public class Relation extends HashSet<String> {
     return attrs;
   }
 
+  public Attribute first() {
+
+    for (String s : this) return get(s);
+
+    return null;
+  }
+
   public ExpressionList getExpressionList() {
 
     return new ExpressionList(this);

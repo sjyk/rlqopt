@@ -8,8 +8,7 @@ import edu.berkeley.riselab.rlqopt.Operator;
 import edu.berkeley.riselab.rlqopt.OperatorException;
 import edu.berkeley.riselab.rlqopt.OperatorParameters;
 import edu.berkeley.riselab.rlqopt.Relation;
-import edu.berkeley.riselab.rlqopt.opt.AttributeStatistics;
-import edu.berkeley.riselab.rlqopt.opt.TableStatisticsModel;
+import edu.berkeley.riselab.rlqopt.cost.*;
 import edu.berkeley.riselab.rlqopt.relalg.*;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -21,53 +20,29 @@ public class WorkloadGeneratorEasy extends WorkloadGenerator {
   Random rand;
   TableStatisticsModel ts;
 
-  public WorkloadGeneratorEasy(int numRelations, int numAttributes, int oom) {
+  public WorkloadGeneratorEasy(DatasetGenerator ds) {
 
-    super();
-
+    db = ds.getDatabase();
+    ts = ds.getStats();
     rand = new Random();
-    db = new Database();
-    ts = new TableStatisticsModel();
 
-    for (int i = 0; i < numRelations; i++) {
-      int numAttributesInRel = rand.nextInt(numAttributes) + 1;
-
-      HashSet<String> attributes = new HashSet();
-      long[] sizes = new long[] {5, 500, 50000, 500000, 500000000};
-
-      long size = sizes[rand.nextInt(5)];
-      // int size = (int) Math.abs(Math.pow(rand.nextInt(oom), 10) + rand.nextInt());
-
-      for (int j = 0; j < numAttributesInRel; j++) {
-        attributes.add(rand.nextInt(numAttributes) + "");
-      }
-
-      Relation r = new Relation(attributes.toArray(new String[attributes.size()]));
-
-      db.add(r);
-
-      for (Attribute a : r.attributes()) {
-        long range = size;
-        AttributeStatistics stats = new AttributeStatistics(size, size, 0, size);
-        ts.putStats(a, stats);
-      }
-    }
   }
 
-  public Database getDatabase() {
+  public TableStatisticsModel getStatsModel(){
+    return ts;
+  }
+
+  public Database getDatabase(){
     return db;
   }
 
-  public TableStatisticsModel getStatsModel() {
-    return ts;
-  }
 
   public Expression generateSelection(Relation r) {
     HashSet<Attribute> allAttributes = r.attributes();
     Attribute[] attributeArray = allAttributes.toArray(new Attribute[allAttributes.size()]);
     Attribute randAttribute = attributeArray[rand.nextInt(attributeArray.length)];
-    AttributeStatistics atStats = ts.get(randAttribute).get(0);
-    int randomEquality = rand.nextInt((int) atStats.maxVal);
+    Histogram atStats = ts.get(randAttribute);
+    int randomEquality = rand.nextInt((int) atStats.max());
     return new Expression(
         Expression.EQUALS, randAttribute.getExpression(), new Expression(randomEquality + ""));
   }
@@ -76,11 +51,27 @@ public class WorkloadGeneratorEasy extends WorkloadGenerator {
     LinkedList<Attribute> allAttributes = r.getVisibleAttributes();
     Attribute[] attributeArray = allAttributes.toArray(new Attribute[allAttributes.size()]);
     Attribute randAttribute = attributeArray[rand.nextInt(attributeArray.length)];
-    AttributeStatistics atStats = ts.get(randAttribute).get(0);
-    int randomEquality = rand.nextInt((int) atStats.maxVal);
-    Expression e =
-        new Expression(
-            Expression.EQUALS, randAttribute.getExpression(), new Expression(randomEquality + ""));
+    Histogram atStats = ts.get(randAttribute);
+    int randomEquality = rand.nextInt((int) atStats.max());
+    
+    int type = rand.nextInt(3);
+    Expression e;
+
+    switch(type){
+
+      case 0:  e =new Expression(
+                        Expression.EQUALS, randAttribute.getExpression(), new Expression(randomEquality + ""));
+      break;
+
+      case 1:  e =new Expression(
+                        Expression.GREATER_THAN, randAttribute.getExpression(), new Expression(randomEquality + ""));
+      break;
+
+
+      default:  e = new Expression(
+                        Expression.LESS_THAN, randAttribute.getExpression(), new Expression(randomEquality + ""));
+    }
+
     OperatorParameters params = new OperatorParameters(e.getExpressionList());
     return new SelectOperator(params, r);
   }

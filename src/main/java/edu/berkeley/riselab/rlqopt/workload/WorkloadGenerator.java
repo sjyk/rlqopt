@@ -3,7 +3,7 @@ package edu.berkeley.riselab.rlqopt.workload;
 import edu.berkeley.riselab.rlqopt.Database;
 import edu.berkeley.riselab.rlqopt.Operator;
 import edu.berkeley.riselab.rlqopt.OperatorException;
-import edu.berkeley.riselab.rlqopt.opt.TableStatisticsModel;
+import edu.berkeley.riselab.rlqopt.cost.*;
 import edu.berkeley.riselab.rlqopt.relalg.*;
 import java.util.LinkedList;
 

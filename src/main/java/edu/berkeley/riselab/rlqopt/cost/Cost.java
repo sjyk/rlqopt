@@ -1,4 +1,4 @@
-package edu.berkeley.riselab.rlqopt.opt;
+package edu.berkeley.riselab.rlqopt.cost;
 
 public class Cost {
 

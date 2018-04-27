@@ -2,7 +2,7 @@ package edu.berkeley.riselab.rlqopt.opt.learning;
 
 import edu.berkeley.riselab.rlqopt.Database;
 import edu.berkeley.riselab.rlqopt.Operator;
-import edu.berkeley.riselab.rlqopt.opt.CostModel;
+import edu.berkeley.riselab.rlqopt.cost.*;
 import java.io.*;
 import java.util.Arrays;
 import java.util.LinkedList;

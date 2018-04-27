@@ -7,12 +7,13 @@ import edu.berkeley.riselab.rlqopt.Operator;
 import edu.berkeley.riselab.rlqopt.OperatorException;
 import edu.berkeley.riselab.rlqopt.OperatorParameters;
 import edu.berkeley.riselab.rlqopt.Relation;
-import edu.berkeley.riselab.rlqopt.opt.CostModel;
+import edu.berkeley.riselab.rlqopt.cost.*;
 import edu.berkeley.riselab.rlqopt.opt.PlanningModule;
 import edu.berkeley.riselab.rlqopt.relalg.*;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+
 
 // this implements one transformation
 // of the plan match

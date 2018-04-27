@@ -49,8 +49,12 @@ public class Experiment {
     for (Planner p : this.planners) {
 
       for (Operator op : workload.copyWorkload(test)) {
-        Operator plannedOp =
-            p.plan(op.copy(), workload.getNoisyStatsModel(), workload.getStatsModel());
+
+        if(p == baseline)
+          p.plan(op.copy(), workload.getStatsModel(), workload.getStatsModel());
+        else
+          p.plan(op.copy(), workload.getNoisyStatsModel(), workload.getStatsModel());
+
         LinkedList<PlanningStatistics> stats = finalCost.get(p);
         stats.add(p.getLastPlanStats());
         finalCost.put(p, stats);
@@ -68,16 +72,23 @@ public class Experiment {
       int n = stats.size();
 
       double sum = 0.0;
+      int nt = 0;
 
       for (int i = 0; i < n; i++) {
+
+        if (statsB.get(i).finalCost == statsB.get(i).initialCost)
+          continue;
+
         double cost =
             ((double) stats.get(i).finalCost - statsB.get(i).finalCost) / statsB.get(i).finalCost;
 
         if (statsB.get(i).finalCost == 0) sum += 0.0;
         else sum += cost;
+
+        nt ++;
       }
 
-      rtn.put(p, sum / n);
+      rtn.put(p, sum / nt);
     }
 
     return rtn;

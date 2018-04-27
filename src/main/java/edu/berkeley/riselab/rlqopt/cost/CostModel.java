@@ -1,4 +1,4 @@
-package edu.berkeley.riselab.rlqopt.opt;
+package edu.berkeley.riselab.rlqopt.cost;
 
 import edu.berkeley.riselab.rlqopt.Operator;
 

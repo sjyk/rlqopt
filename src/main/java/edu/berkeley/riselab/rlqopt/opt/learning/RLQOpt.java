@@ -2,6 +2,7 @@ package edu.berkeley.riselab.rlqopt.opt.learning;
 
 import edu.berkeley.riselab.rlqopt.Operator;
 import edu.berkeley.riselab.rlqopt.opt.*;
+import edu.berkeley.riselab.rlqopt.cost.*;
 import edu.berkeley.riselab.rlqopt.preopt.*;
 import edu.berkeley.riselab.rlqopt.workload.WorkloadGenerator;
 import java.util.LinkedList;
