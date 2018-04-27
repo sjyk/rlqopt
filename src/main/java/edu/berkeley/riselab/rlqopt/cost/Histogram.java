@@ -168,14 +168,19 @@ public class Histogram {
 
 		Histogram result = copy();
 
+		//System.out.println("bb");
+
 		for (int i=0; i< buckets; i++)
 		{
 			for (int j=0; j< buckets; j++){
 
 				double mp = result.histogramBuckets[i][LOW]*0.5 + result.histogramBuckets[i][HIGH]*0.5;
 
-				if (mp >= other.histogramBuckets[i][LOW] && mp <= other.histogramBuckets[i][LOW])
+				//System.out.println(mp + " " + other.histogramBuckets[j][LOW] + " " + other.histogramBuckets[j][HIGH]);
+
+				if (mp >= other.histogramBuckets[j][LOW] && mp <= other.histogramBuckets[j][HIGH])
 				{
+					//System.out.println("a");
 					double init = result.histogramBuckets[i][COUNT];
 					double scaling = (other.distinctCount+0.0)/other.buckets;
 

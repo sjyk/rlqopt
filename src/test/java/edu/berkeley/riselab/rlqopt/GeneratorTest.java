@@ -9,6 +9,8 @@ import edu.berkeley.riselab.rlqopt.relalg.*;
 import edu.berkeley.riselab.rlqopt.cost.*;
 import edu.berkeley.riselab.rlqopt.cost.CostModel;
 
+import edu.berkeley.riselab.rlqopt.opt.postgres.PostgresPlanner;
+
 import java.util.Iterator;
 
 import junit.framework.Test;
@@ -37,8 +39,13 @@ public class GeneratorTest extends TestCase {
     WorkloadGeneratorEasy workload = new WorkloadGeneratorEasy(d);
     CostModel c = workload.getStatsModel();
 
+    PostgresPlanner post = new PostgresPlanner();
+
     for(Operator q: workload.generateWorkload(100))
-      System.out.println(q + " : " + c.estimate(q));
+    {
+      post.plan(q,c);
+      System.out.println(post.getLastPlanStats());
+    }
   }
 
   public void test2() throws OperatorException {

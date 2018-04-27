@@ -15,9 +15,11 @@ public class TableStatisticsModel extends HistogramRelation
     implements CostModel {
 
   private double defaultSelectivity = 0.1;
+  private int availableMemory;
 
   public TableStatisticsModel(HashMap<Attribute, Histogram> data) {
     super(data);
+    this.availableMemory = 50;
   }
 
   public TableStatisticsModel() {
@@ -47,8 +49,12 @@ public class TableStatisticsModel extends HistogramRelation
   public Cost joinOperator(Operator in, Cost l, Cost r) {
 
     int count = HistogramOperations.eval(this, in).count();
+    int countr = HistogramOperations.eval(this, in.source.get(0)).count();
+    int countl = HistogramOperations.eval(this, in.source.get(1)).count();
 
-    return new Cost(2 * l.resultCardinality + 2 * r.resultCardinality, count, 0);
+    //System.out.println(count + " " + countr + " " + countl);
+
+    return new Cost(countr + countl*countr/(availableMemory-2), count, 0);
     
   }
 

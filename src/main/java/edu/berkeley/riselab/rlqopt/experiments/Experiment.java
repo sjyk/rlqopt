@@ -55,6 +55,8 @@ public class Experiment {
         else
           p.plan(op.copy(), workload.getNoisyStatsModel(), workload.getStatsModel());
 
+        //System.out.println(op + " " + p + " " + p.getLastPlanStats());
+
         LinkedList<PlanningStatistics> stats = finalCost.get(p);
         stats.add(p.getLastPlanStats());
         finalCost.put(p, stats);
@@ -76,14 +78,14 @@ public class Experiment {
 
       for (int i = 0; i < n; i++) {
 
-        if (statsB.get(i).finalCost == statsB.get(i).initialCost)
-          continue;
+        //if (statsB.get(i).finalCost == statsB.get(i).initialCost)
+        //  continue;
 
-        double cost =
-            ((double) stats.get(i).finalCost - statsB.get(i).finalCost) / statsB.get(i).finalCost;
+        double cost = (double) Math.log(stats.get(i).finalCost);
+            //( - statsB.get(i).finalCost) / statsB.get(i).finalCost;
 
-        if (statsB.get(i).finalCost == 0) sum += 0.0;
-        else sum += cost;
+        //if (statsB.get(i).finalCost == 0) sum += 0.0;
+        sum += cost;
 
         nt ++;
       }
@@ -108,11 +110,8 @@ public class Experiment {
       double sum = 0.0;
 
       for (int i = 0; i < n; i++) {
-        double cost =
-            ((double) stats.get(i).planning - statsB.get(i).planning) / statsB.get(i).planning;
-
-        if (statsB.get(i).finalCost == 0) sum += 0.0;
-        else sum += cost;
+        double cost = ((double) stats.get(i).planning);
+        sum += cost;
       }
 
       rtn.put(p, sum / n);

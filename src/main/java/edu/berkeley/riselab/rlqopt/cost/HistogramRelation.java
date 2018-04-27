@@ -39,6 +39,12 @@ public class HistogramRelation extends HashMap<Attribute, Histogram> {
 		for(Attribute a: this.keySet())
 			cnt = Math.max(cnt, get(a).getCount());
 
+		/*for(Attribute a: this.keySet())
+		{
+			/System.out.println(a + " " + get(a).getCount());
+		}*/
+
+
 		return cnt;
 	}
 

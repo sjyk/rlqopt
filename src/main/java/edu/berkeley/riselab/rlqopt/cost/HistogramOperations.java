@@ -108,11 +108,14 @@ public class HistogramOperations {
 
 		LinkedList<Attribute>[] lr = getLeftRightAttributes(e);
 
-		for (Attribute a: lr[0])
+		int LEFT = (left.keySet().contains(lr[0].get(0))) ? 0 : 1;
+		int RIGHT = 1 - LEFT;
+
+		for (Attribute a: lr[LEFT])
 		{
 			Histogram lefth = left.get(a);
 
-			for (Attribute b: lr[1])
+			for (Attribute b: lr[RIGHT])
 			{
 				Histogram righth = right.get(b);
 				data.put(a,lefth.merge(righth));
@@ -120,11 +123,11 @@ public class HistogramOperations {
 		}
 
 
-		for (Attribute a: lr[1])
+		for (Attribute a: lr[RIGHT])
 		{
 			Histogram righth = right.get(a);
 
-			for (Attribute b: lr[0])
+			for (Attribute b: lr[LEFT])
 			{
 				Histogram lefth = left.get(b);
 				data.put(a,righth.merge(lefth));
@@ -186,7 +189,7 @@ public class HistogramOperations {
 			return project(op.params.secondary_expression, eval(h, op.source.get(0)));
 		else if (op instanceof CartesianOperator)
 			return cartesian(eval(h, op.source.get(0)), eval(h, op.source.get(1)));
-		else if (op instanceof GroupByOperator)
+		else if (op instanceof JoinOperator)
 			return join(op.params.expression.get(0), eval(h, op.source.get(0)), eval(h, op.source.get(1)));
 		else
 			return h;
