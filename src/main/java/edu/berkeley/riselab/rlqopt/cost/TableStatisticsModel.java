@@ -24,6 +24,7 @@ public class TableStatisticsModel extends HistogramRelation
 
   public TableStatisticsModel() {
     super(new HashMap());
+    this.availableMemory = 50;
   }
 
   public Cost tableAccessOperator(Operator in) {
@@ -52,8 +53,7 @@ public class TableStatisticsModel extends HistogramRelation
     int countr = HistogramOperations.eval(this, in.source.get(0)).count();
     int countl = HistogramOperations.eval(this, in.source.get(1)).count();
 
-    //System.out.println(count + " " + countr + " " + countl);
-
+    //System.out.println((availableMemory-2));
     return new Cost(countr + countl*countr/(availableMemory-2), count, 0);
     
   }
@@ -83,13 +83,13 @@ public class TableStatisticsModel extends HistogramRelation
 
     if (in instanceof JoinOperator)
       return joinOperator(in, doEstimate(in.source.get(0)), doEstimate(in.source.get(1)))
-          .plus(estimate(in.source.get(0)))
-          .plus(estimate(in.source.get(1)));
+          .plus(doEstimate(in.source.get(0)))
+          .plus(doEstimate(in.source.get(1)));
 
     if (in instanceof CartesianOperator)
       return cartesianOperator(in, doEstimate(in.source.get(0)), doEstimate(in.source.get(1)))
-          .plus(estimate(in.source.get(0)))
-          .plus(estimate(in.source.get(1)));
+          .plus(doEstimate(in.source.get(0)))
+          .plus(doEstimate(in.source.get(1)));
 
     return runningCost;
   }

@@ -45,7 +45,7 @@ public class HistogramRelation extends HashMap<Attribute, Histogram> {
 		}*/
 
 
-		return cnt;
+		return Math.max(cnt,1);
 	}
 
 }

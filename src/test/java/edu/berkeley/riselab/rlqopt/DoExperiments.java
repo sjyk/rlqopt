@@ -43,7 +43,7 @@ public class DoExperiments extends TestCase {
 
   public void test1() throws OperatorException {
 
-    DatasetGenerator d = new DatasetGenerator(7, 12, 10000, 100);
+    DatasetGenerator d = new DatasetGenerator(5, 12, 1000, 100);
     WorkloadGeneratorEasy workload = new WorkloadGeneratorEasy(d);
     CostModel c = workload.getStatsModel();
 
@@ -52,8 +52,10 @@ public class DoExperiments extends TestCase {
     planners.add(new PostgresBushyPlanner());
     planners.add(new PostgresPlanner());
     planners.add(new VolcanoPlanner());
+    planners.add(new RLQOpt(workload));
 
-    Experiment e = new Experiment(workload, 5000, 100, planners);
+    Experiment e = new Experiment(workload, 5000, 1000, planners);
+    e.train();
     e.run();
     System.out.println(e.getBaselineImprovement());
 

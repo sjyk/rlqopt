@@ -134,6 +134,10 @@ public class HistogramOperations {
 			}
 		}
 
+		
+		//System.out.println(data);
+
+
 		for (Attribute a: left.keySet())
 			if (! data.containsKey(a))
 				data.put(a, left.get(a));
@@ -169,7 +173,7 @@ public class HistogramOperations {
 		
 		for(Attribute a: h.keySet()){
 			Histogram ahist = h.get(a);
-			double scaling = (count+0.0)/ahist.getCount();
+			double scaling = (count+0.0)/Math.max(ahist.getCount(),1);
 			data.put(a, ahist.scale(scaling));
 		}
 
