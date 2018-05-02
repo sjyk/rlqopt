@@ -18,21 +18,19 @@ public class Relation extends HashSet<String> {
   public Attribute get(String exp) {
 
     String attr = null;
-    if(exp.contains("."))
-    {
-      String [] comps = exp.split("\\.");
+    if (exp.contains(".")) {
+      String[] comps = exp.split("\\.");
       attr = comps[1].toLowerCase();
 
-      //System.out.println(attr + " " + comps[0] + " " + this.contains(attr));
+      // System.out.println(attr + " " + comps[0] + " " + this.contains(attr));
 
       if (!this.name.equalsIgnoreCase(comps[0])) return null;
 
       if (!this.contains(attr)) return null;
 
-    }
-    else{
-        attr = exp.toLowerCase();
-        if (!this.contains(attr)) return null;
+    } else {
+      attr = exp.toLowerCase();
+      if (!this.contains(attr)) return null;
     }
 
     return new Attribute(this, attr);
