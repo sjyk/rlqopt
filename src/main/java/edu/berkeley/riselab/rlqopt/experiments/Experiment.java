@@ -50,12 +50,10 @@ public class Experiment {
 
       for (Operator op : workload.copyWorkload(test)) {
 
-        if(p == baseline)
-          p.plan(op.copy(), workload.getStatsModel(), workload.getStatsModel());
-        else
-          p.plan(op.copy(), workload.getNoisyStatsModel(), workload.getStatsModel());
+        if (p == baseline) p.plan(op.copy(), workload.getStatsModel(), workload.getStatsModel());
+        else p.plan(op.copy(), workload.getNoisyStatsModel(), workload.getStatsModel());
 
-        //System.out.println(op + " " + p + " " + p.getLastPlanStats());
+        // System.out.println(op + " " + p + " " + p.getLastPlanStats());
 
         LinkedList<PlanningStatistics> stats = finalCost.get(p);
         stats.add(p.getLastPlanStats());
@@ -78,16 +76,16 @@ public class Experiment {
 
       for (int i = 0; i < n; i++) {
 
-        //if (statsB.get(i).finalCost == statsB.get(i).initialCost)
+        // if (statsB.get(i).finalCost == statsB.get(i).initialCost)
         //  continue;
 
         double cost = (double) Math.log(stats.get(i).finalCost);
-            //( - statsB.get(i).finalCost) / statsB.get(i).finalCost;
+        // ( - statsB.get(i).finalCost) / statsB.get(i).finalCost;
 
-        //if (statsB.get(i).finalCost == 0) sum += 0.0;
+        // if (statsB.get(i).finalCost == 0) sum += 0.0;
         sum += cost;
 
-        nt ++;
+        nt++;
       }
 
       rtn.put(p, sum / nt);

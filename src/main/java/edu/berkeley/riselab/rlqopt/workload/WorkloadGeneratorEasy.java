@@ -25,17 +25,15 @@ public class WorkloadGeneratorEasy extends WorkloadGenerator {
     db = ds.getDatabase();
     ts = ds.getStats();
     rand = new Random();
-
   }
 
-  public TableStatisticsModel getStatsModel(){
+  public TableStatisticsModel getStatsModel() {
     return ts;
   }
 
-  public Database getDatabase(){
+  public Database getDatabase() {
     return db;
   }
-
 
   public Expression generateSelection(Relation r) {
     HashSet<Attribute> allAttributes = r.attributes();
@@ -53,23 +51,33 @@ public class WorkloadGeneratorEasy extends WorkloadGenerator {
     Attribute randAttribute = attributeArray[rand.nextInt(attributeArray.length)];
     Histogram atStats = ts.get(randAttribute);
     int randomEquality = rand.nextInt((int) atStats.max());
-    
+
     int type = rand.nextInt(3);
     Expression e;
 
-    switch(type){
+    switch (type) {
+      case 0:
+        e =
+            new Expression(
+                Expression.EQUALS,
+                randAttribute.getExpression(),
+                new Expression(randomEquality + ""));
+        break;
 
-      case 0:  e =new Expression(
-                        Expression.EQUALS, randAttribute.getExpression(), new Expression(randomEquality + ""));
-      break;
+      case 1:
+        e =
+            new Expression(
+                Expression.GREATER_THAN,
+                randAttribute.getExpression(),
+                new Expression(randomEquality + ""));
+        break;
 
-      case 1:  e =new Expression(
-                        Expression.GREATER_THAN, randAttribute.getExpression(), new Expression(randomEquality + ""));
-      break;
-
-
-      default:  e = new Expression(
-                        Expression.LESS_THAN, randAttribute.getExpression(), new Expression(randomEquality + ""));
+      default:
+        e =
+            new Expression(
+                Expression.LESS_THAN,
+                randAttribute.getExpression(),
+                new Expression(randomEquality + ""));
     }
 
     OperatorParameters params = new OperatorParameters(e.getExpressionList());
@@ -185,8 +193,8 @@ public class WorkloadGeneratorEasy extends WorkloadGenerator {
     for (int i = 0; i < n; i++) {
       int k = rand.nextInt(3);
       if (k == 0) workload.add(generateJoin());
-      //else if (k == 1) workload.add(generateJoinSel());
-      //else if (k == 2) workload.add(generateJoinSelGb());
+      else if (k == 1) workload.add(generateJoinSel());
+      else if (k == 2) workload.add(generateJoinSelGb());
     }
 
     return workload;

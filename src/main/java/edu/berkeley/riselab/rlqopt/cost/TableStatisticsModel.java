@@ -1,18 +1,11 @@
 package edu.berkeley.riselab.rlqopt.cost;
 
 import edu.berkeley.riselab.rlqopt.Attribute;
-import edu.berkeley.riselab.rlqopt.Expression;
-import edu.berkeley.riselab.rlqopt.ExpressionList;
 import edu.berkeley.riselab.rlqopt.Operator;
-import edu.berkeley.riselab.rlqopt.Relation;
 import edu.berkeley.riselab.rlqopt.relalg.*;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
 
-public class TableStatisticsModel extends HistogramRelation
-    implements CostModel {
+public class TableStatisticsModel extends HistogramRelation implements CostModel {
 
   private double defaultSelectivity = 0.1;
   private int availableMemory;
@@ -33,7 +26,7 @@ public class TableStatisticsModel extends HistogramRelation
   }
 
   public Cost projectOperator(Operator in, Cost costIn) {
-    //int count = HistogramOperations.eval(this, in);
+    // int count = HistogramOperations.eval(this, in);
     return new Cost(costIn.resultCardinality, costIn.resultCardinality, 0);
   }
 
@@ -53,17 +46,15 @@ public class TableStatisticsModel extends HistogramRelation
     int countr = HistogramOperations.eval(this, in.source.get(0)).count();
     int countl = HistogramOperations.eval(this, in.source.get(1)).count();
 
-    //System.out.println((availableMemory-2));
-    return new Cost(countr + countl*countr/(availableMemory-2), count, 0);
-    
+    // System.out.println((availableMemory-2));
+    return new Cost(countr + countl * countr / (availableMemory - 2), count, 0);
   }
 
   public Cost cartesianOperator(Operator in, Cost l, Cost r) {
 
     int count = HistogramOperations.eval(this, in).count();
 
-    return new Cost(
-        l.resultCardinality * r.resultCardinality, count, 0);
+    return new Cost(l.resultCardinality * r.resultCardinality, count, 0);
   }
 
   private Cost doEstimate(Operator in) {

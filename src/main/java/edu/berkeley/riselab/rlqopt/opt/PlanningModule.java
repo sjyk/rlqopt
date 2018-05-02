@@ -1,7 +1,7 @@
 package edu.berkeley.riselab.rlqopt.opt;
 
-import edu.berkeley.riselab.rlqopt.cost.*;
 import edu.berkeley.riselab.rlqopt.Operator;
+import edu.berkeley.riselab.rlqopt.cost.*;
 
 // this implements one transformation
 // of the plan

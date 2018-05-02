@@ -1,26 +1,17 @@
 package edu.berkeley.riselab.rlqopt;
 
-
-import edu.berkeley.riselab.rlqopt.Operator;
-import edu.berkeley.riselab.rlqopt.ExpressionList;
-
-import edu.berkeley.riselab.rlqopt.workload.*;
-import edu.berkeley.riselab.rlqopt.relalg.*;
 import edu.berkeley.riselab.rlqopt.cost.*;
 import edu.berkeley.riselab.rlqopt.cost.CostModel;
-
+import edu.berkeley.riselab.rlqopt.experiments.Experiment;
 import edu.berkeley.riselab.rlqopt.opt.Planner;
-import edu.berkeley.riselab.rlqopt.opt.postgres.PostgresPlanner;
 import edu.berkeley.riselab.rlqopt.opt.bushy.PostgresBushyPlanner;
-import edu.berkeley.riselab.rlqopt.opt.volcano.VolcanoPlanner;
 import edu.berkeley.riselab.rlqopt.opt.learning.RLQOpt;
 import edu.berkeley.riselab.rlqopt.opt.nopt.NoPlanner;
-
-import edu.berkeley.riselab.rlqopt.experiments.Experiment;
-
-import java.util.Iterator;
+import edu.berkeley.riselab.rlqopt.opt.postgres.PostgresPlanner;
+import edu.berkeley.riselab.rlqopt.opt.volcano.VolcanoPlanner;
+import edu.berkeley.riselab.rlqopt.relalg.*;
+import edu.berkeley.riselab.rlqopt.workload.*;
 import java.util.LinkedList;
-
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -58,9 +49,5 @@ public class DoExperiments extends TestCase {
     e.train();
     e.run();
     System.out.println(e.getBaselineImprovement());
-
   }
-
-
-
 }

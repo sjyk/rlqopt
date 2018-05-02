@@ -14,7 +14,7 @@ public class TrainingPlanner extends Planner {
     this.preopt.add(new CorrespondAttributes());
     this.preopt.add(new FlattenJoin());
     this.init.add(new EagerSelectProject());
-    this.planners.add(new TDJoinSampler(0.1));
+    this.planners.add(new TDJoinSampler(0.0));
     this.setPlannerName("learning");
   }
 

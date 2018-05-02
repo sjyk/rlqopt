@@ -47,6 +47,20 @@
     <type>pom</type>
 </dependency>
 
+        <dependency>
+    <groupId>org.apache.calcite</groupId>
+    <artifactId>calcite-core</artifactId>
+    <version>1.16.0</version>
+    <type>jar</type>
+</dependency>
+
+        <dependency>
+    <groupId>org.apache.calcite</groupId>
+    <artifactId>calcite</artifactId>
+    <version>1.16.0</version>
+    <type>tar.gz</type>
+</dependency>
+
 
   </dependencies>
   <properties>

@@ -1,18 +1,11 @@
 package edu.berkeley.riselab.rlqopt;
 
-
-import edu.berkeley.riselab.rlqopt.Operator;
-import edu.berkeley.riselab.rlqopt.ExpressionList;
-
-import edu.berkeley.riselab.rlqopt.workload.*;
-import edu.berkeley.riselab.rlqopt.relalg.*;
 import edu.berkeley.riselab.rlqopt.cost.*;
 import edu.berkeley.riselab.rlqopt.cost.CostModel;
-
 import edu.berkeley.riselab.rlqopt.opt.postgres.PostgresPlanner;
-
+import edu.berkeley.riselab.rlqopt.relalg.*;
+import edu.berkeley.riselab.rlqopt.workload.*;
 import java.util.Iterator;
-
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -41,9 +34,8 @@ public class GeneratorTest extends TestCase {
 
     PostgresPlanner post = new PostgresPlanner();
 
-    for(Operator q: workload.generateWorkload(100))
-    {
-      post.plan(q,c);
+    for (Operator q : workload.generateWorkload(100)) {
+      post.plan(q, c);
       System.out.println(post.getLastPlanStats());
     }
   }
@@ -62,10 +54,7 @@ public class GeneratorTest extends TestCase {
     Expression eb = new Expression("3");
     Expression equals = new Expression(Expression.LESS_THAN, ea, eb);
 
-
-    System.out.println(HistogramOperations.cartesian(h,h));
-
-
+    System.out.println(HistogramOperations.cartesian(h, h));
   }
 
   public void test3() throws OperatorException {
@@ -76,7 +65,7 @@ public class GeneratorTest extends TestCase {
 
     HistogramRelation hr = new HistogramRelation(d.generateData(r));
     HistogramRelation hs = new HistogramRelation(d.generateData(s));
-    HistogramRelation h = HistogramOperations.merge(hr,hs);
+    HistogramRelation h = HistogramOperations.merge(hr, hs);
 
     OperatorParameters scan_params = new OperatorParameters(r.getExpressionList());
     TableAccessOperator scan_r = new TableAccessOperator(scan_params);
@@ -87,9 +76,9 @@ public class GeneratorTest extends TestCase {
     OperatorParameters params = new OperatorParameters(new ExpressionList());
     CartesianOperator c = new CartesianOperator(params, scan_r, scan_s);
 
-    System.out.println(HistogramOperations.eval(h,scan_s).count());
-    System.out.println(HistogramOperations.eval(h,scan_r).count());
-    System.out.println(HistogramOperations.eval(h,c).count());
+    System.out.println(HistogramOperations.eval(h, scan_s).count());
+    System.out.println(HistogramOperations.eval(h, scan_r).count());
+    System.out.println(HistogramOperations.eval(h, c).count());
 
     Iterator<Attribute> attrSetIter = r.attributes().iterator();
     Attribute a = attrSetIter.next();
@@ -98,9 +87,7 @@ public class GeneratorTest extends TestCase {
     Expression eb = new Expression("1");
     Expression equals = new Expression(Expression.LESS_THAN, ea, eb);
     OperatorParameters select_params = new OperatorParameters(equals.getExpressionList());
-    SelectOperator sel_r = new SelectOperator(select_params,c);
-    System.out.println(HistogramOperations.eval(h,sel_r).count());
+    SelectOperator sel_r = new SelectOperator(select_params, c);
+    System.out.println(HistogramOperations.eval(h, sel_r).count());
   }
-
-
 }

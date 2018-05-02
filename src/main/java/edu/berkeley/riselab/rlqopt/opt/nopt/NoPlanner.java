@@ -12,7 +12,7 @@ public class NoPlanner extends Planner {
     // this.preopt.add(new ExposeProjection());
     this.preopt.add(new CascadedSelect());
     this.preopt.add(new CorrespondAttributes());
-    //this.preopt.add(new FlattenJoin());
+    // this.preopt.add(new FlattenJoin());
     this.init.add(new EagerSelectProject());
     this.setPlannerName("nopt");
   }

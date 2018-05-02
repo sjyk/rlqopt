@@ -2,203 +2,187 @@ package edu.berkeley.riselab.rlqopt.cost;
 
 import edu.berkeley.riselab.rlqopt.Expression;
 import java.util.LinkedList;
-import java.util.Arrays;
 
 public class Histogram {
 
-	protected double [][] histogramBuckets;
+  protected double[][] histogramBuckets;
 
-	private final int LOW = 0;
-	private final int HIGH = 1;
-	private final int COUNT = 2;
+  private final int LOW = 0;
+  private final int HIGH = 1;
+  private final int COUNT = 2;
 
-	private double min;
-	private double max;
+  private double min;
+  private double max;
 
-	protected int buckets;
-	private int z;
-	private int distinctCount;
+  protected int buckets;
+  private int z;
+  private int distinctCount;
 
-	public Histogram(int buckets, double min, double max, int distinctCount){
-		this.buckets = buckets;
-		this.min = min;
-		this.max = max;
+  public Histogram(int buckets, double min, double max, int distinctCount) {
+    this.buckets = buckets;
+    this.min = min;
+    this.max = max;
 
-		this.histogramBuckets = new double[buckets][3];
-		this.z = 0;
-		this.distinctCount = distinctCount;
+    this.histogramBuckets = new double[buckets][3];
+    this.z = 0;
+    this.distinctCount = distinctCount;
 
-		initialize();
-	}
+    initialize();
+  }
 
+  public Histogram copy() {
+    Histogram result = new Histogram(buckets, min, max, distinctCount);
+    result.z = this.z;
+    double[][] newBuckets = new double[buckets][3];
+    double step = (max - min) / buckets;
 
-	public Histogram copy(){
-		Histogram result = new Histogram(buckets, min, max, distinctCount);
-		result.z = this.z;
-		double [][] newBuckets = new double[buckets][3];
-		double step = (max - min)/buckets;
+    for (int i = 0; i < buckets; i++) {
+      newBuckets[i][LOW] = min + step * i;
+      newBuckets[i][HIGH] = min + step * (i + 1);
+      newBuckets[i][COUNT] = histogramBuckets[i][COUNT];
+    }
 
-		for (int i=0; i<buckets; i++){
-			newBuckets[i][LOW] = min + step*i;
-			newBuckets[i][HIGH] = min + step*(i+1);
-			newBuckets[i][COUNT] = histogramBuckets[i][COUNT];
-		}
+    result.histogramBuckets = newBuckets;
 
-		result.histogramBuckets = newBuckets;
-		
-		return result;
-	}
+    return result;
+  }
 
-	private void initialize(){
-		
-		double step = (max - min)/buckets;
+  private void initialize() {
 
-		for (int i=0; i<buckets; i++){
-			histogramBuckets[i][LOW] = min + step*i;
-			histogramBuckets[i][HIGH] = min + step*(i+1);
-			histogramBuckets[i][COUNT] = 0.0;
-		}
+    double step = (max - min) / buckets;
 
-	}
+    for (int i = 0; i < buckets; i++) {
+      histogramBuckets[i][LOW] = min + step * i;
+      histogramBuckets[i][HIGH] = min + step * (i + 1);
+      histogramBuckets[i][COUNT] = 0.0;
+    }
+  }
 
-	private void reset(){
-		for (int i=0; i<buckets; i++){
-			histogramBuckets[i][COUNT] = 0.0;
-		}
-		z = 0;
-		distinctCount = 0;
-	}
+  private void reset() {
+    for (int i = 0; i < buckets; i++) {
+      histogramBuckets[i][COUNT] = 0.0;
+    }
+    z = 0;
+    distinctCount = 0;
+  }
 
-	private int val2index(double value){
-		double step = (max - min)/buckets;
-		return Math.max(Math.min((int)((value - min)/step), buckets-1),0);
-	}
+  private int val2index(double value) {
+    double step = (max - min) / buckets;
+    return Math.max(Math.min((int) ((value - min) / step), buckets - 1), 0);
+  }
 
-	
-	public void put(double value){
-		histogramBuckets[val2index(value)][COUNT]++;
-		this.z++;
-	}
+  public void put(double value) {
+    histogramBuckets[val2index(value)][COUNT]++;
+    this.z++;
+  }
 
-	public double max(){
-		return histogramBuckets[buckets-1][HIGH];
-	}
+  public double max() {
+    return histogramBuckets[buckets - 1][HIGH];
+  }
 
-	public double min(){
-		return histogramBuckets[0][LOW];
-	}
+  public double min() {
+    return histogramBuckets[0][LOW];
+  }
 
-	public int getDistinctCount(){
-		return distinctCount;
-	}
+  public int getDistinctCount() {
+    return distinctCount;
+  }
 
-	public int getCount(){
-		return z;
-	}
+  public int getCount() {
+    return z;
+  }
 
-	
-	public Histogram filter(Expression e){
-		
-		Histogram result = copy();
+  public Histogram filter(Expression e) {
 
-		double value = Double.parseDouble(e.children.get(1).op);
+    Histogram result = copy();
 
-		int index = val2index(value);
+    double value = Double.parseDouble(e.children.get(1).op);
 
-		if (e.op.equals(Expression.EQUALS))
-		{
+    int index = val2index(value);
 
-			double [] tmp = result.histogramBuckets[index].clone();
-			
-			result.reset();
+    if (e.op.equals(Expression.EQUALS)) {
 
-			result.histogramBuckets[index] = tmp;
-			
-			result.z = (int) (tmp[COUNT]) + 1;
-			
-			result.distinctCount = (result.z > 0) ? 1: 0;
-		}
-		else if (e.op.equals(Expression.LESS_THAN) || e.op.equals(Expression.LESS_THAN_EQUALS))
-		{
+      double[] tmp = result.histogramBuckets[index].clone();
 
-			double sum = 0.0;
-			double tot = result.z + 0.0;
-			for (int i=index+1; i<buckets;i++)
-			{
-				result.z -= result.histogramBuckets[i][COUNT];
-				sum += result.histogramBuckets[i][COUNT];
-				result.histogramBuckets[i][COUNT] = 0;
-			}
-			result.distinctCount *= (1.0-sum/tot);
-			result.z = Math.max(result.z, 1);
-		}
-		else if (e.op.equals(Expression.GREATER_THAN) || e.op.equals(Expression.GREATER_THAN_EQUALS))
-		{
+      result.reset();
 
-			double sum = 0.0;
-			double tot = result.z + 0.0;
-			for (int i=0; i<index;i++)
-			{
-				result.z -= result.histogramBuckets[i][COUNT];
-				sum += result.histogramBuckets[i][COUNT];
-				result.histogramBuckets[i][COUNT] = 0;
-			}
-			result.distinctCount *= (1.0-sum/tot);
-			result.z = Math.max(result.z, 1);
-		}
+      result.histogramBuckets[index] = tmp;
 
-		return result;
-	}
+      result.z = (int) (tmp[COUNT]) + 1;
 
-	public Histogram scale(double count){
-		Histogram result = copy();
-		result.z *= count;
-		result.distinctCount *= count;
+      result.distinctCount = (result.z > 0) ? 1 : 0;
+    } else if (e.op.equals(Expression.LESS_THAN) || e.op.equals(Expression.LESS_THAN_EQUALS)) {
 
-		for (int i=0; i< buckets; i++)
-			result.histogramBuckets[i][COUNT] *= count;
+      double sum = 0.0;
+      double tot = result.z + 0.0;
+      for (int i = index + 1; i < buckets; i++) {
+        result.z -= result.histogramBuckets[i][COUNT];
+        sum += result.histogramBuckets[i][COUNT];
+        result.histogramBuckets[i][COUNT] = 0;
+      }
+      result.distinctCount *= (1.0 - sum / tot);
+      result.z = Math.max(result.z, 1);
+    } else if (e.op.equals(Expression.GREATER_THAN)
+        || e.op.equals(Expression.GREATER_THAN_EQUALS)) {
 
-		result.z = Math.max(result.z, 1);
+      double sum = 0.0;
+      double tot = result.z + 0.0;
+      for (int i = 0; i < index; i++) {
+        result.z -= result.histogramBuckets[i][COUNT];
+        sum += result.histogramBuckets[i][COUNT];
+        result.histogramBuckets[i][COUNT] = 0;
+      }
+      result.distinctCount *= (1.0 - sum / tot);
+      result.z = Math.max(result.z, 1);
+    }
 
-		return result;
-	}
+    return result;
+  }
 
+  public Histogram scale(double count) {
+    Histogram result = copy();
+    result.z *= count;
+    result.distinctCount *= count;
 
-	public Histogram merge(Histogram other){
+    for (int i = 0; i < buckets; i++) result.histogramBuckets[i][COUNT] *= count;
 
-		Histogram result = copy();
+    result.z = Math.max(result.z, 1);
 
-		//System.out.println("bb");
+    return result;
+  }
 
-		for (int i=0; i< buckets; i++)
-		{
-			for (int j=0; j< buckets; j++){
+  public Histogram merge(Histogram other) {
 
-				double mp = result.histogramBuckets[i][LOW]*0.5 + result.histogramBuckets[i][HIGH]*0.5;
+    Histogram result = copy();
 
-				//System.out.println(mp + " " + other.histogramBuckets[j][LOW] + " " + other.histogramBuckets[j][HIGH]);
+    // System.out.println("bb");
 
-				if (mp >= other.histogramBuckets[j][LOW] && mp <= other.histogramBuckets[j][HIGH])
-				{
-					//System.out.println("a");
-					double init = result.histogramBuckets[i][COUNT];
-					double scaling = (other.distinctCount+0.0)/other.buckets;
+    for (int i = 0; i < buckets; i++) {
+      for (int j = 0; j < buckets; j++) {
 
-					result.histogramBuckets[i][COUNT] *= (other.histogramBuckets[i][COUNT]/scaling);
+        double mp = result.histogramBuckets[i][LOW] * 0.5 + result.histogramBuckets[i][HIGH] * 0.5;
 
-					result.z += (result.histogramBuckets[i][COUNT]-init);
-				}
-				
-			}
-		}
-			
-		return result;
-	}
+        // System.out.println(mp + " " + other.histogramBuckets[j][LOW] + " " +
+        // other.histogramBuckets[j][HIGH]);
 
-	public String toString(){
-		LinkedList<Double> out = new LinkedList();
-		for(int i=0; i< buckets; i++)
-			out.add(histogramBuckets[i][COUNT]);
-		return out.toString();
-	}
+        if (mp >= other.histogramBuckets[j][LOW] && mp <= other.histogramBuckets[j][HIGH]) {
+          // System.out.println("a");
+          double init = result.histogramBuckets[i][COUNT];
+          double scaling = (other.distinctCount + 0.0) / other.buckets;
+
+          result.histogramBuckets[i][COUNT] *= (other.histogramBuckets[i][COUNT] / scaling);
+
+          result.z += (result.histogramBuckets[i][COUNT] - init);
+        }
+      }
+    }
+
+    return result;
+  }
+
+  public String toString() {
+    LinkedList<Double> out = new LinkedList();
+    for (int i = 0; i < buckets; i++) out.add(histogramBuckets[i][COUNT]);
+    return out.toString();
+  }
 }
