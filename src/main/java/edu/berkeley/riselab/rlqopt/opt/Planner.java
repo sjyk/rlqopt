@@ -1,9 +1,9 @@
 package edu.berkeley.riselab.rlqopt.opt;
 
 import edu.berkeley.riselab.rlqopt.Operator;
+import edu.berkeley.riselab.rlqopt.cost.*;
 import edu.berkeley.riselab.rlqopt.preopt.InitRewrite;
 import edu.berkeley.riselab.rlqopt.preopt.PreOptimizationRewrite;
-import edu.berkeley.riselab.rlqopt.cost.*;
 import java.util.List;
 
 // the main planner class

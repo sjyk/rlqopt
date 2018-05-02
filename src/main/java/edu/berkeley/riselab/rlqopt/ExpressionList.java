@@ -13,6 +13,13 @@ public class ExpressionList extends LinkedList<Expression> {
     for (Expression e : args) this.add(e);
   }
 
+  public ExpressionList(LinkedList<Expression> args) {
+
+    super();
+
+    for (Expression e : args) this.add(e);
+  }
+
   // noop loading an attribute
   public ExpressionList(Relation r) {
 

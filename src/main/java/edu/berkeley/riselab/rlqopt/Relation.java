@@ -5,17 +5,33 @@ import java.util.HashSet;
 /** Main data structure for tables, just a wrapper around a HashSet */
 public class Relation extends HashSet<String> {
 
+  public String name;
+
   public Relation(String... args) {
 
     super();
 
     // initialize with the input list
-    for (String arg : args) this.add(arg);
+    for (String arg : args) this.add(arg.toLowerCase());
   }
 
-  public Attribute get(String attr) {
+  public Attribute get(String exp) {
 
-    if (!this.contains(attr)) return null;
+    String attr = null;
+    if (exp.contains(".")) {
+      String[] comps = exp.split("\\.");
+      attr = comps[1].toLowerCase();
+
+      // System.out.println(attr + " " + comps[0] + " " + this.contains(attr));
+
+      if (!this.name.equalsIgnoreCase(comps[0])) return null;
+
+      if (!this.contains(attr)) return null;
+
+    } else {
+      attr = exp.toLowerCase();
+      if (!this.contains(attr)) return null;
+    }
 
     return new Attribute(this, attr);
   }

@@ -23,7 +23,8 @@ public class Attribute {
   }
 
   public String toString() {
-    return "R" + relation.hashCode() + "." + attribute;
+    if (relation.name == null) return "R" + relation.hashCode() + "." + attribute;
+    else return relation.name + "." + attribute;
   }
 
   public int hashCode() {

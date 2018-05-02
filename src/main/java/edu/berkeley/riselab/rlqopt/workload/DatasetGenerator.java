@@ -1,177 +1,176 @@
 package edu.berkeley.riselab.rlqopt.workload;
 
-import java.util.Random;
-import java.util.LinkedList;
-import java.util.HashSet;
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.UUID;
-import edu.berkeley.riselab.rlqopt.Relation;
 import edu.berkeley.riselab.rlqopt.Attribute;
+import edu.berkeley.riselab.rlqopt.Database;
+import edu.berkeley.riselab.rlqopt.Relation;
 import edu.berkeley.riselab.rlqopt.cost.Histogram;
 import edu.berkeley.riselab.rlqopt.cost.TableStatisticsModel;
-import edu.berkeley.riselab.rlqopt.Database;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Random;
+import java.util.UUID;
 
 public class DatasetGenerator {
 
-	private final int NUMBER = 0;
-	private final int STRING = 1;
-	private final int DATE = 2;
+  private final int NUMBER = 0;
+  private final int STRING = 1;
+  private final int DATE = 2;
 
-	private int numAttributes;
-	private int maxTableSize;
-	private int histogramRes;
+  private int numAttributes;
+  private int maxTableSize;
+  private int histogramRes;
 
-	private LinkedList<Integer> attrTypes;
+  private LinkedList<Integer> attrTypes;
 
-	private Database db;
-	private TableStatisticsModel ts;
+  private Database db;
+  private TableStatisticsModel ts;
 
-	public DatasetGenerator(int numRelations, int numAttributes, int maxTableSize, int histogramRes){
-		
-		this.numAttributes = numAttributes;
-		attrTypes = generateAttributes();
-		this.maxTableSize = maxTableSize;
-		this.histogramRes = histogramRes;
+  public DatasetGenerator(int numRelations, int numAttributes, int maxTableSize, int histogramRes) {
 
-		db = new Database();
-		ts = new TableStatisticsModel();
+    this.numAttributes = numAttributes;
+    attrTypes = generateAttributes();
+    this.maxTableSize = maxTableSize;
+    this.histogramRes = histogramRes;
 
-		for(int i = 0; i < numRelations; i++){
-			Relation r = generateRelation();
-			db.add(r);
-			ts.putAll(generateData(r));
-		}
-	}
+    db = new Database();
+    ts = new TableStatisticsModel();
 
-	
-	private Histogram generateColumn(int size, int distinct, int type){
+    for (int i = 0; i < numRelations; i++) {
+      Relation r = generateRelation();
+      db.add(r);
+      ts.putAll(generateData(r));
+    }
+  }
 
-		Random rand = new Random();
-		Histogram h;
+  private Histogram generateColumn(int size, int distinct, int type) {
 
-		switch(type){
-				case NUMBER: h = new Histogram(histogramRes, 0, maxTableSize, distinct);
-				break;
-				case STRING: h = new Histogram(histogramRes, 0, distinct, distinct);
-				break;
-				case DATE: h = new Histogram(histogramRes, 0, maxTableSize, distinct);
-				break;
-				default:
-				return null;
-			}
-		 
+    Random rand = new Random();
+    Histogram h;
 
-		ArrayList<String> distinctKeys = new ArrayList(distinct);
-		ArrayList<String> result = new ArrayList(size);
+    switch (type) {
+      case NUMBER:
+        h = new Histogram(histogramRes, 0, maxTableSize, distinct);
+        break;
+      case STRING:
+        h = new Histogram(histogramRes, 0, distinct, distinct);
+        break;
+      case DATE:
+        h = new Histogram(histogramRes, 0, maxTableSize, distinct);
+        break;
+      default:
+        return null;
+    }
 
-		for(int i = 0; i<distinct; i++)
-		{
-			switch(type){
-				case NUMBER: distinctKeys.add(randomNumber());
-				break;
-				case STRING: distinctKeys.add(randomString());
-				break;
-				case DATE: distinctKeys.add(randomDate());
-				break;
-			}
-		}
+    ArrayList<String> distinctKeys = new ArrayList(distinct);
+    ArrayList<String> result = new ArrayList(size);
 
-		for(int i = 0; i<size; i++)
-		{
-			int index = rand.nextInt(distinctKeys.size());
+    for (int i = 0; i < distinct; i++) {
+      switch (type) {
+        case NUMBER:
+          distinctKeys.add(randomNumber());
+          break;
+        case STRING:
+          distinctKeys.add(randomString());
+          break;
+        case DATE:
+          distinctKeys.add(randomDate());
+          break;
+      }
+    }
 
-			switch(type){
-				case STRING: h.put(index + 0.0);
-				break;
-				default: h.put(Integer.parseInt(distinctKeys.get(index)) + 0.0);
-				break;
-			}
-		}
+    for (int i = 0; i < size; i++) {
+      int index = rand.nextInt(distinctKeys.size());
 
-		return h;
-	}
+      switch (type) {
+        case STRING:
+          h.put(index + 0.0);
+          break;
+        default:
+          h.put(Integer.parseInt(distinctKeys.get(index)) + 0.0);
+          break;
+      }
+    }
 
-	private String randomString(){
-		return UUID.randomUUID().toString().replace("-", "");
-	}
+    return h;
+  }
 
-	private String randomNumber(){
-		return new Random().nextInt(maxTableSize) + "";
-	}
+  private String randomString() {
+    return UUID.randomUUID().toString().replace("-", "");
+  }
 
-	private String randomDate(){
-		return randomNumber();
-	}
+  private String randomNumber() {
+    return new Random().nextInt(maxTableSize) + "";
+  }
 
+  private String randomDate() {
+    return randomNumber();
+  }
 
-	private LinkedList<Integer> generateAttributes(){
-		Random rand = new Random();
-		
-		LinkedList<Integer> attrs = new LinkedList();
+  private LinkedList<Integer> generateAttributes() {
+    Random rand = new Random();
 
-		for(int i=0; i<numAttributes; i++)
-		{
-			int type = rand.nextInt(3);
-			attrs.add(type);
-		}
+    LinkedList<Integer> attrs = new LinkedList();
 
-		return attrs;
-	}
+    for (int i = 0; i < numAttributes; i++) {
+      int type = rand.nextInt(3);
+      attrs.add(type);
+    }
 
+    return attrs;
+  }
 
-	public Relation generateRelation(){
-		
-		Random rand = new Random();
+  public Relation generateRelation() {
 
-		int numAttributesInRel = rand.nextInt(numAttributes) + 2;
+    Random rand = new Random();
 
-		HashSet<String> attributes = new HashSet();
+    int numAttributesInRel = rand.nextInt(numAttributes) + 2;
 
-		for (int j = 0; j < numAttributesInRel; j++) {
-        	attributes.add(rand.nextInt(numAttributes) + "");
-      	}
+    HashSet<String> attributes = new HashSet();
 
-      	return new Relation(attributes.toArray(new String[attributes.size()]));
-	}
+    for (int j = 0; j < numAttributesInRel; j++) {
+      attributes.add(rand.nextInt(numAttributes) + "");
+    }
 
-	public HashMap<Attribute, Histogram> generateData(Relation r){
-		
-		HashMap<Attribute, Histogram> data = new HashMap();
-		int[] distinct = new int[] {5, 500, 50000};
-		int[] divisors = new int[] {1, 10, 100, 1000, 10000};
+    return new Relation(attributes.toArray(new String[attributes.size()]));
+  }
 
-		boolean primary = true;
-		Random rand = new Random();
+  public HashMap<Attribute, Histogram> generateData(Relation r) {
 
-		int tableSize = maxTableSize/divisors[rand.nextInt(5)] + 1;
+    HashMap<Attribute, Histogram> data = new HashMap();
+    int[] distinct = new int[] {5, 500, 50000};
+    int[] divisors = new int[] {1, 10, 100, 1000, 10000};
 
-		for(String attr: r)
-		{
-			int ind = Integer.parseInt(attr);
-			int type = attrTypes.get(ind);
-			
-			if ((type == STRING) && primary){
-				data.put(r.get(attr),generateColumn(tableSize,tableSize, type));
-				primary = false;
-			}
-			else if (type == STRING) {
-				data.put(r.get(attr),generateColumn(tableSize, Math.min(tableSize,distinct[rand.nextInt(3)]), type));
-			}
+    boolean primary = true;
+    Random rand = new Random();
 
-			data.put(r.get(attr), generateColumn(tableSize, tableSize, type));
+    int tableSize = maxTableSize / divisors[rand.nextInt(5)] + 1;
 
-		}
+    for (String attr : r) {
+      int ind = Integer.parseInt(attr);
+      int type = attrTypes.get(ind);
 
-		return data;
-	}
+      if ((type == STRING) && primary) {
+        data.put(r.get(attr), generateColumn(tableSize, tableSize, type));
+        primary = false;
+      } else if (type == STRING) {
+        data.put(
+            r.get(attr),
+            generateColumn(tableSize, Math.min(tableSize, distinct[rand.nextInt(3)]), type));
+      }
 
-	public Database getDatabase(){
-		return db;
-	}
+      data.put(r.get(attr), generateColumn(tableSize, tableSize, type));
+    }
 
-	public TableStatisticsModel getStats(){
-		return ts;
-	}
+    return data;
+  }
 
+  public Database getDatabase() {
+    return db;
+  }
+
+  public TableStatisticsModel getStats() {
+    return ts;
+  }
 }

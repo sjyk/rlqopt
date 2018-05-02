@@ -1,5 +1,3 @@
 package edu.berkeley.riselab.rlqopt.cost;
 
-public class SystemProperties {
-	
-}
+public class SystemProperties {}

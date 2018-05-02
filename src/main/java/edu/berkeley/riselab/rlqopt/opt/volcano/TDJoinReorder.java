@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 
-
 // this implements one transformation
 // of the plan match
 public class TDJoinReorder implements PlanningModule {

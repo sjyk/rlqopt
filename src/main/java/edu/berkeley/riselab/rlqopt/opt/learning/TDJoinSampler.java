@@ -126,7 +126,14 @@ public class TDJoinSampler implements PlanningModule {
       //
       t.cost = cost; // - t.cost;
       if (cost > 1e6)
-        System.out.println(rtn + " : " + cost + " " + c.estimate(rtn.source.get(0)) + " " + c.estimate(rtn.source.get(1)));
+        System.out.println(
+            rtn
+                + " : "
+                + cost
+                + " "
+                + c.estimate(rtn.source.get(0))
+                + " "
+                + c.estimate(rtn.source.get(1)));
       trainingData.add(t);
     }
 
