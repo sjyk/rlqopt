@@ -103,6 +103,8 @@ public class Expression {
 
     if (this.op == null) return this.noop.toString();
 
+    if (children.size() == 0) return this.op;
+
     return this.op + "(" + children.toString() + ")";
   }
 
@@ -120,4 +122,54 @@ public class Expression {
   public boolean isLiteral() {
     return (children.size() == 0);
   }
+
+  
+  public String toSQLString() {
+
+    if(op == null)
+      return toString();
+    
+    if (op.equals(EQUALS))
+    {
+       return " ( " + children.get(0).toString() + " = " + children.get(1).toString() + " ) ";
+    } 
+
+    if (op.equals(GREATER_THAN))
+    {
+       return " ( " + children.get(0).toString() + " > " + children.get(1).toString() + " ) ";
+    }
+
+    if (op.equals(GREATER_THAN_EQUALS))
+    {
+       return " ( " + children.get(0).toString() + " >= " + children.get(1).toString() + " ) ";
+    } 
+
+    if (op.equals(LESS_THAN))
+    {
+       return " ( " + children.get(0).toString() + " < " + children.get(1).toString() + " ) ";
+    }
+
+    if (op.equals(LESS_THAN_EQUALS))
+    {
+       return " ( " + children.get(0).toString() + " <= " + children.get(1).toString() + " ) ";
+    }   
+
+    if (op.equals(OR))
+    {
+       return " ( " + children.get(0).toSQLString() + " OR " + children.get(1).toSQLString() + " ) ";
+    }  
+
+    if (op.equals(AND))
+    {
+       return " ( " + children.get(0).toSQLString() + " AND " + children.get(1).toSQLString() + " ) ";
+    }  
+
+    if (op.equals(NOT))
+    {
+       return " ( NOT ( " + children.get(0).toSQLString() + " ) ) ";
+    }  
+
+    return children.get(0).toSQLString();
+  }
+
 }

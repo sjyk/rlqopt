@@ -35,7 +35,7 @@ public class GeneratorTest extends TestCase {
     PostgresPlanner post = new PostgresPlanner();
 
     for (Operator q : workload.generateWorkload(100)) {
-      post.plan(q, c);
+      System.out.println(post.plan(q, c).toSQLString());
       System.out.println(post.getLastPlanStats());
     }
   }

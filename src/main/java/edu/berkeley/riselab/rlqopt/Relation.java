@@ -1,6 +1,7 @@
 package edu.berkeley.riselab.rlqopt;
 
 import java.util.HashSet;
+import java.util.UUID;
 
 /** Main data structure for tables, just a wrapper around a HashSet */
 public class Relation extends HashSet<String> {
@@ -10,6 +11,8 @@ public class Relation extends HashSet<String> {
   public Relation(String... args) {
 
     super();
+
+    this.name = "R"+UUID.randomUUID().toString().replace("-","").substring(0,4);
 
     // initialize with the input list
     for (String arg : args) this.add(arg.toLowerCase());
