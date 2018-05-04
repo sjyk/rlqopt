@@ -342,4 +342,19 @@ public class SQL2RelAlg {
 
     return null;
   }
+
+  public static String prettyPrint(String sql){
+
+    int index0 = sql.indexOf("(");
+    int indexf = sql.lastIndexOf(")");
+    sql = sql.substring(index0+1, indexf);
+
+    /*sql = sql.replace("FROM", "\nFROM");
+    sql = sql.replace("WHERE", "\nWHERE");
+    sql = sql.replace("SELECT", "SELECT");
+    sql = sql.replace("GROUP BY", "\nGROUP BY");*/
+
+    return sql;
+  }
+
 }

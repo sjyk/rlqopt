@@ -41,7 +41,7 @@ public class SQLTest extends TestCase {
     // s.convert("select a from bear where a = 7 AND b = 4 AND  c = 1");
     // s.convert("select a from bear where bear.a = 7");
     System.out.println(
-        s.convert(
-            "select sum(bear.a) from bear join fred on bear.a = fred.c AND bear.c = fred.c join dog on bear.a = dog.a  where bear.a > 7 AND bear.a = 4 group by bear.b").toSQLString());
+    SQL2RelAlg.prettyPrint(    s.convert(
+            "select sum(bear.a) from bear join fred on bear.a = fred.c AND bear.c = fred.c join dog on bear.a = dog.a  where bear.a > 7 AND bear.a = 4 group by bear.b").toSQLString()));
   }
 }
