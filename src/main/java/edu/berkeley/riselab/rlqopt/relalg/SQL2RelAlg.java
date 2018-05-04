@@ -319,7 +319,7 @@ public class SQL2RelAlg {
     }
 
     ExpressionList elist1 = new ExpressionList(parsed[0]);
-    ExpressionList elist2 = new ExpressionList(parsed[0]);
+    ExpressionList elist2 = new ExpressionList(parsed[1]);
     OperatorParameters gb_params = new OperatorParameters(elist1, elist2);
 
     return new GroupByOperator(gb_params, src);

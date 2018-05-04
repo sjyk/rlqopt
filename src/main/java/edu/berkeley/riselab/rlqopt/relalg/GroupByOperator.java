@@ -4,6 +4,8 @@ import edu.berkeley.riselab.rlqopt.Operator;
 import edu.berkeley.riselab.rlqopt.OperatorException;
 import edu.berkeley.riselab.rlqopt.OperatorParameters;
 
+import edu.berkeley.riselab.rlqopt.Expression;
+
 // implements a group by operator
 public class GroupByOperator extends Operator {
 
@@ -18,4 +20,27 @@ public class GroupByOperator extends Operator {
 
     return true;
   }
+
+  public String toSQLString(){
+      String className = this.getClass().getSimpleName();
+
+      String prefix = "SELECT " + params.expression.get(0).toString()+ " FROM ";
+
+      for (Operator o: source)
+      {
+      	 prefix += o.toSQLString();
+      }
+
+      prefix = prefix.substring(0, prefix.length() - 3);
+
+      prefix += " GROUP BY ";
+
+      for(Expression e: params.secondary_expression)
+      	prefix += e.toSQLString() + " , ";
+
+      prefix = prefix.substring(0, prefix.length() - 3);
+
+      return "("+ prefix +") as " +className+hashCode();
+  }
+
 }

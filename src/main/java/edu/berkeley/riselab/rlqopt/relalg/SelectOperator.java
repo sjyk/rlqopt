@@ -4,6 +4,8 @@ import edu.berkeley.riselab.rlqopt.Operator;
 import edu.berkeley.riselab.rlqopt.OperatorException;
 import edu.berkeley.riselab.rlqopt.OperatorParameters;
 
+import edu.berkeley.riselab.rlqopt.Expression;
+
 // implements a select operator
 public class SelectOperator extends Operator {
 
@@ -17,5 +19,27 @@ public class SelectOperator extends Operator {
     if (source.length != 1) return false;
 
     return true;
+  }
+
+    public String toSQLString(){
+      String className = this.getClass().getSimpleName();
+
+      String prefix = "SELECT * FROM ";
+
+      for (Operator o: source)
+      {
+      	 prefix += o.toSQLString();
+      }
+
+      prefix = prefix.substring(0, prefix.length() - 3);
+
+      prefix += " WHERE ";
+
+      for(Expression e: params.expression)
+      	prefix += e.toSQLString() + " AND ";
+
+      prefix = prefix.substring(0, prefix.length() - 4);
+
+      return "("+ prefix +") as " +className+hashCode();
   }
 }

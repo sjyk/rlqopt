@@ -96,4 +96,13 @@ public abstract class Operator {
       return className + "(" + source.toString() + ")";
     }
   }
+
+    // override
+  public String toSQLString() {
+    String prefix = "SELECT * FROM ";
+    for (Operator o: source)
+      prefix += o.toSQLString() + ",";
+    return prefix.substring(0,prefix.length()-1);
+  }
+
 }
