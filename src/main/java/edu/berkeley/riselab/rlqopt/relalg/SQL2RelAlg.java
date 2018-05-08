@@ -21,6 +21,7 @@ import org.apache.calcite.sql.SqlSelect;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
 
+
 public class SQL2RelAlg {
 
   Database db;
@@ -130,6 +131,10 @@ public class SQL2RelAlg {
 
     SqlSelect select = (SqlSelect) node;
     SqlBasicCall stmt = (SqlBasicCall) (select.getWhere());
+
+    if (stmt == null)
+      return null;
+
     return parseExpression(stmt, activeTables);
   }
 
@@ -298,7 +303,12 @@ public class SQL2RelAlg {
   public Operator makeSelect(SqlNode sqlNode, Operator src) throws OperatorException {
 
     HashMap<Relation, TableAccessOperator> activeTables = getActiveTables((SqlSelect) sqlNode);
-    ExpressionList elist = basicCall2Expression(sqlNode, activeTables).getExpressionList();
+    Expression e = basicCall2Expression(sqlNode, activeTables);
+
+    if (e == null)
+      return src;
+
+    ExpressionList elist = e.getExpressionList();
     OperatorParameters params = new OperatorParameters(elist);
     return new SelectOperator(params, src);
   }
@@ -344,7 +354,6 @@ public class SQL2RelAlg {
   }
 
   public static String prettyPrint(String sql){
-
     int index0 = sql.indexOf("(");
     int indexf = sql.lastIndexOf(")");
     sql = sql.substring(index0+1, indexf);
