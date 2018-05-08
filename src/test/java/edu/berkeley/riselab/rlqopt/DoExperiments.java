@@ -39,13 +39,13 @@ public class DoExperiments extends TestCase {
     CostModel c = workload.getStatsModel();
 
     LinkedList<Planner> planners = new LinkedList();
-    planners.add(new NoPlanner());
+    planners.add(new RLQOpt(workload));
     planners.add(new PostgresBushyPlanner());
     planners.add(new PostgresPlanner());
     planners.add(new VolcanoPlanner());
-    planners.add(new RLQOpt(workload));
 
-    Experiment e = new Experiment(workload, 5000, 1000, planners);
+
+    Experiment e = new Experiment(workload, 1000, 1000, planners);
     e.train();
     e.run();
     System.out.println(e.getBaselineImprovement());

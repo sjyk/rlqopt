@@ -50,7 +50,7 @@ public class Experiment {
 
       for (Operator op : workload.copyWorkload(test)) {
 
-        if (p == baseline) p.plan(op.copy(), workload.getStatsModel(), workload.getStatsModel());
+        if (p == baseline) p.plan(op.copy(), workload.getStatsModel(), workload.getStatsModel()).toSQLString();
         else p.plan(op.copy(), workload.getNoisyStatsModel(), workload.getStatsModel());
 
         // System.out.println(op + " " + p + " " + p.getLastPlanStats());

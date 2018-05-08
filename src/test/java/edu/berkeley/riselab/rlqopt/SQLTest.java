@@ -6,6 +6,8 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.apache.calcite.sql.parser.SqlParseException;
 
+import java.util.Scanner;
+
 /** Unit test for simple App. */
 public class SQLTest extends TestCase {
   /**
@@ -23,25 +25,27 @@ public class SQLTest extends TestCase {
   }
 
   public void test1() throws SqlParseException {
-    Relation bear = new Relation("a", "b", "c");
-    bear.name = "bear";
+    Relation sales = new Relation("sku", "emp_id", "amount");
+    sales.name = "sales";
 
-    Relation fred = new Relation("c", "d", "e");
-    fred.name = "fred";
+    Relation products = new Relation("sku", "price", "comission");
+    products.name = "products";
 
-    Relation dog = new Relation("q", "l", "t");
-    dog.name = "dog";
+    Relation employees = new Relation("emp_id", "name", "salary");
+    employees.name = "employees";
 
-    Database db = new Database(bear, fred, dog);
+    Database db = new Database(sales, products, employees);
 
-    // System.out.println(bear);
+    System.out.println(db);
+    //Scanner scanner = new Scanner(System.in);
 
     SQL2RelAlg s = new SQL2RelAlg(db);
-    // s.convert("select a from bear join fred on bear.l = fred.b");
-    // s.convert("select a from bear where a = 7 AND b = 4 AND  c = 1");
-    // s.convert("select a from bear where bear.a = 7");
-    System.out.println(
-    SQL2RelAlg.prettyPrint(    s.convert(
-            "select sum(bear.a) from bear join fred on bear.a = fred.c AND bear.c = fred.c join dog on bear.a = dog.a  where bear.a > 7 AND bear.a = 4 group by bear.b").toSQLString()));
+    
+    String query = "SELECT * FROM sales join products on sales.sku = products.sku join employees on  sales.emp_id = employees.emp_id";//scanner.nextLine();
+
+    System.out.println("===Input===");
+    System.out.println(query);
+    System.out.println("===Output===");
+    System.out.println(SQL2RelAlg.prettyPrint(s.convert(query).toSQLString()));
   }
 }
