@@ -1,5 +1,6 @@
 package edu.berkeley.riselab.rlqopt;
 
+import edu.berkeley.riselab.rlqopt.relalg.TableAccessOperator;
 import java.util.HashSet;
 import java.util.UUID;
 
@@ -16,6 +17,11 @@ public class Relation extends HashSet<String> {
 
     // initialize with the input list
     for (String arg : args) this.add(arg.toLowerCase());
+  }
+
+  public Operator scan() throws OperatorException {
+    OperatorParameters scan_params = new OperatorParameters(this.getExpressionList());
+    return new TableAccessOperator(scan_params);
   }
 
   public Attribute get(String exp) {
