@@ -46,6 +46,8 @@ public class DatasetGenerator {
 
   private Histogram generateColumn(int size, int distinct, int type) {
 
+    //System.out.println("test");
+
     Random rand = new Random();
     Histogram h;
 
@@ -64,12 +66,15 @@ public class DatasetGenerator {
     }
 
     ArrayList<String> distinctKeys = new ArrayList(distinct);
+    ArrayList<Integer> distinctIntegerKeys = new ArrayList(distinct);
     ArrayList<String> result = new ArrayList(size);
 
     for (int i = 0; i < distinct; i++) {
       switch (type) {
         case NUMBER:
-          distinctKeys.add(randomNumber());
+          int num = randomNumber();
+          distinctKeys.add(num + "");
+          distinctIntegerKeys.add(num);
           break;
         case STRING:
           distinctKeys.add(randomString());
@@ -80,32 +85,79 @@ public class DatasetGenerator {
       }
     }
 
-    for (int i = 0; i < size; i++) {
-      int index = rand.nextInt(distinctKeys.size());
+    
 
-      switch (type) {
-        case STRING:
-          h.put(index + 0.0);
-          break;
-        default:
-          h.put(Integer.parseInt(distinctKeys.get(index)) + 0.0);
-          break;
-      }
+    if(type == NUMBER){
+      ArrayList<Double> weights = generateGaussWeights(distinctIntegerKeys);
+
+      for (int i = 0; i < size; i++)
+        h.put(sample(distinctIntegerKeys, weights)+ 0.0);
+    }
+    else{
+
+      for (int i = 0; i < size; i++)
+        h.put(rand.nextInt(distinctKeys.size()) + 0.0);
+
     }
 
     return h;
   }
 
+  private ArrayList<Double> generateGaussWeights(ArrayList<Integer> nums){
+
+    double sum = 0.0;
+    for(Integer i: nums)
+      sum += i + 0.0;
+
+    double mean = sum / nums.size();
+    double std = maxTableSize/4.0;
+
+    ArrayList<Double> unnormalizedWeights = new ArrayList(nums.size());
+    ArrayList<Double> weights = new ArrayList(nums.size());
+
+    double z = 0.0;
+    for(Integer i: nums)
+    {
+      double x = Math.exp(- Math.pow( (i-mean) , 2 )/std);
+      z += x;
+      unnormalizedWeights.add(x);
+    }
+
+    for(Double x: unnormalizedWeights)
+      weights.add(x/z);
+
+    return weights;
+  }
+
+
+  private Integer sample(ArrayList<Integer> nums, ArrayList<Double> weights){
+
+    Random rand = new Random();
+    double randomWeight = rand.nextDouble();
+
+    for (int i=0; i < nums.size(); i++){
+      randomWeight = randomWeight - weights.get(i);
+
+      if (randomWeight <= 0)
+        return nums.get(i);
+    }
+    
+    return nums.get(nums.size() - 1);
+
+  }
+
+
+
   private String randomString() {
     return UUID.randomUUID().toString().replace("-", "");
   }
 
-  private String randomNumber() {
-    return new Random().nextInt(maxTableSize) + "";
+  private int randomNumber() {
+    return new Random().nextInt(maxTableSize);
   }
 
   private String randomDate() {
-    return randomNumber();
+    return randomNumber() + "";
   }
 
   private LinkedList<Integer> generateAttributes() {
@@ -136,16 +188,32 @@ public class DatasetGenerator {
     return new Relation(attributes.toArray(new String[attributes.size()]));
   }
 
+  private int sampleOrderOfMagnitude(int maxSize, int minSize, double decay){
+
+    Random rand = new Random();
+    while (maxSize >= minSize){ //hyperparam
+      
+      if(rand.nextDouble() > decay)
+        break;
+
+      maxSize /= 10;
+    }
+
+    return Math.max(maxSize,minSize);
+
+  }
+
+
   public HashMap<Attribute, Histogram> generateData(Relation r) {
 
     HashMap<Attribute, Histogram> data = new HashMap();
-    int[] distinct = new int[] {5, 500, 50000};
-    int[] divisors = new int[] {1, 10, 100, 1000, 10000};
 
     boolean primary = true;
     Random rand = new Random();
 
-    int tableSize = maxTableSize / divisors[rand.nextInt(5)] + 1;
+    int tableSize = sampleOrderOfMagnitude(maxTableSize, 10, 0.5); //maxTableSize / divisors[rand.nextInt(5)] + 1;
+
+    //System.out.println(tableSize);
 
     for (String attr : r) {
       int ind = Integer.parseInt(attr);
@@ -155,9 +223,12 @@ public class DatasetGenerator {
         data.put(r.get(attr), generateColumn(tableSize, tableSize, type));
         primary = false;
       } else if (type == STRING) {
+
+        int distinct = sampleOrderOfMagnitude(tableSize, 1, 0.5);
+
         data.put(
             r.get(attr),
-            generateColumn(tableSize, Math.min(tableSize, distinct[rand.nextInt(3)]), type));
+            generateColumn(tableSize, distinct, type));
       }
 
       data.put(r.get(attr), generateColumn(tableSize, tableSize, type));
