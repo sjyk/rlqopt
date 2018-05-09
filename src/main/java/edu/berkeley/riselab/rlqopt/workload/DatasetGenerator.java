@@ -66,12 +66,15 @@ public class DatasetGenerator {
     }
 
     ArrayList<String> distinctKeys = new ArrayList(distinct);
+    ArrayList<Integer> distinctIntegerKeys = new ArrayList(distinct);
     ArrayList<String> result = new ArrayList(size);
 
     for (int i = 0; i < distinct; i++) {
       switch (type) {
         case NUMBER:
-          distinctKeys.add(randomNumber());
+          int num = randomNumber();
+          distinctKeys.add(num + "");
+          distinctIntegerKeys.add(num);
           break;
         case STRING:
           distinctKeys.add(randomString());
@@ -83,7 +86,10 @@ public class DatasetGenerator {
     }
 
     for (int i = 0; i < size; i++) {
-      int index = rand.nextInt(distinctKeys.size());
+
+      int index;
+
+      index = rand.nextInt(distinctKeys.size());
 
       switch (type) {
         case STRING:
@@ -98,16 +104,44 @@ public class DatasetGenerator {
     return h;
   }
 
+  private ArrayList<Double> generateGaussWeights(ArrayList<Integer> nums){
+
+    double sum = 0.0;
+    for(Integer i: nums)
+      sum += i + 0.0;
+
+    double mean = sum / nums.size();
+    double std = maxTableSize/4.0;
+
+    ArrayList<Double> unnormalizedWeights = new ArrayList(nums.size());
+    ArrayList<Double> weights = new ArrayList(nums.size());
+
+    double z = 0.0;
+    for(Integer i: nums)
+    {
+      double x = Math.exp(- Math.pow( (i-mean) , 2 )/std);
+      z += x;
+      unnormalizedWeights.add(x);
+    }
+
+    for(Double x: unnormalizedWeights)
+      weights.add(x/z);
+
+    return weights;
+  }
+
+
+
   private String randomString() {
     return UUID.randomUUID().toString().replace("-", "");
   }
 
-  private String randomNumber() {
-    return new Random().nextInt(maxTableSize) + "";
+  private int randomNumber() {
+    return new Random().nextInt(maxTableSize);
   }
 
   private String randomDate() {
-    return randomNumber();
+    return randomNumber() + "";
   }
 
   private LinkedList<Integer> generateAttributes() {
