@@ -46,6 +46,8 @@ public class DatasetGenerator {
 
   private Histogram generateColumn(int size, int distinct, int type) {
 
+    //System.out.println("test");
+
     Random rand = new Random();
     Histogram h;
 
@@ -136,16 +138,32 @@ public class DatasetGenerator {
     return new Relation(attributes.toArray(new String[attributes.size()]));
   }
 
+  private int sampleOrderOfMagnitude(int maxSize, int minSize, double decay){
+
+    Random rand = new Random();
+    while (maxSize >= minSize){ //hyperparam
+      
+      if(rand.nextDouble() > decay)
+        break;
+
+      maxSize /= 10;
+    }
+
+    return Math.max(maxSize,minSize);
+
+  }
+
+
   public HashMap<Attribute, Histogram> generateData(Relation r) {
 
     HashMap<Attribute, Histogram> data = new HashMap();
-    int[] distinct = new int[] {5, 500, 50000};
-    int[] divisors = new int[] {1, 10, 100, 1000, 10000};
 
     boolean primary = true;
     Random rand = new Random();
 
-    int tableSize = maxTableSize / divisors[rand.nextInt(5)] + 1;
+    int tableSize = sampleOrderOfMagnitude(maxTableSize, 10, 0.5); //maxTableSize / divisors[rand.nextInt(5)] + 1;
+
+    //System.out.println(tableSize);
 
     for (String attr : r) {
       int ind = Integer.parseInt(attr);
@@ -155,9 +173,12 @@ public class DatasetGenerator {
         data.put(r.get(attr), generateColumn(tableSize, tableSize, type));
         primary = false;
       } else if (type == STRING) {
+
+        int distinct = sampleOrderOfMagnitude(tableSize, 1, 0.5);
+
         data.put(
             r.get(attr),
-            generateColumn(tableSize, Math.min(tableSize, distinct[rand.nextInt(3)]), type));
+            generateColumn(tableSize, distinct, type));
       }
 
       data.put(r.get(attr), generateColumn(tableSize, tableSize, type));
