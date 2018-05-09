@@ -85,20 +85,19 @@ public class DatasetGenerator {
       }
     }
 
-    for (int i = 0; i < size; i++) {
+    
 
-      int index;
+    if(type == NUMBER){
+      ArrayList<Double> weights = generateGaussWeights(distinctIntegerKeys);
 
-      index = rand.nextInt(distinctKeys.size());
+      for (int i = 0; i < size; i++)
+        h.put(sample(distinctIntegerKeys, weights)+ 0.0);
+    }
+    else{
 
-      switch (type) {
-        case STRING:
-          h.put(index + 0.0);
-          break;
-        default:
-          h.put(Integer.parseInt(distinctKeys.get(index)) + 0.0);
-          break;
-      }
+      for (int i = 0; i < size; i++)
+        h.put(rand.nextInt(distinctKeys.size()) + 0.0);
+
     }
 
     return h;
@@ -128,6 +127,23 @@ public class DatasetGenerator {
       weights.add(x/z);
 
     return weights;
+  }
+
+
+  private Integer sample(ArrayList<Integer> nums, ArrayList<Double> weights){
+
+    Random rand = new Random();
+    double randomWeight = rand.nextDouble();
+
+    for (int i=0; i < nums.size(); i++){
+      randomWeight = randomWeight - weights.get(i);
+
+      if (randomWeight <= 0)
+        return nums.get(i);
+    }
+    
+    return nums.get(nums.size() - 1);
+
   }
 
 
