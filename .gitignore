@@ -1,0 +1,5 @@
+.idea
+
+# TensorFlow
+**/model.ckpt*
+**/events.out.*
