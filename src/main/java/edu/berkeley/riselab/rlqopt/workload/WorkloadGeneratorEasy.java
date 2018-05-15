@@ -35,14 +35,14 @@ public class WorkloadGeneratorEasy extends WorkloadGenerator {
     return db;
   }
 
-  public Expression generateSelection(Relation r) {
+  private Expression generateSelection(Relation r, String opType) {
     HashSet<Attribute> allAttributes = r.attributes();
     Attribute[] attributeArray = allAttributes.toArray(new Attribute[allAttributes.size()]);
     Attribute randAttribute = attributeArray[rand.nextInt(attributeArray.length)];
     Histogram atStats = ts.get(randAttribute);
     int randomEquality = rand.nextInt((int) atStats.max());
     return new Expression(
-        Expression.EQUALS, randAttribute.getExpression(), new Expression(randomEquality + ""));
+        opType, randAttribute.getExpression(), new Expression(randomEquality + ""));
   }
 
   public Operator generateSelectOp(Operator r) throws OperatorException {
@@ -80,6 +80,8 @@ public class WorkloadGeneratorEasy extends WorkloadGenerator {
                 new Expression(randomEquality + ""));
     }
 
+    System.out.println(e.toSQLString());
+
     OperatorParameters params = new OperatorParameters(e.getExpressionList());
     return new SelectOperator(params, r);
   }
@@ -90,12 +92,16 @@ public class WorkloadGeneratorEasy extends WorkloadGenerator {
     return scan_r;
   }
 
-  public Operator generateSingleSelection() throws OperatorException {
+  public Operator generateSingleSelection(String opType) throws OperatorException {
     int size = db.size();
     Relation r = db.get(rand.nextInt(size));
-    Expression e = generateSelection(r);
+    Expression e = generateSelection(r, opType);
     OperatorParameters params = new OperatorParameters(e.getExpressionList());
     return new SelectOperator(params, createScan(r));
+  }
+
+  public Operator generateSingleSelection() throws OperatorException {
+    return generateSingleSelection(Expression.EQUALS);
   }
 
   public OperatorParameters generateGroupBy(Operator in) {
@@ -192,9 +198,16 @@ public class WorkloadGeneratorEasy extends WorkloadGenerator {
     LinkedList<Operator> workload = new LinkedList();
     for (int i = 0; i < n; i++) {
       int k = rand.nextInt(3);
-      if (k == 0) workload.add(generateJoin());
-      else if (k == 1) workload.add(generateJoinSel());
-      else if (k == 2) workload.add(generateJoinSelGb());
+      if (k == 0) {
+        System.out.println("generating: Join");
+        workload.add(generateJoin());
+      } else if (k == 1) {
+        System.out.println("generating: Join Select");
+        workload.add(generateJoinSel());
+      } else if (k == 2) {
+        System.out.println("generating: Join Select GroupBy");
+        workload.add(generateJoinSelGb());
+      }
     }
 
     return workload;

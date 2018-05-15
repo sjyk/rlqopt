@@ -11,12 +11,19 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import junit.framework.TestCase;
 
 public class ExprLearningTest extends TestCase {
 
   // Assume op is one of "=", ">", ">=", "<", "<=" for now.
-  private List<String> allOps = Arrays.asList("equals", "gt", "gte", "lt", "lte");
+  private List<String> allOps =
+      Arrays.asList(
+          Expression.EQUALS,
+          Expression.GREATER_THAN,
+          Expression.GREATER_THAN_EQUALS,
+          Expression.LESS_THAN,
+          Expression.LESS_THAN_EQUALS);
 
   // Featurize "SELECT * FROM R WHERE R.<attr> <op> <numeric literal>" into
   //    [database description] [expr description]
@@ -70,7 +77,6 @@ public class ExprLearningTest extends TestCase {
         }
         writer.write(String.valueOf(labels.get(i)));
         writer.write('\n');
-        ++i;
       }
       writer.close();
     } catch (IOException e) {
@@ -82,10 +88,10 @@ public class ExprLearningTest extends TestCase {
     // Config.
     final int numRelations = 5;
     final int numAttrs = 10;
-    final int maxTableSize = 100;
+    final int maxTableSize = 1000;
     final int numHistogramBuckets = 100;
-    final int numTraining = 1000;
-    final int numTest = 2000;
+    final int numTraining = 2000;
+    final int numTest = 1000;
     final int numExamples = numTraining + numTest;
 
     DatasetGenerator d =
@@ -108,23 +114,29 @@ public class ExprLearningTest extends TestCase {
             + "maxTblSize-"
             + numHistogramBuckets
             + "buckets-"
-            + numExamples;
-    final String trainFile = "data/train-" + desc + ".csv";
-    final String testFile = "data/test-" + desc + ".csv";
+            + numExamples
+            + "-"
+            + java.time.Instant.now().getEpochSecond();
+    final String trainFile = "train-" + desc + ".csv";
+    final String testFile = "test-" + desc + ".csv";
 
     List<double[]> features = new ArrayList<>(numExamples);
     List<Double> labels = new ArrayList<>(numExamples);
+    Random random = new Random(1234);
 
     // Generate all.
     for (int i = 0; i < numExamples; ++i) {
-      // SELECT * FROM R WHERE R.attr = int_literal
-      Operator select = workload.generateSingleSelection();
+      final int opType = random.nextInt(allOps.size());
+      // SELECT * FROM R WHERE R.attr <op> int_literal
+      Operator select = workload.generateSingleSelection(allOps.get(opType));
       double[] feat = featurizeExpression(db, c, select, statsModel);
       double label = c.estimate(select).resultCardinality;
 
       features.add(feat);
       labels.add(label);
     }
+
+    System.out.println(features.size() + " ; " + features.size() + "; " + labels.size());
 
     // Each line in csv: feat vec; label.
     writeToFile(trainFile, features, labels, 0, numTraining);
