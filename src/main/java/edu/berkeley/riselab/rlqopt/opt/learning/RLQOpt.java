@@ -25,6 +25,7 @@ public class RLQOpt extends Planner implements Trainable {
     learner = new LearningPlanner(w.getDatabase());
     tgen = new TrainingDataGenerator(w.getDatabase(), "output.csv", w.getStatsModel(), trainer);
     model = new ModelTrainer(w.getDatabase());
+    setPlannerName("learning");
   }
 
   public void train(LinkedList<Operator> training) {

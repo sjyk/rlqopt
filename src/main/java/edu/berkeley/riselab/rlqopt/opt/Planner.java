@@ -70,4 +70,8 @@ public class Planner {
   protected void setPlannerName(String name) {
     this.name = name;
   }
+
+  public String toString(){
+    return this.name;
+  }
 }

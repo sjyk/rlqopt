@@ -108,7 +108,7 @@ public class Experiment {
       double sum = 0.0;
 
       for (int i = 0; i < n; i++) {
-        double cost = ((double) stats.get(i).planning);
+        double cost = ((double) stats.get(i).planning/1e6);
         sum += cost;
       }
 

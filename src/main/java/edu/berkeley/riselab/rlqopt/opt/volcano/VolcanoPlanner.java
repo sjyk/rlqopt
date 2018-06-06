@@ -15,6 +15,6 @@ public class VolcanoPlanner extends Planner {
     this.preopt.add(new FlattenJoin());
     this.init.add(new EagerSelectProject());
     this.planners.add(new TDJoinReorder());
-    this.setPlannerName("volcano");
+    this.setPlannerName("ik-kbz");
   }
 }

@@ -34,20 +34,22 @@ public class DoExperiments extends TestCase {
 
   public void test1() throws OperatorException {
 
-    DatasetGenerator d = new DatasetGenerator(5, 12, 1000, 100);
+    DatasetGenerator d = new DatasetGenerator(5, 12, 100, 10);
     WorkloadGeneratorEasy workload = new WorkloadGeneratorEasy(d);
     CostModel c = workload.getStatsModel();
 
     LinkedList<Planner> planners = new LinkedList();
+    planners.add(new NoPlanner());
     planners.add(new RLQOpt(workload));
     planners.add(new PostgresBushyPlanner());
     planners.add(new PostgresPlanner());
     planners.add(new VolcanoPlanner());
 
 
-    Experiment e = new Experiment(workload, 1000, 1000, planners);
+    Experiment e = new Experiment(workload, 500, 100, planners);
     e.train();
     e.run();
     System.out.println(e.getBaselineImprovement());
+    System.out.println(e.getBaselineLatency());
   }
 }
