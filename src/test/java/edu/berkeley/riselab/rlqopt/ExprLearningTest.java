@@ -2,6 +2,7 @@ package edu.berkeley.riselab.rlqopt;
 
 import edu.berkeley.riselab.rlqopt.cost.Cost;
 import edu.berkeley.riselab.rlqopt.cost.CostModel;
+import edu.berkeley.riselab.rlqopt.cost.Histogram;
 import edu.berkeley.riselab.rlqopt.cost.TableStatisticsModel;
 import edu.berkeley.riselab.rlqopt.workload.DatasetGenerator;
 import edu.berkeley.riselab.rlqopt.workload.WorkloadGeneratorEasy;
@@ -25,12 +26,18 @@ public class ExprLearningTest extends TestCase {
           Expression.LESS_THAN,
           Expression.LESS_THAN_EQUALS);
 
+  private List<String> allAttrDtypes = Arrays.asList("number", "string", "date");
+
   // Featurize "SELECT * FROM R WHERE R.<attr> <op> <numeric literal>" into
   //    [database description] [expr description]
+  //
   // where the database description is
   //    [ relation 1's cardinality ] ... [relation N's card.]
   // and the expression description is
-  //    [ 1-hot of "R.<attr>" ] [ 1-hot of op type ] [ the literal ]
+  //    [ 1-hot of "R.<attr>" ]
+  //    [ 1-hot of op type ]
+  //    [ 1-hot of attr dtypes ]
+  //    [ the literal ]
   private double[] featurizeExpression(
       Database db, CostModel c, Operator select, TableStatisticsModel stats)
       throws OperatorException {
@@ -38,7 +45,8 @@ public class ExprLearningTest extends TestCase {
     List<Attribute> allAttributes = db.getAllAttributes();
     final int allAttrDim = allAttributes.size();
     final int allOpDim = allOps.size();
-    int featureDim = numRelations + allAttrDim + allOpDim + 1;
+    final int allAttrDtypeDim = allAttrDtypes.size();
+    final int featureDim = numRelations + allAttrDim + allOpDim + allAttrDtypeDim + 1;
     double[] featVec = new double[featureDim];
     Arrays.fill(featVec, 0.0);
     Expression expr = select.params.expression.getFirst();
@@ -56,11 +64,21 @@ public class ExprLearningTest extends TestCase {
     // TODO: should check "select" is of the above form.
     // Attr.
     Attribute attr = expr.getVisibleAttributes().getFirst();
+    String dtype = stats.get(attr).dtype();
     featVec[allAttributes.indexOf(attr) + numRelations] = 1.0;
     // Op.
+    // If string dtype, only generate equality selection.
+    assert !dtype.equals("string") || expr.op.equals(Expression.EQUALS);
     featVec[allOps.indexOf(expr.op) + numRelations + allAttrDim] = 1.0;
+    // Attr dtype.
+    featVec[allAttrDtypes.indexOf(dtype) + allOpDim + numRelations + allAttrDim] = 1.0;
     // Literal.
-    featVec[featureDim - 1] = Double.valueOf(expr.children.getLast().toString());
+    if (dtype.equals("string")) {
+      featVec[featureDim - 1] =
+          Histogram.featurizeStringLiteral(expr.children.getLast().toString());
+    } else {
+      featVec[featureDim - 1] = Double.valueOf(expr.children.getLast().toString());
+    }
     return featVec;
   }
 
@@ -88,14 +106,15 @@ public class ExprLearningTest extends TestCase {
     // Config.
     final int numRelations = 5;
     final int numAttrs = 10;
+    //    final int maxTableSize = 100;
     final int maxTableSize = 1000;
     final int numHistogramBuckets = 100;
-    final int numTraining = 2000;
-    final int numTest = 1000;
+    final int numTraining = 1000;
+    final int numTest = 2000;
     final int numExamples = numTraining + numTest;
 
     DatasetGenerator d =
-        new DatasetGenerator(numRelations, numAttrs, maxTableSize, numHistogramBuckets);
+        new DatasetGenerator(numRelations, numAttrs, maxTableSize, numHistogramBuckets, "us_state");
     WorkloadGeneratorEasy workload = new WorkloadGeneratorEasy(d);
     Database db = workload.getDatabase();
     CostModel c = workload.getStatsModel();
@@ -129,14 +148,18 @@ public class ExprLearningTest extends TestCase {
       final int opType = random.nextInt(allOps.size());
       // SELECT * FROM R WHERE R.attr <op> int_literal
       Operator select = workload.generateSingleSelection(allOps.get(opType));
+      System.out.println("Generated query: " + select.toSQLString());
       double[] feat = featurizeExpression(db, c, select, statsModel);
       double label = c.estimate(select).resultCardinality;
+
+      System.out.println("feat: " + Arrays.toString(feat));
+      System.out.println("label: " + label);
 
       features.add(feat);
       labels.add(label);
     }
 
-    System.out.println(features.size() + " ; " + features.size() + "; " + labels.size());
+    System.out.println(features.size() + "; " + features.size() + "; " + labels.size());
 
     // Each line in csv: feat vec; label.
     writeToFile(trainFile, features, labels, 0, numTraining);

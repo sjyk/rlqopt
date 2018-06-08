@@ -16,9 +16,9 @@ import java.util.Random;
 
 public class WorkloadGeneratorEasy extends WorkloadGenerator {
 
-  Database db;
-  Random rand;
-  TableStatisticsModel ts;
+  final Database db;
+  final Random rand;
+  final TableStatisticsModel ts;
 
   public WorkloadGeneratorEasy(DatasetGenerator ds) {
 
@@ -40,9 +40,15 @@ public class WorkloadGeneratorEasy extends WorkloadGenerator {
     Attribute[] attributeArray = allAttributes.toArray(new Attribute[allAttributes.size()]);
     Attribute randAttribute = attributeArray[rand.nextInt(attributeArray.length)];
     Histogram atStats = ts.get(randAttribute);
-    int randomEquality = rand.nextInt((int) atStats.max());
+    int randNumericLiteral = rand.nextInt((int) atStats.max());
+    // For string columns, we force the dtype to be equality.
+    if (atStats.isStringColumn()) {
+      String randomStringLiteral = atStats.sampleString(rand);
+      return new Expression(
+          Expression.EQUALS, randAttribute.getExpression(), new Expression(randomStringLiteral));
+    }
     return new Expression(
-        opType, randAttribute.getExpression(), new Expression(randomEquality + ""));
+        opType, randAttribute.getExpression(), new Expression(String.valueOf(randNumericLiteral)));
   }
 
   public Operator generateSelectOp(Operator r) throws OperatorException {

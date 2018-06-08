@@ -1,7 +1,10 @@
 package edu.berkeley.riselab.rlqopt.cost;
 
 import edu.berkeley.riselab.rlqopt.Expression;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
 
 public class Histogram {
 
@@ -18,7 +21,11 @@ public class Histogram {
   private int z;
   private int distinctCount;
 
-  public Histogram(int buckets, double min, double max, int distinctCount) {
+  private String dtype;
+  // TODO: make this a Set instead of a List?
+  public List<String> seenStrings;
+
+  public Histogram(int buckets, double min, double max, int distinctCount, String dtype) {
     this.buckets = buckets;
     this.min = min;
     this.max = max;
@@ -26,24 +33,67 @@ public class Histogram {
     this.histogramBuckets = new double[buckets][3];
     this.z = 0;
     this.distinctCount = distinctCount;
+    this.dtype = dtype;
+    if (dtype.equals("string")) {
+      seenStrings = new ArrayList<>();
+    }
 
     initialize();
   }
 
+  // String histogram.  Min and max depend on an internal hashing param.
+  public Histogram(int buckets, int distinctCount, String dtype) {
+    this(buckets, -STRING_HASH_BUCKETS, STRING_HASH_BUCKETS, distinctCount, dtype);
+    assert isStringColumn();
+  }
+
+  public boolean isStringColumn() {
+    return dtype.equals("string");
+  }
+
+  /** Store a string. */
+  public void putString(String val) {
+    assert isStringColumn();
+    put(featurizeStringLiteral(val));
+    seenStrings.add(val);
+  }
+
+  /** Sample, uniformly at random with occurrences considered, a string from the seen ones. */
+  public String sampleString(Random random) {
+    assert isStringColumn();
+    assert (!seenStrings.isEmpty());
+    return seenStrings.get(random.nextInt(seenStrings.size()));
+  }
+
+  private static final int STRING_HASH_BUCKETS = 10000;
+
+  public static double featurizeStringLiteral(String literal) {
+    return literal.hashCode() % STRING_HASH_BUCKETS;
+  }
+
+  private double featurizeLiteral(String literal) {
+    if (dtype.equals("string")) {
+      return featurizeStringLiteral(literal);
+    }
+    return Double.parseDouble(literal); // Numeric, date.
+  }
+
   public Histogram copy() {
-    Histogram result = new Histogram(buckets, min, max, distinctCount);
+    Histogram result = new Histogram(buckets, min, max, distinctCount, dtype);
     result.z = this.z;
+    // Buckets.
     double[][] newBuckets = new double[buckets][3];
     double step = (max - min) / buckets;
-
     for (int i = 0; i < buckets; i++) {
       newBuckets[i][LOW] = min + step * i;
       newBuckets[i][HIGH] = min + step * (i + 1);
       newBuckets[i][COUNT] = histogramBuckets[i][COUNT];
     }
-
     result.histogramBuckets = newBuckets;
-
+    // Seen strings.
+    if (seenStrings != null) {
+      result.seenStrings.addAll(seenStrings);
+    }
     return result;
   }
 
@@ -71,6 +121,10 @@ public class Histogram {
     return Math.max(Math.min((int) ((value - min) / step), buckets - 1), 0);
   }
 
+  public String dtype() {
+    return dtype;
+  }
+
   public void put(double value) {
     histogramBuckets[val2index(value)][COUNT]++;
     this.z++;
@@ -92,11 +146,12 @@ public class Histogram {
     return z;
   }
 
+  /** Handles "e" which is (1) a selection, and (2) a selection on a numeric column. */
   public Histogram filter(Expression e) {
-
+    String literal = e.children.get(1).op;
     Histogram result = copy();
 
-    double value = Double.parseDouble(e.children.get(1).op);
+    double value = featurizeLiteral(literal);
 
     int index = val2index(value);
 
@@ -108,6 +163,7 @@ public class Histogram {
 
       result.histogramBuckets[index] = tmp;
 
+      // TODO: 6/3/18 why +1 here?  Returning 0 seems sensible.
       result.z = (int) (tmp[COUNT]) + 1;
 
       result.distinctCount = (result.z > 0) ? 1 : 0;
