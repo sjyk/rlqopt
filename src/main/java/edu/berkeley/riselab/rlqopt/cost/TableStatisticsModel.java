@@ -12,12 +12,12 @@ public class TableStatisticsModel extends HistogramRelation implements CostModel
 
   public TableStatisticsModel(HashMap<Attribute, Histogram> data) {
     super(data);
-    this.availableMemory = 50;
+    this.availableMemory = 1;
   }
 
   public TableStatisticsModel() {
     super(new HashMap());
-    this.availableMemory = 50;
+    this.availableMemory = 1;
   }
 
   public Cost tableAccessOperator(Operator in) {
@@ -46,8 +46,10 @@ public class TableStatisticsModel extends HistogramRelation implements CostModel
     int countr = HistogramOperations.eval(this, in.source.get(0)).count();
     int countl = HistogramOperations.eval(this, in.source.get(1)).count();
 
+    //System.out.println(count + " " + countr + " " + countl + "b: "+ in.source.get(1));
+
     // System.out.println((availableMemory-2));
-    return new Cost(countr + countl * countr / (availableMemory - 2), count, 0);
+    return new Cost(countr + countl * countr, count, 0);
   }
 
   public Cost cartesianOperator(Operator in, Cost l, Cost r) {
@@ -88,6 +90,7 @@ public class TableStatisticsModel extends HistogramRelation implements CostModel
   public Cost estimate(Operator in) {
     Cost runningCost = new Cost(0, 0, 0);
     runningCost = doEstimate(in);
+    runningCost.operatorIOcost += HistogramOperations.eval(this, in).count();
 
     if (runningCost.operatorIOcost < 0) runningCost.operatorIOcost = Long.MAX_VALUE;
 

@@ -17,18 +17,18 @@ public class ModelTrainer {
   MultiLayerNetwork net;
 
   public ModelTrainer(Database db) {
-    int numInput = db.getNumAttributes() * 3;
+    int numInput = db.getNumAttributes() * 3 + 1;
 
     int numOutputs = 1;
-    int nHidden = 64;
-    double learningRate = 1e-3;
+    int nHidden = 128;
+    double learningRate = 1e-1;
 
     this.net =
         new MultiLayerNetwork(
             new NeuralNetConfiguration.Builder()
                 .seed(12345)
                 .weightInit(WeightInit.XAVIER)
-                .updater(new Nesterovs(learningRate, 0.1))
+                .updater(new Nesterovs(learningRate, 0.25))
                 .list()
                 .layer(
                     0,
@@ -39,7 +39,7 @@ public class ModelTrainer {
                         .build())
                 .layer(
                     1,
-                    new OutputLayer.Builder(LossFunctions.LossFunction.MSE)
+                    new OutputLayer.Builder(LossFunctions.LossFunction.L1)
                         .activation(Activation.IDENTITY)
                         .nIn(nHidden)
                         .nOut(numOutputs)
@@ -54,7 +54,7 @@ public class ModelTrainer {
     net.init();
 
     // Train the network on the full data set, and evaluate in periodically
-    for (int i = 0; i < 100000; i++) {
+    for (int i = 0; i < 50000; i++) {
       iterator.reset();
       net.fit(iterator);
     }

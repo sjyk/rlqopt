@@ -177,7 +177,18 @@ public class Histogram {
       }
     }
 
+    //System.out.println(result.z);
+
     return result;
+  }
+
+
+  public Histogram mergeKey(Histogram other) {
+
+    Histogram histCopy = copy();
+    Histogram otherCopy = other.copy();
+
+    return (histCopy.distinctCount < otherCopy.distinctCount) ? histCopy: otherCopy;
   }
 
   public String toString() {

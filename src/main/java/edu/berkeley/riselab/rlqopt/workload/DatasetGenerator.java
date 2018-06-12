@@ -207,30 +207,29 @@ public class DatasetGenerator {
 
     HashMap<Attribute, Histogram> data = new HashMap();
 
-    boolean primary = true;
+    //boolean primary = true;
     Random rand = new Random();
 
-    int tableSize = sampleOrderOfMagnitude(maxTableSize, 10, 0.5); //maxTableSize / divisors[rand.nextInt(5)] + 1;
+    int tableSize = sampleOrderOfMagnitude(maxTableSize, 10, 0.25); //maxTableSize / divisors[rand.nextInt(5)] + 1;
 
     //System.out.println(tableSize);
 
     for (String attr : r) {
       int ind = Integer.parseInt(attr);
       int type = attrTypes.get(ind);
+      Attribute attrObj = r.get(attr);
 
-      if ((type == STRING) && primary) {
-        data.put(r.get(attr), generateColumn(tableSize, tableSize, type));
-        primary = false;
+      if (attrObj.isKey) {
+        data.put(attrObj, generateColumn(tableSize, tableSize, type));
       } else if (type == STRING) {
 
-        int distinct = sampleOrderOfMagnitude(tableSize, 1, 0.5);
+        int distinct = sampleOrderOfMagnitude(tableSize, 1, 0.25);
 
-        data.put(
-            r.get(attr),
+        data.put(attrObj,
             generateColumn(tableSize, distinct, type));
       }
 
-      data.put(r.get(attr), generateColumn(tableSize, tableSize, type));
+      data.put(attrObj, generateColumn(tableSize, tableSize, type));
     }
 
     return data;

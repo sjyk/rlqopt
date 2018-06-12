@@ -108,7 +108,12 @@ public class HistogramOperations {
 
       for (Attribute b : lr[RIGHT]) {
         Histogram righth = right.get(b);
-        data.put(a, lefth.merge(righth));
+
+        if (a.isKey)
+          data.put(a, lefth.mergeKey(righth));
+        else
+          data.put(a, lefth.merge(righth));
+
       }
     }
 
@@ -117,7 +122,12 @@ public class HistogramOperations {
 
       for (Attribute b : lr[LEFT]) {
         Histogram lefth = left.get(b);
-        data.put(a, righth.merge(lefth));
+
+        if (a.isKey)
+          data.put(a, lefth.mergeKey(righth));
+        else
+          data.put(a, lefth.merge(righth));
+
       }
     }
 
@@ -144,15 +154,31 @@ public class HistogramOperations {
 
   public static HistogramRelation equalize(HistogramRelation h) {
     HashMap<Attribute, Histogram> data = new HashMap<Attribute, Histogram>();
-    int count = Integer.MAX_VALUE;
+    int countMin = Integer.MAX_VALUE;
+    int countKeyMin = Integer.MAX_VALUE;
 
-    for (Attribute a : h.keySet()) count = Math.min(h.get(a).getCount(), count);
+    for (Attribute a : h.keySet()) {
+      //System.out.println(countMin);
+      countMin = Math.min(h.get(a).getCount(), countMin);
+
+      if (a.isKey)
+        countKeyMin = Math.min(h.get(a).getCount(), countKeyMin);
+    }
+
+    int count = Math.min(countMin, countKeyMin);
+
+    //System.out.println( "a:" + count);
+
 
     for (Attribute a : h.keySet()) {
       Histogram ahist = h.get(a);
       double scaling = (count + 0.0) / Math.max(ahist.getCount(), 1);
-      data.put(a, ahist.scale(scaling));
+      Histogram scaledHist = ahist.scale(scaling);
+      //System.out.println( "b:" + scaledHist.getCount());
+      data.put(a, scaledHist );
     }
+
+    
 
     return new HistogramRelation(data);
   }

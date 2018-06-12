@@ -191,9 +191,10 @@ public class WorkloadGeneratorEasy extends WorkloadGenerator {
 
     LinkedList<Operator> workload = new LinkedList();
     for (int i = 0; i < n; i++) {
-      int k = rand.nextInt(2);
-      if (k == 0) workload.add(generateJoin());
-      else if (k == 1) workload.add(generateJoinSel());
+      //int k = rand.nextInt(2);
+      //if (k == 0) 
+      workload.add(generateJoin());
+      //else if (k == 1) workload.add(generateJoinSel());
       //else if (k == 2) workload.add(generateJoinSelGb());
     }
 

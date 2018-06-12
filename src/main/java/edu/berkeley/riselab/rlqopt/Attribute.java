@@ -5,17 +5,42 @@ public class Attribute {
 
   public Relation relation;
   public String attribute;
+  public boolean isKey;
+  private int type;
+
+  public final static int NUMBER = 0;
+  public final static int STRING = 1;
+  public final static int DATE = 2;
 
   // create it explicitly named
   public Attribute(Relation r, String attr) {
     this.relation = r;
     this.attribute = attr;
+    this.isKey = false;
+    this.type = STRING;
+
+  }
+
+  public Attribute(Relation r, String attr, boolean isKey, int type) {
+    this.relation = r;
+    this.attribute = attr;
+    this.isKey = isKey;
+    this.type = type;
+  }
+
+  public Attribute(Relation r, String attr, boolean isKey) {
+    this.relation = r;
+    this.attribute = attr;
+    this.isKey = isKey;
+    this.type = STRING;
   }
 
   // implicitly named
   public Attribute(String attr) {
     this.relation = null;
     this.attribute = attr;
+    this.isKey = false;
+    this.type = STRING;
   }
 
   public Expression getExpression() {
@@ -23,8 +48,12 @@ public class Attribute {
   }
 
   public String toString() {
-    if (relation.name == null) return "R" + relation.hashCode() + "." + attribute;
-    else return relation.name + "." + attribute;
+    if (relation.name == null) return "R" + relation.hashCode() + "." + attribute + modifiers();
+    else return relation.name + "." + attribute + modifiers();
+  }
+
+  public String modifiers(){
+    return "["+type+"]"+ ((this.isKey) ? "*" : "");
   }
 
   public int hashCode() {

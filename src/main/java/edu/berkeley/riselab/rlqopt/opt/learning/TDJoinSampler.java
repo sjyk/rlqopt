@@ -124,7 +124,7 @@ public class TDJoinSampler implements PlanningModule {
 
     for (TrainingDataPoint t : localData) {
       //
-      t.cost = cost; // - t.cost;
+      //t.cost = cost; // - t.cost;
       if (cost > 1e6)
         System.out.println(
             rtn
@@ -252,7 +252,7 @@ public class TDJoinSampler implements PlanningModule {
     rtn.remove(pairToJoin[1]);
     rtn.add(pairToJoin[2]);
 
-    localData.add(new TrainingDataPoint(pairToJoin, 0.0));
+    localData.add(new TrainingDataPoint(pairToJoin, minCost, relations.size()+0.0));
 
     return rtn;
   }

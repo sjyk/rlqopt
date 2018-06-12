@@ -1,12 +1,18 @@
 package edu.berkeley.riselab.rlqopt;
 
+import java.util.LinkedList;
 import java.util.HashSet;
 import java.util.UUID;
+import java.util.Arrays;
 
 /** Main data structure for tables, just a wrapper around a HashSet */
-public class Relation extends HashSet<String> {
+public class Relation extends LinkedList<String> {
 
   public String name;
+
+  public LinkedList<Integer> types;
+
+  private LinkedList<Integer> keys;
 
   public Relation(String... args) {
 
@@ -16,6 +22,25 @@ public class Relation extends HashSet<String> {
 
     // initialize with the input list
     for (String arg : args) this.add(arg.toLowerCase());
+  }
+
+
+  public Relation(String [] args, int [] types, int [] keys) {
+
+    super();
+
+    this.name = "R"+UUID.randomUUID().toString().replace("-","").substring(0,4);
+
+    this.types = new LinkedList();
+    this.keys = new LinkedList();
+
+    // initialize with the input list
+    for (String arg : args) this.add(arg.toLowerCase());
+
+    for (int arg : types) this.types.add(arg);
+
+    for (int arg : keys) this.keys.add(arg);
+
   }
 
   public Attribute get(String exp) {
@@ -36,12 +61,27 @@ public class Relation extends HashSet<String> {
       if (!this.contains(attr)) return null;
     }
 
-    return new Attribute(this, attr);
+    if (this.types == null || this.keys == null)
+      return new Attribute(this, attr);
+
+    int index = this.indexOf(attr);
+    boolean isKey = this.keys.contains(index);
+
+    return new Attribute(this, attr, isKey, this.types.get(index));
   }
 
   public HashSet<Attribute> attributes() {
 
     HashSet<Attribute> attrs = new HashSet();
+
+    for (String s : this) attrs.add(get(s));
+
+    return attrs;
+  }
+
+  public LinkedList<Attribute> attributesList() {
+
+    LinkedList<Attribute> attrs = new LinkedList();
 
     for (String s : this) attrs.add(get(s));
 

@@ -17,12 +17,22 @@ import org.nd4j.linalg.factory.Nd4j;
 public class TrainingDataPoint {
 
   public Operator[] oplist;
-  public Double cost;
+  public Double cost = 0.0;
+  public Double size = 0.0;
 
   public TrainingDataPoint(Operator[] oplist, Double cost) {
 
     this.oplist = oplist;
     this.cost = cost;
+
+  }
+
+  public TrainingDataPoint(Operator[] oplist, Double cost, Double size) {
+
+    this.oplist = oplist;
+    this.cost = cost;
+    this.size = size;
+
   }
 
   public String toString() {
@@ -59,19 +69,19 @@ public class TrainingDataPoint {
 
     int n = allAttributes.size();
 
-    Double[] vector = new Double[n * 3 + 1];
+    Double[] vector = new Double[n * 3 + 2];
     for (int i = 0; i < n * 3; i++) vector[i] = 0.0;
 
     for (Attribute a : oplist[0].getVisibleAttributes()) {
 
-      vector[allAttributes.indexOf(a)] =
-          Math.log(cardMap.get(a) / c.estimate(oplist[0]).resultCardinality);
+      vector[allAttributes.indexOf(a)] = 1.0;
+          //Math.log(cardMap.get(a) / c.estimate(oplist[0]).resultCardinality);
     }
 
     for (Attribute a : oplist[1].getVisibleAttributes()) {
 
-      vector[allAttributes.indexOf(a) + n] =
-          Math.log(cardMap.get(a) / c.estimate(oplist[1]).resultCardinality);
+      vector[allAttributes.indexOf(a) + n] = 1.0;
+          //Math.log(cardMap.get(a) / c.estimate(oplist[1]).resultCardinality);
     }
 
     // System.out.println(oplist[3].getVisibleAttributes() + " " + oplist[3]);
@@ -81,7 +91,9 @@ public class TrainingDataPoint {
       vector[allAttributes.indexOf(a) + 2 * n] = 1.0;
     }
 
-    vector[3 * n] = cost;
+    vector[3 * n] = size;
+
+    vector[3 * n + 1] = cost;
 
     return vector;
   }

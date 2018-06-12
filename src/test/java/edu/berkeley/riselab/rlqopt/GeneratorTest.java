@@ -1,11 +1,14 @@
 package edu.berkeley.riselab.rlqopt;
 
 import edu.berkeley.riselab.rlqopt.cost.*;
-import edu.berkeley.riselab.rlqopt.cost.CostModel;
-import edu.berkeley.riselab.rlqopt.opt.postgres.PostgresPlanner;
+import edu.berkeley.riselab.rlqopt.*;
+import edu.berkeley.riselab.rlqopt.Expression;
+import edu.berkeley.riselab.rlqopt.ExpressionList;
 import edu.berkeley.riselab.rlqopt.relalg.*;
 import edu.berkeley.riselab.rlqopt.workload.*;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Arrays;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -28,66 +31,42 @@ public class GeneratorTest extends TestCase {
 
   public void test1() throws OperatorException {
 
-    DatasetGenerator d = new DatasetGenerator(5, 10, 10000, 100);
-    WorkloadGeneratorEasy workload = new WorkloadGeneratorEasy(d);
-    CostModel c = workload.getStatsModel();
+    String [] cols = {"id","name","salary"};
+    int [] types = {Attribute.NUMBER, Attribute.STRING, Attribute.NUMBER};
+    int [] keys = {0};
 
-    PostgresPlanner post = new PostgresPlanner();
+    Relation r = new Relation(cols,types,keys);
 
-    for (Operator q : workload.generateWorkload(100)) {
-      //System.out.println(post.plan(q, c).toSQLString());
-      System.out.println(post.getLastPlanStats());
+    String [][] table = {{"1", "Peter Parker", "10"}, {"2", "John Doe", "10"}, {"3", "Jane Doe", "10"}};
+    LinkedList<LinkedList<String>> data = arrayToTable(table);
+    MaterializedRelation m = new MaterializedRelation(r.attributesList(), data);
+
+    Expression ea = r.get("id").getExpression();
+    Expression eb = new Expression("2");
+    Expression equals = new Expression(Expression.EQUALS, eb, ea);
+    System.out.println(m);
+    System.out.println(m.select(equals));
+    System.out.println(m.project(ea.getExpressionList()));
+    System.out.println(m.cartesian(m));
+  }
+
+  private LinkedList<LinkedList<String>> arrayToTable(String [][] table){
+
+    LinkedList<LinkedList<String>> result = new LinkedList();
+    for(int i=0; i<table.length; i++){
+      
+      LinkedList<String> record = new LinkedList();
+
+      for(String attr: Arrays.asList(table[i])){
+        record.add(attr); 
+      }
+
+      result.add(record);
     }
+
+    return result;
+
   }
 
-  public void test2() throws OperatorException {
 
-    DatasetGenerator d = new DatasetGenerator(5, 10, 10000, 10);
-    Relation r = d.generateRelation();
-    HistogramRelation h = new HistogramRelation(d.generateData(r));
-    System.out.println(h);
-    System.out.println(h.count());
-
-    Attribute a = r.first();
-
-    Expression ea = a.getExpression();
-    Expression eb = new Expression("3");
-    Expression equals = new Expression(Expression.LESS_THAN, ea, eb);
-
-    System.out.println(HistogramOperations.cartesian(h, h));
-  }
-
-  public void test3() throws OperatorException {
-
-    DatasetGenerator d = new DatasetGenerator(5, 10, 10000, 10);
-    Relation r = d.generateRelation();
-    Relation s = d.generateRelation();
-
-    HistogramRelation hr = new HistogramRelation(d.generateData(r));
-    HistogramRelation hs = new HistogramRelation(d.generateData(s));
-    HistogramRelation h = HistogramOperations.merge(hr, hs);
-
-    OperatorParameters scan_params = new OperatorParameters(r.getExpressionList());
-    TableAccessOperator scan_r = new TableAccessOperator(scan_params);
-
-    OperatorParameters scan_paramss = new OperatorParameters(s.getExpressionList());
-    TableAccessOperator scan_s = new TableAccessOperator(scan_paramss);
-
-    OperatorParameters params = new OperatorParameters(new ExpressionList());
-    CartesianOperator c = new CartesianOperator(params, scan_r, scan_s);
-
-    System.out.println(HistogramOperations.eval(h, scan_s).count());
-    System.out.println(HistogramOperations.eval(h, scan_r).count());
-    System.out.println(HistogramOperations.eval(h, c).count());
-
-    Iterator<Attribute> attrSetIter = r.attributes().iterator();
-    Attribute a = attrSetIter.next();
-
-    Expression ea = a.getExpression();
-    Expression eb = new Expression("1");
-    Expression equals = new Expression(Expression.LESS_THAN, ea, eb);
-    OperatorParameters select_params = new OperatorParameters(equals.getExpressionList());
-    SelectOperator sel_r = new SelectOperator(select_params, c);
-    System.out.println(HistogramOperations.eval(h, sel_r).count());
-  }
 }

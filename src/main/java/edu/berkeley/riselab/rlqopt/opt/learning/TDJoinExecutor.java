@@ -30,12 +30,16 @@ public class TDJoinExecutor implements PlanningModule {
   MultiLayerNetwork net;
   Database db;
 
+  BaselineLeftDeep lfdb;
+
   public TDJoinExecutor(Database db) {
 
     this.rand = new Random();
     this.alpha = alpha;
     this.db = db;
     trainingData = new LinkedList();
+
+    lfdb = new BaselineLeftDeep();
   }
 
   private LinkedList<Attribute>[] getLeftRightAttributes(Expression e) {
@@ -96,14 +100,14 @@ public class TDJoinExecutor implements PlanningModule {
 
   public Operator reorderJoin(Operator in, CostModel c) {
 
-    if (in.source.size() == 2) {
+    /*if (in.source.size() == 2) {
       try {
         OperatorParameters params = new OperatorParameters(in.params.expression);
         return new JoinOperator(params, in.source.get(0), in.source.get(1));
       } catch (OperatorException opex) {
         return in;
       }
-    }
+    }*/
 
     HashSet<Operator> relations = new HashSet();
 
@@ -149,9 +153,10 @@ public class TDJoinExecutor implements PlanningModule {
     return null;
   }
 
-  private Operator getRemainingOperators(HashSet<Operator> relations) throws OperatorException {
+ private Operator getRemainingOperators(HashSet<Operator> relations, Operator in)
+      throws OperatorException {
     Operator[] relArray = relations.toArray(new Operator[relations.size()]);
-    OperatorParameters params = new OperatorParameters(new ExpressionList());
+    OperatorParameters params = new OperatorParameters(in.params.expression);
     return new KWayJoinOperator(params, relArray);
   }
 
@@ -189,9 +194,9 @@ public class TDJoinExecutor implements PlanningModule {
         currentPair[0] = i;
         currentPair[1] = j;
         currentPair[2] = cjv;
-        currentPair[3] = getRemainingOperators(relations);
+        currentPair[3] = getRemainingOperators(relations, in);
 
-        TrainingDataPoint tpd = new TrainingDataPoint(currentPair, new Double(0));
+        TrainingDataPoint tpd = new TrainingDataPoint(currentPair, new Double(0), relations.size() + 0.0);
 
         INDArray input = tpd.featurizeND4j(db, c);
         double cost;
@@ -199,7 +204,17 @@ public class TDJoinExecutor implements PlanningModule {
         if (net != null) {
           INDArray out = net.output(input, false);
           cost = out.getDouble(0);
-          System.out.println(cost + " " + Math.log(c.estimate(cjv).operatorIOcost));
+
+          //remove
+          /*HashSet<Operator> local = (HashSet) rtn.clone();
+          local.remove(i);
+          local.remove(j);
+          local.add(cjv);
+          Operator baseline = lfdb.reorderJoin(getRemainingOperators(local, in), c);
+
+          System.out.println(input + " : " + cost + " " + Math.log(c.estimate(baseline).operatorIOcost));
+          */
+          
         } else {
           cost = c.estimate(cjv).operatorIOcost;
         }

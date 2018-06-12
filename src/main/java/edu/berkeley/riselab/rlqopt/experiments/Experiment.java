@@ -76,7 +76,7 @@ public class Experiment {
 
       for (int i = 0; i < n; i++) {
 
-        // if (statsB.get(i).finalCost == statsB.get(i).initialCost)
+        //if (stats.get(i).finalCost == stats.get(i).initialCost)
         //  continue;
 
         double cost = (double) Math.log(stats.get(i).finalCost);
