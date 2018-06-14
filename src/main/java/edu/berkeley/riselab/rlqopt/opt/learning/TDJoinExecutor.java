@@ -194,9 +194,9 @@ public class TDJoinExecutor implements PlanningModule {
         currentPair[0] = i;
         currentPair[1] = j;
         currentPair[2] = cjv;
-        currentPair[3] = getRemainingOperators(relations, in);
+        currentPair[3] = in.copy();
 
-        TrainingDataPoint tpd = new TrainingDataPoint(currentPair, new Double(0), relations.size() + 0.0);
+        TrainingDataPoint tpd = new TrainingDataPoint(currentPair, new Double(0), Math.log(c.estimate(cjv).operatorIOcost), relations.size() + 0.0);
 
         INDArray input = tpd.featurizeND4j(db, c);
         double cost;
@@ -206,15 +206,15 @@ public class TDJoinExecutor implements PlanningModule {
           cost = out.getDouble(0);
 
           //remove
-          /*HashSet<Operator> local = (HashSet) rtn.clone();
+          HashSet<Operator> local = (HashSet) rtn.clone();
           local.remove(i);
           local.remove(j);
           local.add(cjv);
           Operator baseline = lfdb.reorderJoin(getRemainingOperators(local, in), c);
 
           System.out.println(input + " : " + cost + " " + Math.log(c.estimate(baseline).operatorIOcost));
-          */
           
+
         } else {
           cost = c.estimate(cjv).operatorIOcost;
         }

@@ -6,6 +6,7 @@ import edu.berkeley.riselab.rlqopt.relalg.TableAccessOperator;
 import java.lang.reflect.InvocationTargetException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.HashSet;
 
 /** Operator class- this class defines an abstract relational operator */
 public abstract class Operator {
@@ -23,6 +24,15 @@ public abstract class Operator {
     for (Operator o : source) this.source.add(o);
 
     this.params = params;
+  }
+
+  public HashSet<Relation> getVisibleRelations(){
+
+    HashSet<Relation> relations = new HashSet();
+    for(Attribute attr: getVisibleAttributes())
+      relations.add(attr.relation);
+
+    return relations;
   }
 
   public LinkedList<Attribute> getVisibleAttributes() {

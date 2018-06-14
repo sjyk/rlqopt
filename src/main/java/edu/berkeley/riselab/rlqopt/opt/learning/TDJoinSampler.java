@@ -125,15 +125,15 @@ public class TDJoinSampler implements PlanningModule {
     for (TrainingDataPoint t : localData) {
       //
       //t.cost = cost; // - t.cost;
-      if (cost > 1e6)
+      //if (cost > 1e2)
         System.out.println(
             rtn
-                + " : "
+                + " /// "
                 + cost
                 + " "
-                + c.estimate(rtn.source.get(0))
+                + c.estimate(rtn.source.get(0)).operatorIOcost 
                 + " "
-                + c.estimate(rtn.source.get(1)));
+                + c.estimate(rtn.source.get(1)).operatorIOcost);
       trainingData.add(t);
     }
 
@@ -205,6 +205,8 @@ public class TDJoinSampler implements PlanningModule {
       throws OperatorException {
 
     double minCost = Double.MAX_VALUE;
+    double minGreedyCost = Double.MAX_VALUE;
+
     Operator[] pairToJoin = new Operator[4];
     HashSet<Operator> rtn = (HashSet) relations.clone();
 
@@ -236,14 +238,24 @@ public class TDJoinSampler implements PlanningModule {
         // System.out.println(rand.nextGaussian());
         double cost = c.estimate(baseline).operatorIOcost;
 
+
+        Operator[] trainingToJoin = new Operator[4];
+        trainingToJoin[0] = i;
+        trainingToJoin[1] = j;
+        trainingToJoin[2] = cjv;
+        trainingToJoin[3] = in.copy();
+
+        localData.add(new TrainingDataPoint(trainingToJoin, cost, Math.log(c.estimate(cjv).operatorIOcost), relations.size()+0.0));
+
         // System.out.println(cost);
 
         if ((cost < minCost) && !egreedy) {
           minCost = cost;
+          minGreedyCost = Math.log(c.estimate(cjv).operatorIOcost);
           pairToJoin[0] = i;
           pairToJoin[1] = j;
           pairToJoin[2] = cjv;
-          pairToJoin[3] = getRemainingOperators(relations, in);
+          pairToJoin[3] = in.copy();
         }
       }
     }
@@ -252,7 +264,7 @@ public class TDJoinSampler implements PlanningModule {
     rtn.remove(pairToJoin[1]);
     rtn.add(pairToJoin[2]);
 
-    localData.add(new TrainingDataPoint(pairToJoin, minCost, relations.size()+0.0));
+    //localData.add(new TrainingDataPoint(pairToJoin, minCost, minGreedyCost, relations.size()+0.0));
 
     return rtn;
   }

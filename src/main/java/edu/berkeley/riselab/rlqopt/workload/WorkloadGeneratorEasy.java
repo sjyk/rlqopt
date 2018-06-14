@@ -13,6 +13,8 @@ import edu.berkeley.riselab.rlqopt.relalg.*;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Random;
+import java.util.Collections;
+import java.util.ArrayList;
 
 public class WorkloadGeneratorEasy extends WorkloadGenerator {
 
@@ -159,17 +161,23 @@ public class WorkloadGeneratorEasy extends WorkloadGenerator {
     Relation prev = null;
     Operator rtn = null;
 
-    for (Relation r : tablesToJoin) {
+    ArrayList<Relation> tempList = new ArrayList(tablesToJoin.size());
+    for (Relation r : tablesToJoin)
+      tempList.add(r);
+
+    Collections.shuffle(tempList);
+
+    for (Relation r : tempList) {
       if (prev == null) {
         rtn = createScan(r);
         prev = r;
       } else {
         OperatorParameters params = createNaturalJoin(r, prev);
 
-        if (params == null)
-          rtn =
-              new CartesianOperator(
-                  new OperatorParameters(new ExpressionList()), createScan(r), rtn);
+        if (params == null || tempList.size() < 3)
+          return null;
+
+
         else rtn = new JoinOperator(params, createScan(r), rtn);
       }
     }
@@ -193,7 +201,12 @@ public class WorkloadGeneratorEasy extends WorkloadGenerator {
     for (int i = 0; i < n; i++) {
       //int k = rand.nextInt(2);
       //if (k == 0) 
-      workload.add(generateJoin());
+      Operator o = generateJoin();
+
+      if (o == null)
+        continue;
+
+      workload.add(o);
       //else if (k == 1) workload.add(generateJoinSel());
       //else if (k == 2) workload.add(generateJoinSelGb());
     }

@@ -17,17 +17,17 @@ public class ModelTrainer {
   MultiLayerNetwork net;
 
   public ModelTrainer(Database db) {
-    int numInput = db.getNumAttributes() * 3 + 1;
+    int numInput = db.getNumAttributes() * 3 + 2;
 
     int numOutputs = 1;
     int nHidden = 128;
-    double learningRate = 1e-1;
+    double learningRate = 5e-1;//1e-10;
 
     this.net =
         new MultiLayerNetwork(
             new NeuralNetConfiguration.Builder()
                 .seed(12345)
-                .weightInit(WeightInit.XAVIER)
+                .weightInit(WeightInit.XAVIER_UNIFORM)
                 .updater(new Nesterovs(learningRate, 0.25))
                 .list()
                 .layer(
@@ -52,11 +52,20 @@ public class ModelTrainer {
   public MultiLayerNetwork train(DataSetIterator iterator) {
 
     net.init();
+    
 
     // Train the network on the full data set, and evaluate in periodically
-    for (int i = 0; i < 50000; i++) {
-      iterator.reset();
+    for (int i = 0; i < 100000; i++) {
+
+     System.out.println("Iteration: " + i);
+
+     iterator.reset();
+
+     if (iterator.hasNext()) {
+      iterator.next();
       net.fit(iterator);
+      }
+
     }
 
     return net;

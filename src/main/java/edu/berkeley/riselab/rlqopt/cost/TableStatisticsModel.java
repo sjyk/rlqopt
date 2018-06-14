@@ -3,21 +3,30 @@ package edu.berkeley.riselab.rlqopt.cost;
 import edu.berkeley.riselab.rlqopt.Attribute;
 import edu.berkeley.riselab.rlqopt.Operator;
 import edu.berkeley.riselab.rlqopt.relalg.*;
+import edu.berkeley.riselab.rlqopt.Relation;
 import java.util.HashMap;
+import java.util.HashSet;
 
 public class TableStatisticsModel extends HistogramRelation implements CostModel {
 
   private double defaultSelectivity = 0.1;
   private int availableMemory;
+  private HashMap<HashSet<Relation>, Double> joinReductionFactors;
 
   public TableStatisticsModel(HashMap<Attribute, Histogram> data) {
     super(data);
     this.availableMemory = 1;
+    joinReductionFactors = new HashMap();
   }
 
   public TableStatisticsModel() {
     super(new HashMap());
     this.availableMemory = 1;
+    joinReductionFactors = new HashMap();
+  }
+
+  public void setJoinReductionFactors(HashMap<HashSet<Relation>, Double> jr){
+    joinReductionFactors = jr;
   }
 
   public Cost tableAccessOperator(Operator in) {
@@ -42,14 +51,21 @@ public class TableStatisticsModel extends HistogramRelation implements CostModel
 
   public Cost joinOperator(Operator in, Cost l, Cost r) {
 
-    int count = HistogramOperations.eval(this, in).count();
-    int countr = HistogramOperations.eval(this, in.source.get(0)).count();
-    int countl = HistogramOperations.eval(this, in.source.get(1)).count();
+    long countr = r.resultCardinality;
+    long countl = l.resultCardinality;
 
-    //System.out.println(count + " " + countr + " " + countl + "b: "+ in.source.get(1));
+    double reduction = 1.0;
+    HashSet<Relation> relations = in.getVisibleRelations();
 
-    // System.out.println((availableMemory-2));
-    return new Cost(countr + countl * countr, count, 0);
+    if (joinReductionFactors.containsKey(relations))
+      reduction = joinReductionFactors.get(relations);
+
+    if (! joinReductionFactors.containsKey(relations))
+      System.out.println(relations + " ///// " + joinReductionFactors);
+
+    long count = (long)(countl*countr*reduction);
+
+    return new Cost(countl + countl * countr, count, 0);
   }
 
   public Cost cartesianOperator(Operator in, Cost l, Cost r) {
@@ -75,9 +91,12 @@ public class TableStatisticsModel extends HistogramRelation implements CostModel
       return groupByOperator(in, estimate(in.source.get(0))).plus(doEstimate(in.source.get(0)));
 
     if (in instanceof JoinOperator)
-      return joinOperator(in, doEstimate(in.source.get(0)), doEstimate(in.source.get(1)))
-          .plus(doEstimate(in.source.get(0)))
-          .plus(doEstimate(in.source.get(1)));
+    {
+        Cost left = doEstimate(in.source.get(0));
+        Cost right = doEstimate(in.source.get(1));
+
+        return joinOperator(in, left, right).plus(left).plus(right);
+    }
 
     if (in instanceof CartesianOperator)
       return cartesianOperator(in, doEstimate(in.source.get(0)), doEstimate(in.source.get(1)))
@@ -90,7 +109,7 @@ public class TableStatisticsModel extends HistogramRelation implements CostModel
   public Cost estimate(Operator in) {
     Cost runningCost = new Cost(0, 0, 0);
     runningCost = doEstimate(in);
-    runningCost.operatorIOcost += HistogramOperations.eval(this, in).count();
+    runningCost.operatorIOcost += runningCost.resultCardinality;
 
     if (runningCost.operatorIOcost < 0) runningCost.operatorIOcost = Long.MAX_VALUE;
 

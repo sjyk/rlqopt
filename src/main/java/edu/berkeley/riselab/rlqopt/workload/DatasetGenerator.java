@@ -42,7 +42,83 @@ public class DatasetGenerator {
       db.add(r);
       ts.putAll(generateData(r));
     }
+    ts.setJoinReductionFactors(getJoinReductionFactors(db));
   }
+
+  private String int2bin(int x, int len){
+    String binCode = Integer.toBinaryString(x);
+    while (binCode.length() < len)
+      binCode = "0" + binCode;
+
+    return binCode;
+  }
+
+
+  private HashMap<HashSet<Relation>, Double> getJoinReductionFactors(LinkedList<Relation> allRelations){
+      HashMap<HashSet<Relation>, Double> reductions = new HashMap();
+
+      int maxCode = (int) Math.pow(2, allRelations.size());
+
+      //System.out.println(maxCode);
+
+      Relation [] relationArray = allRelations.toArray(new Relation[allRelations.size()]);
+
+      Random rand = new Random();
+
+      for(int code = 0; code<=maxCode; code++){
+        String binCode = int2bin(code, allRelations.size());
+
+        HashSet<Relation> incidentRelations = new HashSet();
+        HashSet<Relation> prefix = new HashSet();
+        ArrayList<Integer> incidentIndexes = new ArrayList();
+
+        for(int i=0; i<binCode.length(); i++)
+        {
+           if(binCode.charAt(i) == '1')
+           {
+             incidentRelations.add(relationArray[i]);
+             incidentIndexes.add(i);
+           }
+
+        }
+
+        for(int i=0; i<binCode.length() && prefix.size() < incidentRelations.size() - 1; i++)
+        {
+           if(binCode.charAt(i) == '1')
+             prefix.add(relationArray[i]);
+        }
+
+        if(reductions.containsKey(incidentRelations))
+          continue;
+        
+        //neighbor boost to add some systematic characteristic to the costs.
+        double boost = 1.0;
+        for (int i = 0; i<incidentIndexes.size()-1 && incidentIndexes.size() > 1; i++)
+        {
+          if (Math.abs(incidentIndexes.get(i) - incidentIndexes.get(i+1)) == 1)
+            boost = boost/(maxTableSize*maxTableSize);//Math.pow(10.0, incidentIndexes.size());
+        }
+
+        if (!reductions.containsKey(prefix) || prefix.size() == 0)
+        { 
+          reductions.put(incidentRelations, 1.0);
+          System.out.println(prefix + " => " + reductions.get(prefix) + " xx " + incidentRelations + " " + reductions.size());
+        }
+        else{
+
+          Double prefixReduction = reductions.get(prefix);
+          
+          System.out.println(prefix + " => " + prefixReduction + " xx " + incidentRelations + " " + reductions.size());
+
+          reductions.put(incidentRelations, prefixReduction*(rand.nextDouble())*boost);
+
+        }
+        
+      }
+
+      return reductions;
+  }
+
 
   private Histogram generateColumn(int size, int distinct, int type) {
 

@@ -18,6 +18,7 @@ public class TrainingDataPoint {
 
   public Operator[] oplist;
   public Double cost = 0.0;
+  public Double gcost = 0.0;
   public Double size = 0.0;
 
   public TrainingDataPoint(Operator[] oplist, Double cost) {
@@ -27,11 +28,12 @@ public class TrainingDataPoint {
 
   }
 
-  public TrainingDataPoint(Operator[] oplist, Double cost, Double size) {
+  public TrainingDataPoint(Operator[] oplist, Double cost, Double greedyCost, Double size) {
 
     this.oplist = oplist;
     this.cost = cost;
     this.size = size;
+    this.gcost = greedyCost;
 
   }
 
@@ -69,7 +71,7 @@ public class TrainingDataPoint {
 
     int n = allAttributes.size();
 
-    Double[] vector = new Double[n * 3 + 2];
+    Double[] vector = new Double[n * 3 + 3];
     for (int i = 0; i < n * 3; i++) vector[i] = 0.0;
 
     for (Attribute a : oplist[0].getVisibleAttributes()) {
@@ -84,7 +86,7 @@ public class TrainingDataPoint {
           //Math.log(cardMap.get(a) / c.estimate(oplist[1]).resultCardinality);
     }
 
-    // System.out.println(oplist[3].getVisibleAttributes() + " " + oplist[3]);
+    //System.out.println(oplist[3].getVisibleAttributes() + " " + oplist[3]);
 
     for (Attribute a : oplist[3].getVisibleAttributes()) {
 
@@ -93,7 +95,9 @@ public class TrainingDataPoint {
 
     vector[3 * n] = size;
 
-    vector[3 * n + 1] = cost;
+    vector[3 * n + 1] = gcost;
+
+    vector[3 * n + 2] = cost;
 
     return vector;
   }

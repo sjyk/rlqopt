@@ -117,4 +117,17 @@ public class Relation extends LinkedList<String> {
 
     return rtn;
   }
+
+  public int hashCode() {
+    return this.toString().hashCode();
+  }
+
+  public String toString(){
+    return this.name;
+  }
+
+  public boolean equals(Object obj) {
+    return (this.hashCode() == obj.hashCode());
+  }
+
 }

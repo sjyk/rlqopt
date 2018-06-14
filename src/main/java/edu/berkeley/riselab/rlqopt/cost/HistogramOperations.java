@@ -90,55 +90,8 @@ public class HistogramOperations {
     return rtn;
   }
 
-  public static HistogramRelation join(
-      Expression e, HistogramRelation left, HistogramRelation right) {
-    HashMap<Attribute, Histogram> data = new HashMap<Attribute, Histogram>();
-
-    if (!e.isEquality()) return cartesian(left, right);
-
-    // HashMap<Attribute, Histogram> data = new HashMap<Attribute, Histogram>();
-
-    LinkedList<Attribute>[] lr = getLeftRightAttributes(e);
-
-    int LEFT = (left.keySet().contains(lr[0].get(0))) ? 0 : 1;
-    int RIGHT = 1 - LEFT;
-
-    for (Attribute a : lr[LEFT]) {
-      Histogram lefth = left.get(a);
-
-      for (Attribute b : lr[RIGHT]) {
-        Histogram righth = right.get(b);
-
-        if (a.isKey)
-          data.put(a, lefth.mergeKey(righth));
-        else
-          data.put(a, lefth.merge(righth));
-
-      }
-    }
-
-    for (Attribute a : lr[RIGHT]) {
-      Histogram righth = right.get(a);
-
-      for (Attribute b : lr[LEFT]) {
-        Histogram lefth = left.get(b);
-
-        if (a.isKey)
-          data.put(a, lefth.mergeKey(righth));
-        else
-          data.put(a, lefth.merge(righth));
-
-      }
-    }
-
-    // System.out.println(data);
-
-    for (Attribute a : left.keySet()) if (!data.containsKey(a)) data.put(a, left.get(a));
-
-    for (Attribute a : right.keySet()) if (!data.containsKey(a)) data.put(a, right.get(a));
-
-    HistogramRelation jagged = new HistogramRelation(data);
-    return equalize(jagged);
+  public static HistogramRelation join(Expression e, HistogramRelation left, HistogramRelation right) {
+    return cartesian(left, right);
   }
 
   public static HistogramRelation merge(HistogramRelation l, HistogramRelation r) {
