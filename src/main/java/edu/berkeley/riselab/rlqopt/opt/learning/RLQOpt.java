@@ -29,7 +29,8 @@ public class RLQOpt extends Planner implements Trainable {
   }
 
   public void train(LinkedList<Operator> training) {
-    net = model.train(tgen.generateDataSetIterator(training, 1));
+//    net = model.train(tgen.generateDataSetIterator(training, 1))
+    net = model.train(null);;
     learner.setNetwork(net);
   }
 

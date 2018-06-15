@@ -83,7 +83,7 @@ public class TableStatisticsModel extends HistogramRelation implements CostModel
 
   private Cost doEstimate(Operator in) {
 
-    Cost runningCost = new Cost(0, 0, 0);
+//    Cost runningCost = new Cost(0, 0, 0);
 
     if (in instanceof TableAccessOperator) return tableAccessOperator(in);
 
@@ -109,12 +109,12 @@ public class TableStatisticsModel extends HistogramRelation implements CostModel
           .plus(doEstimate(in.source.get(0)))
           .plus(doEstimate(in.source.get(1)));
 
-    return runningCost;
+    return new Cost(0,0,0);
   }
 
   public Cost estimate(Operator in) {
-    Cost runningCost = new Cost(0, 0, 0);
-    runningCost = doEstimate(in);
+//    Cost runningCost = new Cost(0, 0, 0);
+    Cost runningCost = doEstimate(in);
     runningCost.operatorIOcost += runningCost.resultCardinality;
 
     if (runningCost.operatorIOcost < 0) runningCost.operatorIOcost = Long.MAX_VALUE;

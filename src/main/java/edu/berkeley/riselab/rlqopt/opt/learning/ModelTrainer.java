@@ -55,18 +55,19 @@ public class ModelTrainer {
     
 
     // Train the network on the full data set, and evaluate in periodically
-    for (int i = 0; i < 100000; i++) {
-
-     System.out.println("Iteration: " + i);
-
-     iterator.reset();
-
-     if (iterator.hasNext()) {
-      iterator.next();
-      net.fit(iterator);
-      }
-
-    }
+//    for (int i = 0; i < 100; i++) {
+////        for (int i = 0; i < 100000; i++) {
+//
+//     System.out.println("Iteration: " + i);
+//
+//     iterator.reset();
+//
+//     if (iterator.hasNext()) {
+//      iterator.next();
+//      net.fit(iterator);
+//      }
+//
+//    }
 
     return net;
   }
