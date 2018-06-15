@@ -137,8 +137,7 @@ public class HistogramOperations {
   }
 
   public static HistogramRelation eval(HistogramRelation hist, Operator op) {
-
-    HistogramRelation h = hist.copy();
+    HistogramRelation h = hist;
 
     if (op instanceof TableAccessOperator) return project(op.params.expression, h);
     else if (op instanceof SelectOperator)
