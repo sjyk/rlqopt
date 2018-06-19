@@ -56,20 +56,20 @@ public class TrainingDataGenerator {
     int p = 0;
 
     for (TrainingDataPoint tr : planner.getTrainingData()) {
-      Double[] vector = tr.featurize(db, c);
+      float[] vector = tr.featurize(db, c);
       p = vector.length;
 
       float[] xBuffer = new float[p - 1];
 
-      for (int ind = 0; ind < vector.length - 1; ind++) xBuffer[ind] = vector[ind].floatValue();
+      for (int ind = 0; ind < vector.length - 1; ind++) xBuffer[ind] = vector[ind];
 
       float[] yBuffer = new float[1];
 
-      if (Double.isInfinite(vector[vector.length - 1].floatValue()))
+      if (Double.isInfinite(vector[vector.length - 1]))
          continue;
 
       //System.out.println("--" + Math.log(vector[vector.length - 1].floatValue()) + "," + vector[vector.length - 1].floatValue());
-      yBuffer[0] = (float) (Math.log(vector[vector.length - 1].floatValue())); // todo fix scaling
+      yBuffer[0] = (float) (Math.log(vector[vector.length - 1])); // todo fix scaling
       // System.out.println(yBuffer[0]);
 
       trainingExamples.add(Nd4j.create(xBuffer, new int[] {1, p - 1}));

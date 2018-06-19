@@ -153,7 +153,7 @@ public class TDJoinExecutor implements PlanningModule {
     return null;
   }
 
- private Operator getRemainingOperators(HashSet<Operator> relations, Operator in)
+  private Operator getRemainingOperators(HashSet<Operator> relations, Operator in)
       throws OperatorException {
     Operator[] relArray = relations.toArray(new Operator[relations.size()]);
     OperatorParameters params = new OperatorParameters(in.params.expression);
@@ -196,26 +196,34 @@ public class TDJoinExecutor implements PlanningModule {
         currentPair[2] = cjv;
         currentPair[3] = in.copy();
 
-        TrainingDataPoint tpd = new TrainingDataPoint(currentPair, new Double(0), 0.0, relations.size() + 0.0);
-
-        INDArray input = tpd.featurizeND4j(db, c);
         double cost;
 
         if (net != null) {
+//          System.out.println("********************");
+//          System.exit(1);
+//            assert false;
+          TrainingDataPoint tpd =
+              new TrainingDataPoint(
+                  currentPair,
+                  0f,
+                0f,
+                  (float) relations.size());
+          INDArray input = tpd.featurizeND4j(db, c);
           INDArray out = net.output(input, false);
           cost = out.getDouble(0);
 
           //remove
-          /*HashSet<Operator> local = (HashSet) rtn.clone();
-          local.remove(i);
-          local.remove(j);
-          local.add(cjv);
-          Operator baseline = lfdb.reorderJoin(getRemainingOperators(local, in), c);
+//          HashSet<Operator> local = (HashSet) rtn.clone();
+//          local.remove(i);
+//          local.remove(j);
+//          local.add(cjv);
+//          Operator baseline = lfdb.reorderJoin(getRemainingOperators(local, in), c);
+//
+//          System.out.println(input + " : " + cost + " " + Math.log(c.estimate(baseline).operatorIOcost));
 
-          System.out.println(input + " : " + cost + " " + Math.log(c.estimate(baseline).operatorIOcost));
-          */
 
         } else {
+//          assert false;
           cost = c.estimate(cjv).operatorIOcost;
         }
 

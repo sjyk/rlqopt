@@ -234,7 +234,7 @@ public class TDJoinSampler implements PlanningModule {
         trainingToJoin[2] = cjv;
         trainingToJoin[3] = in.copy();
 
-        localData.add(new TrainingDataPoint(trainingToJoin, cost, 0.0 , relations.size()+0.0));
+        localData.add(new TrainingDataPoint(trainingToJoin, (float) cost, 0f, relations.size()));
 
         // System.out.println(cost);
 
