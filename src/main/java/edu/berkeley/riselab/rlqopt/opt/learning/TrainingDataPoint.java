@@ -67,7 +67,7 @@ public class TrainingDataPoint {
   public Double[] featurize(Database db, CostModel c) {
 
     LinkedList<Attribute> allAttributes = db.getAllAttributes();
-    HashMap<Attribute, Double> cardMap = calculateBaseCardinality(db, c);
+    //HashMap<Attribute, Double> cardMap = calculateBaseCardinality(db, c);
 
     int n = allAttributes.size();
 

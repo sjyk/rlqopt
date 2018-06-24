@@ -12,17 +12,20 @@ public class TableStatisticsModel extends HistogramRelation implements CostModel
   private double defaultSelectivity = 0.1;
   private int availableMemory;
   private HashMap<HashSet<Relation>, Double> joinReductionFactors;
+  private HashMap<Operator, Cost> memoizeTable;
 
   public TableStatisticsModel(HashMap<Attribute, Histogram> data) {
     super(data);
     this.availableMemory = 1;
     joinReductionFactors = new HashMap();
+    memoizeTable = new HashMap();
   }
 
   public TableStatisticsModel() {
     super(new HashMap());
     this.availableMemory = 1;
     joinReductionFactors = new HashMap();
+    memoizeTable = new HashMap();
   }
 
   public void setJoinReductionFactors(HashMap<HashSet<Relation>, Double> jr){
@@ -53,6 +56,9 @@ public class TableStatisticsModel extends HistogramRelation implements CostModel
 
     long countr = r.resultCardinality;
     long countl = l.resultCardinality;
+
+    //int countrh = HistogramOperations.eval(this, in.source.get(0)).count();
+    //int countlh = HistogramOperations.eval(this, in.source.get(1)).count();
 
     double reduction = 1.0;
     HashSet<Relation> relations = in.getVisibleRelations();

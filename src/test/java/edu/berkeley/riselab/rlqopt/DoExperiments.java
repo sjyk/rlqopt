@@ -34,6 +34,7 @@ public class DoExperiments extends TestCase {
 
   public void test1() throws OperatorException {
 
+    //DatasetGenerator d = new DatasetGenerator(5, 12, 1000, 100);
     DatasetGenerator d = new DatasetGenerator(5, 12, 1000, 100);
     //DatasetGenerator d = new DatasetGenerator(3, 8, 1000, 100);
     WorkloadGeneratorEasy workload = new WorkloadGeneratorEasy(d);

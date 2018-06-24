@@ -9,7 +9,7 @@ import edu.berkeley.riselab.rlqopt.OperatorParameters;
 import edu.berkeley.riselab.rlqopt.Relation;
 import edu.berkeley.riselab.rlqopt.cost.*;
 import edu.berkeley.riselab.rlqopt.opt.PlanningModule;
-import edu.berkeley.riselab.rlqopt.opt.learning.BaselineLeftDeep;
+import edu.berkeley.riselab.rlqopt.opt.learning.BaselineBushy;
 import edu.berkeley.riselab.rlqopt.relalg.*;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,11 +21,11 @@ public class BushyJoinEnumerator implements PlanningModule {
 
   boolean resetPerSession;
   double alpha;
-  BaselineLeftDeep lfdb;
+  BaselineBushy lfdb;
 
   public BushyJoinEnumerator() {
 
-    lfdb = new BaselineLeftDeep();
+    lfdb = new BaselineBushy();
   }
 
   private LinkedList<Attribute>[] getLeftRightAttributes(Expression e) {

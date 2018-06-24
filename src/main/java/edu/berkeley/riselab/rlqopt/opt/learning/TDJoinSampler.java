@@ -24,14 +24,14 @@ public class TDJoinSampler implements PlanningModule {
   double alpha;
   LinkedList<TrainingDataPoint> trainingData;
   LinkedList<TrainingDataPoint> localData;
-  BaselineLeftDeep lfdb;
+  BaselineBushy lfdb;
 
   public TDJoinSampler(double alpha) {
 
     this.rand = new Random();
     this.alpha = alpha;
     trainingData = new LinkedList();
-    lfdb = new BaselineLeftDeep();
+    lfdb = new BaselineBushy();
   }
 
   private LinkedList<Attribute>[] getLeftRightAttributes(Expression e) {
@@ -123,17 +123,6 @@ public class TDJoinSampler implements PlanningModule {
       System.out.println("J:" + cost);*/
 
     for (TrainingDataPoint t : localData) {
-      //
-      //t.cost = cost; // - t.cost;
-      //if (cost > 1e2)
-        System.out.println(
-            rtn
-                + " /// "
-                + cost
-                + " "
-                + c.estimate(rtn.source.get(0)).operatorIOcost 
-                + " "
-                + c.estimate(rtn.source.get(1)).operatorIOcost);
       trainingData.add(t);
     }
 
@@ -245,7 +234,7 @@ public class TDJoinSampler implements PlanningModule {
         trainingToJoin[2] = cjv;
         trainingToJoin[3] = in.copy();
 
-        localData.add(new TrainingDataPoint(trainingToJoin, cost, Math.log(c.estimate(cjv).operatorIOcost), relations.size()+0.0));
+        localData.add(new TrainingDataPoint(trainingToJoin, cost, 0.0 , relations.size()+0.0));
 
         // System.out.println(cost);
 
