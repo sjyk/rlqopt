@@ -7,6 +7,7 @@ import edu.berkeley.riselab.rlqopt.opt.bushy.PostgresBushyPlanner;
 import edu.berkeley.riselab.rlqopt.opt.learning.RLQOpt;
 import edu.berkeley.riselab.rlqopt.opt.nopt.NoPlanner;
 import edu.berkeley.riselab.rlqopt.opt.postgres.PostgresPlanner;
+import edu.berkeley.riselab.rlqopt.opt.quickpick.QuickPickPlanner;
 import edu.berkeley.riselab.rlqopt.opt.volcano.VolcanoPlanner;
 import edu.berkeley.riselab.rlqopt.workload.DatasetGenerator;
 import edu.berkeley.riselab.rlqopt.workload.WorkloadGeneratorEasy;
@@ -42,8 +43,6 @@ public class DoExperiments extends TestCase {
   }
 
   public void test1() throws OperatorException {
-
-    //DatasetGenerator d = new DatasetGenerator(5, 12, 1000, 100);
     DatasetGenerator d = new DatasetGenerator(5, 12, 1000, 100);
     // DatasetGenerator d = new DatasetGenerator(3, 8, 1000, 100);
     WorkloadGeneratorEasy workload = new WorkloadGeneratorEasy(d);
@@ -53,10 +52,11 @@ public class DoExperiments extends TestCase {
 
     LinkedList<Planner> planners = new LinkedList();
     planners.add(new NoPlanner());
-    planners.add(new RLQOpt(workload));
+//    planners.add(new RLQOpt(workload));
     planners.add(new PostgresBushyPlanner());
     planners.add(new PostgresPlanner());
     planners.add(new VolcanoPlanner());
+    planners.add(new QuickPickPlanner(100));
 
     Experiment e = new Experiment(workload, 1000, 1000, planners);
     e.train();
