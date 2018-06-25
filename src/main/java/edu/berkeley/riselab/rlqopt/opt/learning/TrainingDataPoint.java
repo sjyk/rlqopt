@@ -17,17 +17,17 @@ import org.nd4j.linalg.factory.Nd4j;
 public class TrainingDataPoint {
 
   public Operator[] oplist;
-  public float cost = 0.0f;
-  public float gcost = 0.0f;
-  public float size = 0.0f;
+  public Double cost = 0.0;
+  public Double gcost = 0.0;
+  public Double size = 0.0;
 
-  public TrainingDataPoint(Operator[] oplist, float cost) {
+  public TrainingDataPoint(Operator[] oplist, Double cost) {
 
     this.oplist = oplist;
     this.cost = cost;
   }
 
-  public TrainingDataPoint(Operator[] oplist, float cost, float greedyCost, float size) {
+  public TrainingDataPoint(Operator[] oplist, Double cost, Double greedyCost, Double size) {
 
     this.oplist = oplist;
     this.cost = cost;
@@ -39,10 +39,10 @@ public class TrainingDataPoint {
     return Arrays.toString(oplist) + " => " + cost;
   }
 
-  private HashMap<Attribute, Float> calculateBaseCardinality(Database db, CostModel c) {
+  private HashMap<Attribute, Double> calculateBaseCardinality(Database db, CostModel c) {
 
     LinkedList<Attribute> allAttributes = db.getAllAttributes();
-    HashMap<Attribute, Float> rtn = new HashMap<>();
+    HashMap<Attribute, Double> rtn = new HashMap<>();
 
     for (Attribute a : allAttributes) {
       Relation r = a.relation;
@@ -56,39 +56,42 @@ public class TrainingDataPoint {
         return null;
       }
 
-      rtn.put(a, (float) c.estimate(scan_r).resultCardinality);
+      rtn.put(a, (double) c.estimate(scan_r).resultCardinality);
     }
 
     return rtn;
   }
 
-  public float[] featurize(Database db, CostModel c) {
+  public Double[] featurize(Database db, CostModel c) {
 
     LinkedList<Attribute> allAttributes = db.getAllAttributes();
     //HashMap<Attribute, Double> cardMap = calculateBaseCardinality(db, c);
 
     int n = allAttributes.size();
 
-    float[] vector = new float[n * 3 + 3];
-    for (int i = 0; i < n * 3; i++) vector[i] = 0.0f;
+    Double[] vector = new Double[n * 3 + 3];
+    for (int i = 0; i < n * 3; i++) vector[i] = 0.0;
+
+//    long lhsCard = c.estimate(oplist[0]).resultCardinality;
+//    long rhsCard = c.estimate(oplist[1]).resultCardinality;
 
     for (Attribute a : oplist[0].getVisibleAttributes()) {
 
-      vector[allAttributes.indexOf(a)] = 1.0f;
-      // Math.log(cardMap.get(a) / c.estimate(oplist[0]).resultCardinality);
+      vector[allAttributes.indexOf(a)] = 1.0;
+//          Math.log(cardMap.get(a) / lhsCard);
     }
 
     for (Attribute a : oplist[1].getVisibleAttributes()) {
 
-      vector[allAttributes.indexOf(a) + n] = 1.0f;
-      // Math.log(cardMap.get(a) / c.estimate(oplist[1]).resultCardinality);
+      vector[allAttributes.indexOf(a) + n] = 1.0;
+//          Math.log(cardMap.get(a) / rhsCard);
     }
 
     // System.out.println(oplist[3].getVisibleAttributes() + " " + oplist[3]);
 
     for (Attribute a : oplist[3].getVisibleAttributes()) {
 
-      vector[allAttributes.indexOf(a) + 2 * n] = 1.0f;
+      vector[allAttributes.indexOf(a) + 2 * n] = 1.0;
     }
 
     vector[3 * n] = size;
@@ -101,12 +104,12 @@ public class TrainingDataPoint {
   }
 
   public INDArray featurizeND4j(Database db, CostModel c) {
-    float[] vector = featurize(db, c);
+    Double[] vector = featurize(db, c);
     int p = vector.length;
 
     float[] xBuffer = new float[p - 1];
 
-    for (int ind = 0; ind < vector.length - 1; ind++) xBuffer[ind] = vector[ind];
+    for (int ind = 0; ind < vector.length - 1; ind++) xBuffer[ind] = vector[ind].floatValue();
 
     return Nd4j.create(xBuffer, new int[] {1, p - 1});
   }

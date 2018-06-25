@@ -129,7 +129,6 @@ public class TDJoinExecutor implements PlanningModule {
     }
 
     Operator rtn = (Operator) relations.toArray()[0];
-    double cost = c.estimate(rtn).operatorIOcost;
 
     if (!(rtn instanceof JoinOperator) || relations.size() > 1)
       System.out.println("___!!!!___" + relations);
@@ -204,10 +203,7 @@ public class TDJoinExecutor implements PlanningModule {
 //            assert false;
           TrainingDataPoint tpd =
               new TrainingDataPoint(
-                  currentPair,
-                  0f,
-                0f,
-                  (float) relations.size());
+                      currentPair, 0.0, 0.0, (double) relations.size());
           INDArray input = tpd.featurizeND4j(db, c);
           INDArray out = net.output(input, false);
           cost = out.getDouble(0);
@@ -221,9 +217,7 @@ public class TDJoinExecutor implements PlanningModule {
 //
 //          System.out.println(input + " : " + cost + " " + Math.log(c.estimate(baseline).operatorIOcost));
 
-
         } else {
-//          assert false;
           cost = c.estimate(cjv).operatorIOcost;
         }
 
