@@ -60,6 +60,14 @@ public class DatasetGenerator {
     ts.setJoinReductionFactors(getJoinReductionFactors(db));
   }
 
+  public int numRelations() {
+    return db.size();
+  }
+
+  public int numTotalAttributes() {
+    return db.getAllAttributes().size();
+  }
+
   private String int2bin(int x, int len) {
     String binCode = Integer.toBinaryString(x);
     while (binCode.length() < len) binCode = "0" + binCode;

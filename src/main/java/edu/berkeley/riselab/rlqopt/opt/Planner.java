@@ -71,6 +71,10 @@ public class Planner {
     this.name = name;
   }
 
+  public String getPlannerName() {
+    return this.name;
+  }
+
   public String toString(){
     return this.name;
   }
