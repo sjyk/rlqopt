@@ -8,6 +8,7 @@ import edu.berkeley.riselab.rlqopt.OperatorException;
 import edu.berkeley.riselab.rlqopt.OperatorParameters;
 import edu.berkeley.riselab.rlqopt.Relation;
 import edu.berkeley.riselab.rlqopt.cost.CostModel;
+import edu.berkeley.riselab.rlqopt.opt.CostCachingModule;
 import edu.berkeley.riselab.rlqopt.opt.PlanningModule;
 import edu.berkeley.riselab.rlqopt.relalg.JoinOperator;
 import edu.berkeley.riselab.rlqopt.relalg.KWayJoinOperator;
@@ -18,12 +19,12 @@ import java.util.List;
 import java.util.Random;
 import org.apache.calcite.util.Pair;
 
-public class QuickPick implements PlanningModule {
+public class QuickPick implements PlanningModule, CostCachingModule {
 
   private int numTrajectories;
   private Random random;
 
-  public QuickPick(int numTrajectories) {
+  QuickPick(int numTrajectories) {
     this.numTrajectories = numTrajectories;
     this.random = new Random(1234);
   }
@@ -98,10 +99,12 @@ public class QuickPick implements PlanningModule {
   private Operator quickPick(Operator in, CostModel c) throws OperatorException {
     double bestCost = Double.MAX_VALUE;
     Operator bestPlan = null;
-    for (int i = 0; i < this.numTrajectories; ++i) {
-      List<Operator> relations = new ArrayList<>(in.source);
-      Pair<Operator, Double> joinAndCost = rollout(relations, c, in);
-      System.out.println("QuickPick: collected trajectory " + i);
+    for (int i = 1; i <= this.numTrajectories; ++i) {
+      Pair<Operator, Double> joinAndCost = rollout(new ArrayList<>(in.source), c, in, bestCost);
+      if (joinAndCost == null) continue;
+      if (i % 50 == 0) {
+        System.out.println("QuickPick: collected trajectory " + i);
+      }
       double cost = joinAndCost.right;
       if (bestPlan == null || cost < bestCost) {
         bestPlan = joinAndCost.left;
@@ -111,12 +114,19 @@ public class QuickPick implements PlanningModule {
     return bestPlan;
   }
 
-  private Pair<Operator, Double> rollout(List<Operator> relations, CostModel c, Operator in)
+  // "relations" is a forest.
+  private double totalCost(List<Operator> relations, CostModel c) {
+    double cost = 0;
+    for (Operator rel : relations) cost += getOrComputeIOEstimate(rel, c);
+    return cost;
+  }
+
+  private Pair<Operator, Double> rollout(
+      List<Operator> relations, final CostModel c, final Operator in, final double bestCost)
       throws OperatorException {
     if (relations.size() == 1) {
       Operator finalJoin = (Operator) (relations.toArray()[0]);
-      double cost = (double) c.estimate(finalJoin).operatorIOcost;
-      return new Pair<>(finalJoin, cost);
+      return new Pair<>(finalJoin, getOrComputeIOEstimate(finalJoin, c));
     }
     // Pick a random & valid edge (i, j) to join.
     int n = relations.size();
@@ -125,11 +135,11 @@ public class QuickPick implements PlanningModule {
     while (true) {
       i = random.nextInt(n);
       j = random.nextInt(n);
-      left = relations.get(i);
-      right = relations.get(j);
-
       // No self-join.
       if (i == j) continue;
+
+      left = relations.get(i);
+      right = relations.get(j);
       Expression e = findJoinExpression(in.params.expression, left, right);
       // Has to have a valid edge (i, j).
       if (e == null) continue;
@@ -138,9 +148,22 @@ public class QuickPick implements PlanningModule {
       randomJoin = new JoinOperator(params, left, right);
       break;
     }
+
+    // Optimization.
+    if (getOrComputeIOEstimate(randomJoin, c) >= bestCost) {
+      return null;
+    }
+
     relations.remove(left);
     relations.remove(right);
     relations.add(randomJoin);
-    return rollout(relations, c, in);
+
+    // Optimization: compute costs of "relations", if it's already larger than best, exit.
+    double totalCost = totalCost(relations, c);
+    if (totalCost >= bestCost) {
+      return null;
+    }
+
+    return rollout(relations, c, in, bestCost);
   }
 }
