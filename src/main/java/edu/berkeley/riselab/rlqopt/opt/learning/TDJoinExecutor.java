@@ -198,9 +198,6 @@ public class TDJoinExecutor implements PlanningModule {
         double cost;
 
         if (net != null) {
-//          System.out.println("********************");
-//          System.exit(1);
-//            assert false;
           TrainingDataPoint tpd =
               new TrainingDataPoint(
                       currentPair, 0.0, 0.0, (double) relations.size());
