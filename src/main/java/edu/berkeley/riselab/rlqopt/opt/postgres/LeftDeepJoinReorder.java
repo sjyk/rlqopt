@@ -7,6 +7,7 @@ import edu.berkeley.riselab.rlqopt.OperatorException;
 import edu.berkeley.riselab.rlqopt.OperatorParameters;
 import edu.berkeley.riselab.rlqopt.Relation;
 import edu.berkeley.riselab.rlqopt.cost.*;
+import edu.berkeley.riselab.rlqopt.opt.CostCachingModule;
 import edu.berkeley.riselab.rlqopt.opt.PlanningModule;
 import edu.berkeley.riselab.rlqopt.relalg.*;
 import java.util.HashMap;
@@ -15,7 +16,7 @@ import java.util.LinkedList;
 
 // this implements one transformation
 // of the plan match
-public class LeftDeepJoinReorder implements PlanningModule {
+public class LeftDeepJoinReorder implements PlanningModule, CostCachingModule {
 
   boolean resetPerSession;
 
@@ -67,8 +68,8 @@ public class LeftDeepJoinReorder implements PlanningModule {
     if (!map.containsKey(key)) return newOp;
     else {
       Operator oldOp = map.get(key);
-      double oldOpCost = c.estimate(oldOp).operatorIOcost;
-      double newOpCost = c.estimate(newOp).operatorIOcost;
+      double oldOpCost = getOrComputeIOEstimate(oldOp, c);
+      double newOpCost = getOrComputeIOEstimate(newOp, c);
 
       if (newOpCost < oldOpCost) return newOp;
       else return oldOp;
@@ -80,7 +81,6 @@ public class LeftDeepJoinReorder implements PlanningModule {
   // takes an operator returns an equivalent operator
 
   public Operator apply(Operator in, CostModel c) {
-
     LinkedList<Operator> newChildren = new LinkedList();
 
     for (Operator child : in.source) newChildren.add(apply(child, c));

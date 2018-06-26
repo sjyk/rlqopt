@@ -129,7 +129,6 @@ public class TDJoinExecutor implements PlanningModule {
     }
 
     Operator rtn = (Operator) relations.toArray()[0];
-    double cost = c.estimate(rtn).operatorIOcost;
 
     if (!(rtn instanceof JoinOperator) || relations.size() > 1)
       System.out.println("___!!!!___" + relations);
@@ -153,7 +152,7 @@ public class TDJoinExecutor implements PlanningModule {
     return null;
   }
 
- private Operator getRemainingOperators(HashSet<Operator> relations, Operator in)
+  private Operator getRemainingOperators(HashSet<Operator> relations, Operator in)
       throws OperatorException {
     Operator[] relArray = relations.toArray(new Operator[relations.size()]);
     OperatorParameters params = new OperatorParameters(in.params.expression);
@@ -196,24 +195,24 @@ public class TDJoinExecutor implements PlanningModule {
         currentPair[2] = cjv;
         currentPair[3] = in.copy();
 
-        TrainingDataPoint tpd = new TrainingDataPoint(currentPair, new Double(0), 0.0, relations.size() + 0.0);
-
-        INDArray input = tpd.featurizeND4j(db, c);
         double cost;
 
         if (net != null) {
+          TrainingDataPoint tpd =
+              new TrainingDataPoint(
+                      currentPair, 0.0, 0.0, (double) relations.size());
+          INDArray input = tpd.featurizeND4j(db, c);
           INDArray out = net.output(input, false);
           cost = out.getDouble(0);
 
           //remove
-          /*HashSet<Operator> local = (HashSet) rtn.clone();
-          local.remove(i);
-          local.remove(j);
-          local.add(cjv);
-          Operator baseline = lfdb.reorderJoin(getRemainingOperators(local, in), c);
-
-          System.out.println(input + " : " + cost + " " + Math.log(c.estimate(baseline).operatorIOcost));
-          */
+//          HashSet<Operator> local = (HashSet) rtn.clone();
+//          local.remove(i);
+//          local.remove(j);
+//          local.add(cjv);
+//          Operator baseline = lfdb.reorderJoin(getRemainingOperators(local, in), c);
+//
+//          System.out.println(input + " : " + cost + " " + Math.log(c.estimate(baseline).operatorIOcost));
 
         } else {
           cost = c.estimate(cjv).operatorIOcost;

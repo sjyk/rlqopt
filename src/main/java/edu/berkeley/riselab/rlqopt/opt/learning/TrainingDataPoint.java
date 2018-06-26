@@ -25,7 +25,6 @@ public class TrainingDataPoint {
 
     this.oplist = oplist;
     this.cost = cost;
-
   }
 
   public TrainingDataPoint(Operator[] oplist, Double cost, Double greedyCost, Double size) {
@@ -34,7 +33,6 @@ public class TrainingDataPoint {
     this.cost = cost;
     this.size = size;
     this.gcost = greedyCost;
-
   }
 
   public String toString() {
@@ -44,7 +42,7 @@ public class TrainingDataPoint {
   private HashMap<Attribute, Double> calculateBaseCardinality(Database db, CostModel c) {
 
     LinkedList<Attribute> allAttributes = db.getAllAttributes();
-    HashMap<Attribute, Double> rtn = new HashMap();
+    HashMap<Attribute, Double> rtn = new HashMap<>();
 
     for (Attribute a : allAttributes) {
       Relation r = a.relation;
@@ -58,7 +56,7 @@ public class TrainingDataPoint {
         return null;
       }
 
-      rtn.put(a, new Double(c.estimate(scan_r).resultCardinality + 0.0));
+      rtn.put(a, (double) c.estimate(scan_r).resultCardinality);
     }
 
     return rtn;
@@ -74,19 +72,22 @@ public class TrainingDataPoint {
     Double[] vector = new Double[n * 3 + 3];
     for (int i = 0; i < n * 3; i++) vector[i] = 0.0;
 
+//    long lhsCard = c.estimate(oplist[0]).resultCardinality;
+//    long rhsCard = c.estimate(oplist[1]).resultCardinality;
+
     for (Attribute a : oplist[0].getVisibleAttributes()) {
 
       vector[allAttributes.indexOf(a)] = 1.0;
-          //Math.log(cardMap.get(a) / c.estimate(oplist[0]).resultCardinality);
+//          Math.log(cardMap.get(a) / lhsCard);
     }
 
     for (Attribute a : oplist[1].getVisibleAttributes()) {
 
       vector[allAttributes.indexOf(a) + n] = 1.0;
-          //Math.log(cardMap.get(a) / c.estimate(oplist[1]).resultCardinality);
+//          Math.log(cardMap.get(a) / rhsCard);
     }
 
-    //System.out.println(oplist[3].getVisibleAttributes() + " " + oplist[3]);
+    // System.out.println(oplist[3].getVisibleAttributes() + " " + oplist[3]);
 
     for (Attribute a : oplist[3].getVisibleAttributes()) {
 
