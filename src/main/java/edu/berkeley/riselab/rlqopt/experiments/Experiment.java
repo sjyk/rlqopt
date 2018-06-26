@@ -9,6 +9,7 @@ import edu.berkeley.riselab.rlqopt.workload.WorkloadGenerator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class Experiment {
 
@@ -50,8 +51,11 @@ public class Experiment {
 
       for (Operator op : workload.copyWorkload(test)) {
 
-        if (p == baseline) p.plan(op.copy(), workload.getStatsModel(), workload.getStatsModel()).toSQLString();
-        else p.plan(op.copy(), workload.getNoisyStatsModel(), workload.getStatsModel());
+        if (p == baseline) {
+          p.plan(op.copy(), workload.getStatsModel(), workload.getStatsModel()).toSQLString();
+        } else {
+          p.plan(op.copy(), workload.getNoisyStatsModel(), workload.getStatsModel());
+        }
 
         // System.out.println(op + " " + p + " " + p.getLastPlanStats());
 
@@ -62,7 +66,7 @@ public class Experiment {
     }
   }
 
-  public HashMap<Planner, Double> getBaselineImprovement() {
+  public Map<Planner, Double> getBaselineImprovement() {
 
     HashMap<Planner, Double> rtn = new HashMap();
 
@@ -76,7 +80,7 @@ public class Experiment {
 
       for (int i = 0; i < n; i++) {
 
-        //if (stats.get(i).finalCost == stats.get(i).initialCost)
+        // if (stats.get(i).finalCost == stats.get(i).initialCost)
         //  continue;
 
         double cost = (double) Math.log(stats.get(i).finalCost);
@@ -90,7 +94,6 @@ public class Experiment {
 
       rtn.put(p, sum / nt);
     }
-
     return rtn;
   }
 
@@ -108,7 +111,7 @@ public class Experiment {
       double sum = 0.0;
 
       for (int i = 0; i < n; i++) {
-        double cost = ((double) stats.get(i).planning/1e6);
+        double cost = ((double) stats.get(i).planning / 1e6);
         sum += cost;
       }
 

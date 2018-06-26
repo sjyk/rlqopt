@@ -7,6 +7,7 @@ import edu.berkeley.riselab.rlqopt.OperatorException;
 import edu.berkeley.riselab.rlqopt.OperatorParameters;
 import edu.berkeley.riselab.rlqopt.Relation;
 import edu.berkeley.riselab.rlqopt.cost.*;
+import edu.berkeley.riselab.rlqopt.opt.CostCachingModule;
 import edu.berkeley.riselab.rlqopt.relalg.*;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,7 +15,7 @@ import java.util.LinkedList;
 
 // this implements one transformation
 // of the plan match
-public class BaselineLeftDeep {
+public class BaselineLeftDeep implements CostCachingModule {
 
   boolean resetPerSession;
 
@@ -63,15 +64,12 @@ public class BaselineLeftDeep {
       CostModel c,
       HashSet<Operator> key,
       Operator newOp) {
-    if (!map.containsKey(key)) return newOp;
-    else {
-      Operator oldOp = map.get(key);
-      double oldOpCost = c.estimate(oldOp).operatorIOcost;
-      double newOpCost = c.estimate(newOp).operatorIOcost;
-
-      if (newOpCost < oldOpCost) return newOp;
-      else return oldOp;
-    }
+    Operator oldOp = map.get(key);
+    if (oldOp == null) return newOp;
+    double oldOpCost = getOrComputeIOEstimate(oldOp, c);
+    double newOpCost = getOrComputeIOEstimate(newOp, c);
+    if (newOpCost < oldOpCost) return newOp;
+    return oldOp;
   }
 
   // get all the visible attributes
@@ -117,7 +115,7 @@ public class BaselineLeftDeep {
       HashMap<HashSet<Operator>, Operator> costMap, CostModel c, Operator in)
       throws OperatorException {
 
-    HashMap<HashSet<Operator>, Operator> result = new HashMap();
+    HashMap<HashSet<Operator>, Operator> result = new HashMap<>();
 
     for (HashSet<Operator> key : costMap.keySet()) {
       Operator val = costMap.get(key);

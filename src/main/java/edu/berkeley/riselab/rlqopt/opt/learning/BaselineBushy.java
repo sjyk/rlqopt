@@ -6,15 +6,17 @@ import edu.berkeley.riselab.rlqopt.Operator;
 import edu.berkeley.riselab.rlqopt.OperatorException;
 import edu.berkeley.riselab.rlqopt.OperatorParameters;
 import edu.berkeley.riselab.rlqopt.Relation;
-import edu.berkeley.riselab.rlqopt.cost.*;
-import edu.berkeley.riselab.rlqopt.relalg.*;
+import edu.berkeley.riselab.rlqopt.cost.CostModel;
+import edu.berkeley.riselab.rlqopt.opt.CostCachingModule;
+import edu.berkeley.riselab.rlqopt.relalg.JoinOperator;
+import edu.berkeley.riselab.rlqopt.relalg.KWayJoinOperator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 
 // this implements one transformation
 // of the plan match
-public class BaselineBushy {
+public class BaselineBushy implements CostCachingModule {
 
   boolean resetPerSession;
 
@@ -66,8 +68,8 @@ public class BaselineBushy {
     if (!map.containsKey(key)) return newOp;
     else {
       Operator oldOp = map.get(key);
-      double oldOpCost = c.estimate(oldOp).operatorIOcost;
-      double newOpCost = c.estimate(newOp).operatorIOcost;
+      double oldOpCost = getOrComputeIOEstimate(oldOp, c);
+      double newOpCost = getOrComputeIOEstimate(newOp, c);
 
       if (newOpCost < oldOpCost) return newOp;
       else return oldOp;
@@ -89,6 +91,7 @@ public class BaselineBushy {
     if (in instanceof KWayJoinOperator) return reorderJoin(in, c);
     else return in;
   }
+
 
   public Operator reorderJoin(Operator in, CostModel c) {
 

@@ -8,6 +8,7 @@ import edu.berkeley.riselab.rlqopt.OperatorException;
 import edu.berkeley.riselab.rlqopt.OperatorParameters;
 import edu.berkeley.riselab.rlqopt.Relation;
 import edu.berkeley.riselab.rlqopt.cost.*;
+import edu.berkeley.riselab.rlqopt.opt.CostCachingModule;
 import edu.berkeley.riselab.rlqopt.opt.PlanningModule;
 import edu.berkeley.riselab.rlqopt.opt.learning.BaselineBushy;
 import edu.berkeley.riselab.rlqopt.relalg.*;
@@ -17,7 +18,7 @@ import java.util.LinkedList;
 
 // this implements one transformation
 // of the plan match, discount
-public class BushyJoinEnumerator implements PlanningModule {
+public class BushyJoinEnumerator implements PlanningModule, CostCachingModule {
 
   boolean resetPerSession;
   double alpha;
@@ -106,9 +107,6 @@ public class BushyJoinEnumerator implements PlanningModule {
     }
 
     Operator rtn = (Operator) relations.toArray()[0];
-    // System.out.println(rtn);
-    double cost = c.estimate(rtn).operatorIOcost;
-
     return rtn;
   }
 
@@ -181,7 +179,7 @@ public class BushyJoinEnumerator implements PlanningModule {
 
         // exploration
         // System.out.println(rand.nextGaussian());
-        double cost = c.estimate(baseline).operatorIOcost;
+        double cost = getOrComputeIOEstimate(baseline, c);
 
         // System.out.println(cost);
 
