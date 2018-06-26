@@ -92,11 +92,17 @@ public class DatasetGenerator {
       HashSet<Relation> prefix = new HashSet();
       ArrayList<Integer> incidentIndexes = new ArrayList();
 
-        if(reductions.containsKey(incidentRelations))
-          continue;
+      for (int i = 0; i < binCode.length(); i++) {
+        if (binCode.charAt(i) == '1') {
+          incidentRelations.add(relationArray[i]);
+          incidentIndexes.add(i);
+        }
       }
 
-  
+      for (int i = 0; i < binCode.length() && prefix.size() < incidentRelations.size() - 1; i++) {
+        if (binCode.charAt(i) == '1') prefix.add(relationArray[i]);
+      }
+
       if (reductions.containsKey(incidentRelations)) continue;
 
       // neighbor boost to add some systematic characteristic to the costs.
@@ -105,9 +111,6 @@ public class DatasetGenerator {
         if (Math.abs(incidentIndexes.get(i) - incidentIndexes.get(i + 1)) == 1)
           boost = boost / (maxTableSize * maxTableSize); // Math.pow(10.0, incidentIndexes.size());
       }
-
-      if (sum % 2 == 0)
-        boost = Math.pow(boost,2);
 
       if (!reductions.containsKey(prefix) || prefix.size() == 0) {
         reductions.put(incidentRelations, 1.0);
