@@ -102,7 +102,7 @@ public class BaselineBushy {
 
     // System.out.println(costMap);
 
-    for (int i = 0; i < in.source.size() - 1; i++) {
+    for (int i = 0; i < in.source.size(); i++) {
       try {
         
         costMap = dynamicProgram(costMap, c, in);

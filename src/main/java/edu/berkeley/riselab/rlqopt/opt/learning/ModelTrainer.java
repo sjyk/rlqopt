@@ -20,7 +20,7 @@ public class ModelTrainer {
     int numInput = db.getNumAttributes() * 3 + 2;
 
     int numOutputs = 1;
-    int nHidden = 128;
+    int nHidden = 16;
     double learningRate = 5e-1;//1e-10;
 
     this.net =

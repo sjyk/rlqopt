@@ -93,11 +93,20 @@ public class DatasetGenerator {
         
         //neighbor boost to add some systematic characteristic to the costs.
         double boost = 1.0;
+        double sum = 0.0;
         for (int i = 0; i<incidentIndexes.size()-1 && incidentIndexes.size() > 1; i++)
         {
           if (Math.abs(incidentIndexes.get(i) - incidentIndexes.get(i+1)) == 1)
             boost = boost/(maxTableSize*maxTableSize);//Math.pow(10.0, incidentIndexes.size());
+
+          sum += incidentIndexes.get(i);
+
         }
+
+        
+        if (sum % 2 == 0)
+          boost = Math.pow(boost,2);
+
 
         if (!reductions.containsKey(prefix) || prefix.size() == 0)
         { 
