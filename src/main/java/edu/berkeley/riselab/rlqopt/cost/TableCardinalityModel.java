@@ -2,10 +2,15 @@ package edu.berkeley.riselab.rlqopt.cost;
 
 import edu.berkeley.riselab.rlqopt.Attribute;
 import edu.berkeley.riselab.rlqopt.Operator;
+import edu.berkeley.riselab.rlqopt.Database;
 import edu.berkeley.riselab.rlqopt.Relation;
 import edu.berkeley.riselab.rlqopt.relalg.*;
 import java.util.HashMap;
 import java.util.HashSet;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
 
 public class TableCardinalityModel implements CostModel {
 
@@ -15,6 +20,24 @@ public class TableCardinalityModel implements CostModel {
 
   public TableCardinalityModel(HashMap<Relation, Long> cardinality) {
     this.cardinality = cardinality;
+  }
+
+  public TableCardinalityModel(Database db, String filename) {
+    try {
+
+      Scanner scanner = new Scanner(new File(filename));
+      cardinality = new HashMap();
+
+      while(scanner.hasNext()){
+        String [] line = scanner.nextLine().trim().split(":");
+        Relation r = db.getByName(line[0]);
+        long r_cardinality = Long.parseLong(line[1]);
+        cardinality.put(r, r_cardinality);
+      }
+
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    }
   }
 
   public Cost tableAccessOperator(Operator in) {
@@ -51,7 +74,7 @@ public class TableCardinalityModel implements CostModel {
     switch(jop.getJoinType())
     {
       case JoinOperator.IE: return new Cost(countl + countl*countr, countl*countr, 0);
-      case JoinOperator.NN: return new Cost(countl + countl*countr, countl*countr, 0);
+      case JoinOperator.NN: return new Cost(countl + countl*countr, Math.max(countl,countr), 0);
       case JoinOperator.NK: return new Cost(countl + Math.log10(countr), countl, 0);
       case JoinOperator.KN: return new Cost(countr + Math.log10(countl), countr, 0);
       case JoinOperator.KK: return new Cost(countl + Math.log10(countr), Math.min(countl,countr), 0);
