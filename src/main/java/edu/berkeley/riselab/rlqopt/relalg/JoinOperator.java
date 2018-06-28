@@ -12,11 +12,11 @@ import java.util.HashSet;
 // implements a project operator
 public class JoinOperator extends Operator {
 
-  public final int NN = 0;
-  public final int KN = 1;
-  public final int NK = 2;
-  public final int KK = 3;
-  public final int IE = 4;
+  public final static int NN = 0;
+  public final static int KN = 1;
+  public final static  int NK = 2;
+  public final static int KK = 3;
+  public final static int IE = 4;
 
   public JoinOperator(OperatorParameters params, Operator... source) throws OperatorException {
     super(params, source);
