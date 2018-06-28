@@ -387,7 +387,7 @@ public class SQL2RelAlg {
       Operator j = makeJoins(activeTables.values(), joinConditions);
       Operator sj = makeSelect(predicates, j);
 
-      return sj;
+      return j;
 
     } catch (Exception ex) {
       ex.printStackTrace();
