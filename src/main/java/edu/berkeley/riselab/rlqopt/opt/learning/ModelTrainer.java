@@ -21,7 +21,7 @@ public class ModelTrainer {
 
     int numOutputs = 1;
     int nHidden = 16;
-    double learningRate = 5e-1;//1e-10;
+    double learningRate = 5e-1; // 1e-10;
 
     this.net =
         new MultiLayerNetwork(
@@ -52,20 +52,18 @@ public class ModelTrainer {
   public MultiLayerNetwork train(DataSetIterator iterator) {
 
     net.init();
-    
 
     // Train the network on the full data set, and evaluate in periodically
     for (int i = 0; i < 100000; i++) {
 
-     System.out.println("Iteration: " + i);
+      System.out.println("Iteration: " + i);
 
-     iterator.reset();
+      iterator.reset();
 
-     if (iterator.hasNext()) {
-      iterator.next();
-      net.fit(iterator);
+      if (iterator.hasNext()) {
+        iterator.next();
+        net.fit(iterator);
       }
-
     }
 
     return net;

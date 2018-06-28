@@ -65,10 +65,10 @@ public class TrainingDataGenerator {
 
       float[] yBuffer = new float[1];
 
-      if (Double.isInfinite(vector[vector.length - 1].floatValue()))
-         continue;
+      if (Double.isInfinite(vector[vector.length - 1].floatValue())) continue;
 
-      //System.out.println("--" + Math.log(vector[vector.length - 1].floatValue()) + "," + vector[vector.length - 1].floatValue());
+      // System.out.println("--" + Math.log(vector[vector.length - 1].floatValue()) + "," +
+      // vector[vector.length - 1].floatValue());
       yBuffer[0] = (float) (Math.log(vector[vector.length - 1].floatValue())); // todo fix scaling
       // System.out.println(yBuffer[0]);
 

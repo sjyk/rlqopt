@@ -1,9 +1,8 @@
 package edu.berkeley.riselab.rlqopt;
 
-import java.util.LinkedList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.UUID;
-import java.util.Arrays;
 
 /** Main data structure for tables, just a wrapper around a HashSet */
 public class Relation extends LinkedList<String> {
@@ -18,18 +17,17 @@ public class Relation extends LinkedList<String> {
 
     super();
 
-    this.name = "R"+UUID.randomUUID().toString().replace("-","").substring(0,4);
+    this.name = "R" + UUID.randomUUID().toString().replace("-", "").substring(0, 4);
 
     // initialize with the input list
     for (String arg : args) this.add(arg.toLowerCase());
   }
 
-
-  public Relation(String [] args, int [] types, int [] keys) {
+  public Relation(String[] args, int[] types, int[] keys) {
 
     super();
 
-    this.name = "R"+UUID.randomUUID().toString().replace("-","").substring(0,4);
+    this.name = "R" + UUID.randomUUID().toString().replace("-", "").substring(0, 4);
 
     this.types = new LinkedList();
     this.keys = new LinkedList();
@@ -40,7 +38,23 @@ public class Relation extends LinkedList<String> {
     for (int arg : types) this.types.add(arg);
 
     for (int arg : keys) this.keys.add(arg);
+  }
 
+  public Relation(String[] args, Integer[] types, Integer[] keys) {
+
+    super();
+
+    this.name = "R" + UUID.randomUUID().toString().replace("-", "").substring(0, 4);
+
+    this.types = new LinkedList();
+    this.keys = new LinkedList();
+
+    // initialize with the input list
+    for (String arg : args) this.add(arg.toLowerCase());
+
+    for (int arg : types) this.types.add(arg);
+
+    for (int arg : keys) this.keys.add(arg);
   }
 
   public Attribute get(String exp) {
@@ -61,8 +75,7 @@ public class Relation extends LinkedList<String> {
       if (!this.contains(attr)) return null;
     }
 
-    if (this.types == null || this.keys == null)
-      return new Attribute(this, attr);
+    if (this.types == null || this.keys == null) return new Attribute(this, attr);
 
     int index = this.indexOf(attr);
     boolean isKey = this.keys.contains(index);
@@ -122,12 +135,11 @@ public class Relation extends LinkedList<String> {
     return this.toString().hashCode();
   }
 
-  public String toString(){
+  public String toString() {
     return this.name;
   }
 
   public boolean equals(Object obj) {
     return (this.hashCode() == obj.hashCode());
   }
-
 }

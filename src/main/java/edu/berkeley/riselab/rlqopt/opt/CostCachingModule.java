@@ -5,7 +5,7 @@ import edu.berkeley.riselab.rlqopt.cost.CostModel;
 import java.util.HashMap;
 import java.util.Map;
 
-/** A mix-in class that caches IO cost estimates.  Cache is write-once, never-modified. */
+/** A mix-in class that caches IO cost estimates. Cache is write-once, never-modified. */
 public interface CostCachingModule {
 
   Map<String, Double> costCache = new HashMap<>();

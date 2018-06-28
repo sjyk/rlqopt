@@ -92,7 +92,6 @@ public class BaselineBushy implements CostCachingModule {
     else return in;
   }
 
-
   public Operator reorderJoin(Operator in, CostModel c) {
 
     HashMap<HashSet<Operator>, Operator> costMap = new HashMap();
@@ -107,13 +106,12 @@ public class BaselineBushy implements CostCachingModule {
 
     for (int i = 0; i < in.source.size(); i++) {
       try {
-        
+
         costMap = dynamicProgram(costMap, c, in);
-        
+
         Operator argMax = baseCase(costMap, in);
-        if (argMax != null)
-        {
-           return argMax;
+        if (argMax != null) {
+          return argMax;
         }
 
       } catch (OperatorException opex) {
@@ -121,82 +119,68 @@ public class BaselineBushy implements CostCachingModule {
       }
     }
 
-    return null;//(Operator) costMap.values().toArray()[0];
+    return null; // (Operator) costMap.values().toArray()[0];
   }
 
+  private Operator baseCase(HashMap<HashSet<Operator>, Operator> costMap, Operator in) {
 
-  private Operator baseCase(HashMap<HashSet<Operator>, Operator> costMap, Operator in){
-
-    for(HashSet<Operator> opList: costMap.keySet())
-    {
+    for (HashSet<Operator> opList : costMap.keySet()) {
 
       HashSet<Operator> childOps = new HashSet();
 
-      for(Operator child: in.source)
-        childOps.add(child);
+      for (Operator child : in.source) childOps.add(child);
 
-      
-      if (childOps.equals(opList))
-        return costMap.get(opList);
+      if (childOps.equals(opList)) return costMap.get(opList);
     }
 
     return null;
-
   }
-
 
   private HashMap<HashSet<Operator>, Operator> dynamicProgram(
       HashMap<HashSet<Operator>, Operator> costMap, CostModel c, Operator in)
       throws OperatorException {
 
-     HashMap<HashSet<Operator>, Operator> result = new HashMap(costMap);
+    HashMap<HashSet<Operator>, Operator> result = new HashMap(costMap);
 
-     for (HashSet<Operator> key : costMap.keySet()) {
-        Operator op1 = costMap.get(key);
-        LinkedList<Attribute> joinedAttributes1 = op1.getVisibleAttributes();
+    for (HashSet<Operator> key : costMap.keySet()) {
+      Operator op1 = costMap.get(key);
+      LinkedList<Attribute> joinedAttributes1 = op1.getVisibleAttributes();
 
-        for (HashSet<Operator> key2 : costMap.keySet()) {
-          Operator op2 = costMap.get(key2);
-          LinkedList<Attribute> joinedAttributes2 = op2.getVisibleAttributes();
+      for (HashSet<Operator> key2 : costMap.keySet()) {
+        Operator op2 = costMap.get(key2);
+        LinkedList<Attribute> joinedAttributes2 = op2.getVisibleAttributes();
 
-          HashSet<Operator> intersection = new HashSet(key);
-          intersection.retainAll(key2);
+        HashSet<Operator> intersection = new HashSet(key);
+        intersection.retainAll(key2);
 
-          HashSet<Operator> union = new HashSet(key);
-          union.addAll(key2);
+        HashSet<Operator> union = new HashSet(key);
+        union.addAll(key2);
 
-          //figure out if this is an eligible pair
-          if(intersection.size() > 0)
-             continue;
+        // figure out if this is an eligible pair
+        if (intersection.size() > 0) continue;
 
-          for (Expression e : in.params.expression) {
-            LinkedList<Attribute>[] leftRight = getLeftRightAttributes(e);
+        for (Expression e : in.params.expression) {
+          LinkedList<Attribute>[] leftRight = getLeftRightAttributes(e);
 
-            LinkedList<Attribute> left = leftRight[0];
-            LinkedList<Attribute> right = leftRight[1];
+          LinkedList<Attribute> left = leftRight[0];
+          LinkedList<Attribute> right = leftRight[1];
 
-            if (!(isSubList(joinedAttributes2, left) || isSubList(joinedAttributes2, right))) continue;
+          if (!(isSubList(joinedAttributes2, left) || isSubList(joinedAttributes2, right)))
+            continue;
 
-            if (!(isSubList(joinedAttributes1, left) || isSubList(joinedAttributes1, right))) continue;
+          if (!(isSubList(joinedAttributes1, left) || isSubList(joinedAttributes1, right)))
+            continue;
 
-            if ((isSubList(joinedAttributes1, left) && isSubList(joinedAttributes2, right)) || 
-                (isSubList(joinedAttributes2, left) && isSubList(joinedAttributes1, right)))
-            {
-              OperatorParameters params = new OperatorParameters(e.getExpressionList());
-              JoinOperator cjv = new JoinOperator(params, op1, op2);
-              result.put(union, greatest(result, c, union, cjv));
-              break;
-            }
-
+          if ((isSubList(joinedAttributes1, left) && isSubList(joinedAttributes2, right))
+              || (isSubList(joinedAttributes2, left) && isSubList(joinedAttributes1, right))) {
+            OperatorParameters params = new OperatorParameters(e.getExpressionList());
+            JoinOperator cjv = new JoinOperator(params, op1, op2);
+            result.put(union, greatest(result, c, union, cjv));
+            break;
           }
-
-
         }
-
-
       }
-      return result;
+    }
+    return result;
   }
-
-
 }

@@ -1,14 +1,10 @@
 package edu.berkeley.riselab.rlqopt;
 
 import edu.berkeley.riselab.rlqopt.cost.*;
-import edu.berkeley.riselab.rlqopt.*;
-import edu.berkeley.riselab.rlqopt.Expression;
-import edu.berkeley.riselab.rlqopt.ExpressionList;
 import edu.berkeley.riselab.rlqopt.relalg.*;
 import edu.berkeley.riselab.rlqopt.workload.*;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -31,13 +27,15 @@ public class GeneratorTest extends TestCase {
 
   public void test1() throws OperatorException {
 
-    String [] cols = {"id","name","salary"};
-    int [] types = {Attribute.NUMBER, Attribute.STRING, Attribute.NUMBER};
-    int [] keys = {0};
+    String[] cols = {"id", "name", "salary"};
+    int[] types = {Attribute.NUMBER, Attribute.STRING, Attribute.NUMBER};
+    int[] keys = {0};
 
-    Relation r = new Relation(cols,types,keys);
+    Relation r = new Relation(cols, types, keys);
 
-    String [][] table = {{"1", "Peter Parker", "10"}, {"2", "John Doe", "10"}, {"3", "Jane Doe", "10"}};
+    String[][] table = {
+      {"1", "Peter Parker", "10"}, {"2", "John Doe", "10"}, {"3", "Jane Doe", "10"}
+    };
     LinkedList<LinkedList<String>> data = arrayToTable(table);
     MaterializedRelation m = new MaterializedRelation(r.attributesList(), data);
 
@@ -50,23 +48,20 @@ public class GeneratorTest extends TestCase {
     System.out.println(m.cartesian(m));
   }
 
-  private LinkedList<LinkedList<String>> arrayToTable(String [][] table){
+  private LinkedList<LinkedList<String>> arrayToTable(String[][] table) {
 
     LinkedList<LinkedList<String>> result = new LinkedList();
-    for(int i=0; i<table.length; i++){
-      
+    for (int i = 0; i < table.length; i++) {
+
       LinkedList<String> record = new LinkedList();
 
-      for(String attr: Arrays.asList(table[i])){
-        record.add(attr); 
+      for (String attr : Arrays.asList(table[i])) {
+        record.add(attr);
       }
 
       result.add(record);
     }
 
     return result;
-
   }
-
-
 }

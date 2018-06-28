@@ -199,26 +199,26 @@ public class TDJoinExecutor implements PlanningModule {
 
         if (net != null) {
           TrainingDataPoint tpd =
-              new TrainingDataPoint(
-                      currentPair, 0.0, 0.0, (double) relations.size());
+              new TrainingDataPoint(currentPair, 0.0, 0.0, (double) relations.size());
           INDArray input = tpd.featurizeND4j(db, c);
           INDArray out = net.output(input, false);
           cost = out.getDouble(0);
 
-          //remove
-//          HashSet<Operator> local = (HashSet) rtn.clone();
-//          local.remove(i);
-//          local.remove(j);
-//          local.add(cjv);
-//          Operator baseline = lfdb.reorderJoin(getRemainingOperators(local, in), c);
-//
-//          System.out.println(input + " : " + cost + " " + Math.log(c.estimate(baseline).operatorIOcost));
+          // remove
+          //          HashSet<Operator> local = (HashSet) rtn.clone();
+          //          local.remove(i);
+          //          local.remove(j);
+          //          local.add(cjv);
+          //          Operator baseline = lfdb.reorderJoin(getRemainingOperators(local, in), c);
+          //
+          //          System.out.println(input + " : " + cost + " " +
+          // Math.log(c.estimate(baseline).operatorIOcost));
 
         } else {
           cost = c.estimate(cjv).operatorIOcost;
         }
 
-        //if (Double.isNaN(cost)) cost = c.estimate(cjv).operatorIOcost;
+        // if (Double.isNaN(cost)) cost = c.estimate(cjv).operatorIOcost;
 
         if (cost < minCost) {
           minCost = cost;

@@ -6,8 +6,6 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.apache.calcite.sql.parser.SqlParseException;
 
-import java.util.Scanner;
-
 /** Unit test for simple App. */
 public class SQLTest extends TestCase {
   /**
@@ -25,23 +23,16 @@ public class SQLTest extends TestCase {
   }
 
   public void test1() throws SqlParseException {
-    Relation sales = new Relation("sku", "emp_id", "amount");
-    sales.name = "sales";
-
-    Relation products = new Relation("sku", "price", "comission");
-    products.name = "products";
-
-    Relation employees = new Relation("emp_id", "name", "salary");
-    employees.name = "employees";
-
-    Database db = new Database(sales, products, employees);
+    Database db = new Database("schematext.sql");
 
     System.out.println(db);
-    //Scanner scanner = new Scanner(System.in);
+
+    // Scanner scanner = new Scanner(System.in);
 
     SQL2RelAlg s = new SQL2RelAlg(db);
-    
-    String query = "SELECT * FROM sales join products on sales.sku = products.sku join employees on  sales.emp_id = employees.emp_id";//scanner.nextLine();
+
+    String query =
+        "SELECT MIN(chn.name) AS uncredited_voiced_character, MIN(t.title) AS russian_movie FROM char_name AS chn, cast_info AS ci, company_name AS cn, company_type AS ct, movie_companies AS mc, role_type AS rt, title AS t WHERE ci.note  like '%(voice)%' and ci.note like '%(uncredited)%' AND cn.country_code  = '[ru]' AND rt.role  = 'actor' AND t.production_year > 2005 AND t.id = mc.movie_id AND t.id = ci.movie_id AND ci.movie_id = mc.movie_id AND chn.id = ci.person_role_id AND rt.id = ci.role_id AND cn.id = mc.company_id AND ct.id = mc.company_type_id"; // scanner.nextLine();
 
     System.out.println("===Input===");
     System.out.println(query);

@@ -34,10 +34,10 @@ public class DatasetGenerator {
     System.out.print("Num relations: " + numRelations);
     System.out.print("; #Attrs: ");
     for (Relation r : db) {
-        System.out.print(r.size() + " ");
+      System.out.print(r.size() + " ");
     }
     int totalNumAttrs = db.getAllAttributes().size();
-    System.out.println("; Total #attrs: "+ totalNumAttrs);
+    System.out.println("; Total #attrs: " + totalNumAttrs);
   }
 
   public DatasetGenerator(int numRelations, int numAttributes, int maxTableSize, int histogramRes) {

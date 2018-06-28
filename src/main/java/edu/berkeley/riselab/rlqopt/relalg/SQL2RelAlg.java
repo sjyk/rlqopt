@@ -3,24 +3,25 @@ package edu.berkeley.riselab.rlqopt.relalg;
 import edu.berkeley.riselab.rlqopt.Attribute;
 import edu.berkeley.riselab.rlqopt.Database;
 import edu.berkeley.riselab.rlqopt.Expression;
-import edu.berkeley.riselab.rlqopt.ExpressionList;
 import edu.berkeley.riselab.rlqopt.Operator;
 import edu.berkeley.riselab.rlqopt.OperatorException;
 import edu.berkeley.riselab.rlqopt.OperatorParameters;
 import edu.berkeley.riselab.rlqopt.Relation;
+import edu.berkeley.riselab.rlqopt.ExpressionList;
+
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.LinkedList;
+
+import java.util.ArrayList;
 import org.apache.calcite.sql.SqlBasicCall;
-import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.SqlIdentifier;
 import org.apache.calcite.sql.SqlJoin;
 import org.apache.calcite.sql.SqlNode;
-import org.apache.calcite.sql.SqlNodeList;
 import org.apache.calcite.sql.SqlSelect;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
-
 
 public class SQL2RelAlg {
 
@@ -28,6 +29,30 @@ public class SQL2RelAlg {
 
   public SQL2RelAlg(Database db) {
     this.db = db;
+  }
+
+  private HashMap<String, Relation> getTableNameMaps(SqlSelect statement) {
+
+    HashMap<String, Relation> rtn = new HashMap();
+
+    if (statement.getFrom() instanceof SqlJoin) {
+
+      String[] joinExp = statement.getFrom().toString().split(",");
+
+      for (String s : joinExp) {
+        String exp = s.toLowerCase();
+        if (exp.contains("as")) {
+          String relName = exp.split(" ")[0].replace("`", "").trim();
+          String aliasName = exp.split(" ")[2].replace("`", "").trim();
+
+          rtn.put(relName, getSingleTable(relName));
+          rtn.put(aliasName, getSingleTable(relName));
+          System.out.println(relName + " >> " + aliasName);
+        }
+      }
+    }
+
+    return rtn;
   }
 
   private HashMap<Relation, TableAccessOperator> getActiveTables(SqlSelect statement)
@@ -68,7 +93,7 @@ public class SQL2RelAlg {
     return rtn;
   }
 
-  private LinkedList<Expression> gatherAllJoinExpressions(
+  /*private LinkedList<Expression> gatherAllJoinExpressions(
       SqlSelect statement, HashMap<Relation, TableAccessOperator> activeTables) {
 
     LinkedList<SqlNode> opList = new LinkedList();
@@ -96,7 +121,7 @@ public class SQL2RelAlg {
       if (isExpression(s)) opList.add(s);
     }
     return opList;
-  }
+  }*/
 
   private boolean isExpression(SqlNode s) {
 
@@ -126,20 +151,17 @@ public class SQL2RelAlg {
     return false;
   }
 
-  private Expression basicCall2Expression(
-      SqlNode node, HashMap<Relation, TableAccessOperator> activeTables) {
+  private Expression basicCall2Expression(SqlNode node, HashMap<String, Relation> activeTables) {
 
     SqlSelect select = (SqlSelect) node;
     SqlBasicCall stmt = (SqlBasicCall) (select.getWhere());
 
-    if (stmt == null)
-      return null;
+    if (stmt == null) return null;
 
     return parseExpression(stmt, activeTables);
   }
 
-  private Expression parseExpression(
-      SqlBasicCall stmt, HashMap<Relation, TableAccessOperator> activeTables) {
+  private Expression parseExpression(SqlBasicCall stmt, HashMap<String, Relation> activeTables) {
 
     Expression e;
 
@@ -187,37 +209,76 @@ public class SQL2RelAlg {
             Expression.GREATER_THAN_EQUALS,
             literalOrAttribute(l.get(0).toString(), activeTables),
             literalOrAttribute(l.get(1).toString(), activeTables));
+
+      case IN:
+        return new Expression(
+            Expression.IN,
+            literalOrAttribute(l.get(0).toString(), activeTables),
+            literalOrAttribute(l.get(1).toString(), activeTables));
+
+      case LIKE:
+        return new Expression(
+            Expression.LIKE,
+            literalOrAttribute(l.get(0).toString(), activeTables),
+            literalOrAttribute(l.get(1).toString(), activeTables));
+
+      case NOT_EQUALS:
+        return new Expression(
+            Expression.NOT,
+            new Expression(
+                Expression.EQUALS,
+                literalOrAttribute(l.get(0).toString(), activeTables),
+                literalOrAttribute(l.get(1).toString(), activeTables)));
+
+      default:
+        return new Expression(stmt.toString().replace("`", ""));
     }
 
-    return null;
+    // return null;
   }
 
-  private Expression literalOrAttribute(
-      String name, HashMap<Relation, TableAccessOperator> activeTables) {
+  private Expression literalOrAttribute(String name, HashMap<String, Relation> activeTables) {
 
     name = name.replace("`", "");
 
-    Attribute a = getAttribute(name.toString(), activeTables);
+    // System.out.println(name);
+
+    Attribute a = getAttribute(name, activeTables);
     if (a == null) {
-      return new Expression(name.toString());
+      return new Expression(name);
     }
 
     return new Expression(a);
   }
 
-  private Attribute getAttribute(String name, HashMap<Relation, TableAccessOperator> activeTables) {
+  private Attribute getAttribute(String name, HashMap<String, Relation> activeTables) {
 
-    name = name.replace("`", "");
+    name = name.toLowerCase();
 
-    for (Relation r : activeTables.keySet()) {
-      Attribute a = r.get(name);
-      if (a != null) return a;
-    }
-    return null;
+    String[] comps = name.split("\\.");
+
+    if (comps.length != 2) return null;
+
+    String relation = name.split("\\.")[0];
+    String attrName = name.split("\\.")[1];
+
+    Relation r = activeTables.get(relation);
+
+    System.out.println(r + " , " + name + " " + r.get(attrName));
+
+    if (r == null) return null;
+
+    return r.get(attrName);
   }
 
   private Relation getSingleTable(SqlNode in) {
     String name = in.toString();
+    Relation r = this.db.getByName(name);
+    return r;
+  }
+
+  private Relation getSingleTable(String in) {
+    String name = in;
     Relation r = this.db.getByName(name);
     return r;
   }
@@ -227,7 +288,7 @@ public class SQL2RelAlg {
     return new TableAccessOperator(scan_params);
   }
 
-  private String cleanSQLString(String in, HashMap<Relation, TableAccessOperator> activeTables) {
+  /*private String cleanSQLString(String in, HashMap<Relation, TableAccessOperator> activeTables) {
 
     in = in.toLowerCase();
 
@@ -239,46 +300,9 @@ public class SQL2RelAlg {
     }
 
     return in;
-  }
+  }*/
 
-  private LinkedList<Expression>[] getProjectionGroupBy(
-      SqlSelect in, HashMap<Relation, TableAccessOperator> activeTables) {
-    SqlNodeList selList = in.getSelectList();
-
-    LinkedList<Expression> projection = new LinkedList();
-
-    for (SqlNode s : selList) {
-      if (s.toString().contains("*")) {
-        projection = new LinkedList();
-        break;
-      }
-
-      Attribute a = getAttribute(s.toString(), activeTables);
-
-      if (a != null) {
-        projection.add(new Expression(a));
-      } else {
-        String compoundExpr = s.toSqlString(SqlDialect.CALCITE).getSql();
-        projection.add(new Expression(cleanSQLString(compoundExpr, activeTables)));
-      }
-    }
-
-    SqlNodeList gbList = in.getGroup();
-
-    LinkedList<Expression> groupBy = new LinkedList();
-    if (gbList != null) {
-      for (SqlNode gb : gbList) {
-        Attribute a = getAttribute(gb.toString(), activeTables);
-        groupBy.add(new Expression(a));
-      }
-    }
-
-    LinkedList<Expression>[] rtn = new LinkedList[2];
-    rtn[0] = projection;
-    rtn[1] = groupBy;
-
-    return rtn;
-  }
+  /*
 
   public Operator makeJoins(SqlNode sqlNode) throws OperatorException {
 
@@ -313,50 +337,69 @@ public class SQL2RelAlg {
     return new SelectOperator(params, src);
   }
 
-  public Operator makeProjectGB(SqlNode sqlNode, Operator src) throws OperatorException {
+*/
 
-    HashMap<Relation, TableAccessOperator> activeTables = getActiveTables((SqlSelect) sqlNode);
-    LinkedList<Expression>[] parsed = getProjectionGroupBy((SqlSelect) sqlNode, activeTables);
+  public Operator makeJoins(java.util.Collection<edu.berkeley.riselab.rlqopt.Relation> tables, ArrayList<Expression> conditions)
+      throws OperatorException {
 
-    if (parsed[0].size() == 0) {
-      return src;
+    ExpressionList elist =
+        new ExpressionList(conditions.toArray(new Expression[conditions.size()]));
 
-    } else if (parsed[1].size() == 0) {
+    OperatorParameters params = new OperatorParameters(elist);
+    LinkedList<Operator> inputOps = new LinkedList();
+    HashSet<Relation> tset = new HashSet(tables);
 
-      ExpressionList elist = new ExpressionList(parsed[0]);
-      OperatorParameters proj_params = new OperatorParameters(elist);
-      return new ProjectOperator(proj_params, src);
-    }
+    for (Relation r : tset) inputOps.add(getTableAccessOperator(r));
 
-    ExpressionList elist1 = new ExpressionList(parsed[0]);
-    ExpressionList elist2 = new ExpressionList(parsed[1]);
-    OperatorParameters gb_params = new OperatorParameters(elist1, elist2);
-
-    return new GroupByOperator(gb_params, src);
+    Operator[] inputOpsArray = new Operator[inputOps.size()];
+    inputOpsArray = inputOps.toArray(inputOpsArray);
+    return new KWayJoinOperator(params, inputOpsArray);
   }
+
+
+  public Operator makeSelect(ArrayList<Expression> conditions, Operator src) throws OperatorException {
+
+    for(Expression child: conditions)
+    {
+      ExpressionList elist = child.getExpressionList();
+      OperatorParameters params = new OperatorParameters(elist);
+      src = new SelectOperator(params, src);
+
+    }
+    
+    return src;
+  }
+
 
   public Operator convert(String sql) throws SqlParseException {
     SqlParser parser = SqlParser.create(sql);
     SqlNode sqlNode = parser.parseStmt();
+    HashMap<String, Relation> activeTables = getTableNameMaps((SqlSelect) sqlNode);
+    Expression conditions = basicCall2Expression(sqlNode, activeTables);
+
+    ArrayList<Expression> predicates = conditions.getAllSingleTableExpressions();
+    ArrayList<Expression> joinConditions = conditions.getAllJoinTableExpressions();
+
+    
 
     try {
-      Operator joined = makeJoins(sqlNode);
-      Operator select = makeSelect(sqlNode, joined);
-      Operator gb = makeProjectGB(sqlNode, select);
-      return gb;
+
+      Operator j = makeJoins(activeTables.values(), joinConditions);
+      Operator sj = makeSelect(predicates, j);
+
+      return sj;
 
     } catch (Exception ex) {
       ex.printStackTrace();
-    }
-    ;
+    };
 
     return null;
   }
 
-  public static String prettyPrint(String sql){
+  public static String prettyPrint(String sql) {
     int index0 = sql.indexOf("(");
     int indexf = sql.lastIndexOf(")");
-    sql = sql.substring(index0+1, indexf);
+    sql = sql.substring(index0 + 1, indexf);
 
     /*sql = sql.replace("FROM", "\nFROM");
     sql = sql.replace("WHERE", "\nWHERE");
@@ -365,5 +408,4 @@ public class SQL2RelAlg {
 
     return sql;
   }
-
 }

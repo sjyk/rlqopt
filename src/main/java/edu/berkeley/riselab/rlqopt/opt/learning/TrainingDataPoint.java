@@ -65,26 +65,26 @@ public class TrainingDataPoint {
   public Double[] featurize(Database db, CostModel c) {
 
     LinkedList<Attribute> allAttributes = db.getAllAttributes();
-    //HashMap<Attribute, Double> cardMap = calculateBaseCardinality(db, c);
+    // HashMap<Attribute, Double> cardMap = calculateBaseCardinality(db, c);
 
     int n = allAttributes.size();
 
     Double[] vector = new Double[n * 3 + 3];
     for (int i = 0; i < n * 3; i++) vector[i] = 0.0;
 
-//    long lhsCard = c.estimate(oplist[0]).resultCardinality;
-//    long rhsCard = c.estimate(oplist[1]).resultCardinality;
+    //    long lhsCard = c.estimate(oplist[0]).resultCardinality;
+    //    long rhsCard = c.estimate(oplist[1]).resultCardinality;
 
     for (Attribute a : oplist[0].getVisibleAttributes()) {
 
       vector[allAttributes.indexOf(a)] = 1.0;
-//          Math.log(cardMap.get(a) / lhsCard);
+      //          Math.log(cardMap.get(a) / lhsCard);
     }
 
     for (Attribute a : oplist[1].getVisibleAttributes()) {
 
       vector[allAttributes.indexOf(a) + n] = 1.0;
-//          Math.log(cardMap.get(a) / rhsCard);
+      //          Math.log(cardMap.get(a) / rhsCard);
     }
 
     // System.out.println(oplist[3].getVisibleAttributes() + " " + oplist[3]);

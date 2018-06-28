@@ -4,9 +4,9 @@ import edu.berkeley.riselab.rlqopt.relalg.GroupByOperator;
 import edu.berkeley.riselab.rlqopt.relalg.ProjectOperator;
 import edu.berkeley.riselab.rlqopt.relalg.TableAccessOperator;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.HashSet;
 
 /** Operator class- this class defines an abstract relational operator */
 public abstract class Operator {
@@ -26,11 +26,10 @@ public abstract class Operator {
     this.params = params;
   }
 
-  public HashSet<Relation> getVisibleRelations(){
+  public HashSet<Relation> getVisibleRelations() {
 
     HashSet<Relation> relations = new HashSet();
-    for(Attribute attr: getVisibleAttributes())
-      relations.add(attr.relation);
+    for (Attribute attr : getVisibleAttributes()) relations.add(attr.relation);
 
     return relations;
   }
@@ -107,12 +106,10 @@ public abstract class Operator {
     }
   }
 
-    // override
+  // override
   public String toSQLString() {
     String prefix = "SELECT * FROM ";
-    for (Operator o: source)
-      prefix += o.toSQLString() + ",";
-    return prefix.substring(0,prefix.length()-1);
+    for (Operator o : source) prefix += o.toSQLString() + ",";
+    return prefix.substring(0, prefix.length() - 1);
   }
-
 }

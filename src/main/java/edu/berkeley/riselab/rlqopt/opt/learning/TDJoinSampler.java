@@ -227,14 +227,13 @@ public class TDJoinSampler implements PlanningModule {
         // System.out.println(rand.nextGaussian());
         double cost = c.estimate(baseline).operatorIOcost;
 
-
         Operator[] trainingToJoin = new Operator[4];
         trainingToJoin[0] = i;
         trainingToJoin[1] = j;
         trainingToJoin[2] = cjv;
         trainingToJoin[3] = in.copy();
 
-        localData.add(new TrainingDataPoint(trainingToJoin, cost, 0.0 , relations.size()+0.0));
+        localData.add(new TrainingDataPoint(trainingToJoin, cost, 0.0, relations.size() + 0.0));
 
         // System.out.println(cost);
 
@@ -253,7 +252,8 @@ public class TDJoinSampler implements PlanningModule {
     rtn.remove(pairToJoin[1]);
     rtn.add(pairToJoin[2]);
 
-    //localData.add(new TrainingDataPoint(pairToJoin, minCost, minGreedyCost, relations.size()+0.0));
+    // localData.add(new TrainingDataPoint(pairToJoin, minCost, minGreedyCost,
+    // relations.size()+0.0));
 
     return rtn;
   }

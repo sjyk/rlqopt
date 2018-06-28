@@ -2,6 +2,7 @@ package edu.berkeley.riselab.rlqopt;
 
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.ArrayList;
 
 /** An expression is a tree with a operator and a sequence of other expressions */
 public class Expression {
@@ -15,6 +16,8 @@ public class Expression {
   public static final String NOT = "not";
   public static final String AND = "and";
   public static final String OR = "or";
+  public static final String IN = "in";
+  public static final String LIKE = "like";
 
   public String op;
   public LinkedList<Expression> children;
@@ -119,6 +122,101 @@ public class Expression {
         || op.equals(LESS_THAN_EQUALS));
   }
 
+
+
+  public ArrayList<Expression> getAllSingleTableExpressions()
+  {
+    Expression e = this;
+
+    ArrayList<Expression> rtn = new ArrayList();
+
+    if(e.op.equals(AND))
+    {
+       for (Expression child: e.children)
+         rtn.addAll(child.getAllSingleTableExpressions());
+
+       return rtn;
+    }
+    else
+    {
+      
+
+
+      if(e.op.equals(EQUALS))
+      {
+        if(e.children.get(0).noop == null && e.children.get(1) != null)
+        {
+          rtn.add(e);
+          return rtn;
+        }
+
+        if(e.children.get(1).noop == null && e.children.get(0) != null)
+        {
+          rtn.add(e);
+          return rtn;
+        }
+
+        if(e.children.get(1).noop == null && e.children.get(0) == null)
+        {
+          rtn.add(e);
+          return rtn;
+        }
+
+          if(! e.children.get(0).noop.equals(e.children.get(1).noop))
+            return rtn;
+      }
+
+      rtn.add(e);
+      return rtn;
+      
+    }
+    
+  }
+
+
+    public ArrayList<Expression> getAllJoinTableExpressions()
+  {
+
+    Expression e = this;
+
+    ArrayList<Expression> rtn = new ArrayList();
+
+    if(e.op.equals(AND))
+    {
+       for (Expression child: e.children)
+         rtn.addAll(child.getAllJoinTableExpressions());
+
+       return rtn;
+    }
+    else
+    {
+      
+      if(e.op.equals(EQUALS))
+      {
+
+        if(e.children.get(0).noop == null && e.children.get(1) != null)
+        return rtn;
+
+        if(e.children.get(1).noop == null && e.children.get(0) != null)
+        return rtn;
+
+        if(e.children.get(1).noop == null && e.children.get(0) == null)
+          return rtn;
+
+          if(! e.children.get(0).noop.equals(e.children.get(1).noop))
+          {
+
+          rtn.add(e);
+          return rtn;
+          }
+      }
+
+      return rtn;
+      
+    }
+    
+  }
+
   public boolean isLiteral() {
     return (children.size() == 0);
   }
@@ -167,7 +265,17 @@ public class Expression {
     if (op.equals(NOT))
     {
        return " ( NOT ( " + children.get(0).toSQLString() + " ) ) ";
+    } 
+
+    if (op.equals(LIKE))
+    {
+       return " ( " + children.get(0).toSQLString() + " )";
     }  
+
+    if (op.equals(IN))
+    {
+       return " ( " + children.get(0).toSQLString() + " )";
+    }    
 
     return children.get(0).toSQLString();
   }

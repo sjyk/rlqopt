@@ -75,7 +75,7 @@ public class Planner {
     return this.name;
   }
 
-  public String toString(){
+  public String toString() {
     return this.name;
   }
 }

@@ -87,7 +87,6 @@ public class DoExperiments extends TestCase {
       numRels = Integer.valueOf(System.getProperty("numRels"));
     }
 
-
     DatasetGenerator d = new DatasetGenerator(numRels, 12, 1000, 100);
     WorkloadGeneratorEasy workload = new WorkloadGeneratorEasy(d);
 
@@ -98,7 +97,6 @@ public class DoExperiments extends TestCase {
     planners.add(new PostgresPlanner());
     planners.add(new VolcanoPlanner());
     planners.add(new QuickPickPlanner(100));
-
 
     Experiment e = new Experiment(workload, 1000, 1000, planners);
     e.run();

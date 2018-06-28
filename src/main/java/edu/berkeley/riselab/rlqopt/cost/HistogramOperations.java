@@ -90,7 +90,8 @@ public class HistogramOperations {
     return rtn;
   }
 
-  public static HistogramRelation join(Expression e, HistogramRelation left, HistogramRelation right) {
+  public static HistogramRelation join(
+      Expression e, HistogramRelation left, HistogramRelation right) {
     return cartesian(left, right);
   }
 
@@ -111,27 +112,23 @@ public class HistogramOperations {
     int countKeyMin = Integer.MAX_VALUE;
 
     for (Attribute a : h.keySet()) {
-      //System.out.println(countMin);
+      // System.out.println(countMin);
       countMin = Math.min(h.get(a).getCount(), countMin);
 
-      if (a.isKey)
-        countKeyMin = Math.min(h.get(a).getCount(), countKeyMin);
+      if (a.isKey) countKeyMin = Math.min(h.get(a).getCount(), countKeyMin);
     }
 
     int count = Math.min(countMin, countKeyMin);
 
-    //System.out.println( "a:" + count);
-
+    // System.out.println( "a:" + count);
 
     for (Attribute a : h.keySet()) {
       Histogram ahist = h.get(a);
       double scaling = (count + 0.0) / Math.max(ahist.getCount(), 1);
       Histogram scaledHist = ahist.scale(scaling);
-      //System.out.println( "b:" + scaledHist.getCount());
-      data.put(a, scaledHist );
+      // System.out.println( "b:" + scaledHist.getCount());
+      data.put(a, scaledHist);
     }
-
-    
 
     return new HistogramRelation(data);
   }

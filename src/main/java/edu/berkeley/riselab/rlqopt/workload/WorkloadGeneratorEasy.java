@@ -10,11 +10,11 @@ import edu.berkeley.riselab.rlqopt.OperatorParameters;
 import edu.berkeley.riselab.rlqopt.Relation;
 import edu.berkeley.riselab.rlqopt.cost.*;
 import edu.berkeley.riselab.rlqopt.relalg.*;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Random;
-import java.util.Collections;
-import java.util.ArrayList;
 
 public class WorkloadGeneratorEasy extends WorkloadGenerator {
 
@@ -162,8 +162,7 @@ public class WorkloadGeneratorEasy extends WorkloadGenerator {
     Operator rtn = null;
 
     ArrayList<Relation> tempList = new ArrayList(tablesToJoin.size());
-    for (Relation r : tablesToJoin)
-      tempList.add(r);
+    for (Relation r : tablesToJoin) tempList.add(r);
 
     Collections.shuffle(tempList);
 
@@ -174,10 +173,7 @@ public class WorkloadGeneratorEasy extends WorkloadGenerator {
       } else {
         OperatorParameters params = createNaturalJoin(r, prev);
 
-        if (params == null || tempList.size() < 3)
-          return null;
-
-
+        if (params == null || tempList.size() < 3) return null;
         else rtn = new JoinOperator(params, createScan(r), rtn);
       }
     }
@@ -199,16 +195,15 @@ public class WorkloadGeneratorEasy extends WorkloadGenerator {
 
     LinkedList<Operator> workload = new LinkedList();
     for (int i = 0; i < n; i++) {
-      //int k = rand.nextInt(2);
-      //if (k == 0) 
+      // int k = rand.nextInt(2);
+      // if (k == 0)
       Operator o = generateJoin();
 
-      if (o == null)
-        continue;
+      if (o == null) continue;
 
       workload.add(o);
-      //else if (k == 1) workload.add(generateJoinSel());
-      //else if (k == 2) workload.add(generateJoinSelGb());
+      // else if (k == 1) workload.add(generateJoinSel());
+      // else if (k == 2) workload.add(generateJoinSelGb());
     }
 
     return workload;

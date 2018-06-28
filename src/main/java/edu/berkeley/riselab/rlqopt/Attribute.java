@@ -8,9 +8,9 @@ public class Attribute {
   public boolean isKey;
   private int type;
 
-  public final static int NUMBER = 0;
-  public final static int STRING = 1;
-  public final static int DATE = 2;
+  public static final int NUMBER = 0;
+  public static final int STRING = 1;
+  public static final int DATE = 2;
 
   // create it explicitly named
   public Attribute(Relation r, String attr) {
@@ -18,7 +18,6 @@ public class Attribute {
     this.attribute = attr;
     this.isKey = false;
     this.type = STRING;
-
   }
 
   public Attribute(Relation r, String attr, boolean isKey, int type) {
@@ -48,12 +47,12 @@ public class Attribute {
   }
 
   public String toString() {
-    if (relation.name == null) return "R" + relation.hashCode() + "." + attribute + modifiers();
-    else return relation.name + "." + attribute + modifiers();
+    if (relation.name == null) return "R" + relation.hashCode() + "." + attribute;
+    else return relation.name + "." + attribute;
   }
 
-  public String modifiers(){
-    return "["+type+"]"+ ((this.isKey) ? "*" : "");
+  public String modifiers() {
+    return "[" + type + "]" + ((this.isKey) ? "*" : "");
   }
 
   public int hashCode() {
