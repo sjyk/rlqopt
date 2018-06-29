@@ -141,6 +141,8 @@ public class TDJoinSampler implements PlanningModule {
       LinkedList<Attribute> righte = leftRight[1];
 
       if (isSubList(leftAttributes, lefte) && isSubList(rightAttributes, righte)) return child;
+
+      if (isSubList(leftAttributes, righte) && isSubList(rightAttributes, lefte)) return child;
     }
 
     return null;

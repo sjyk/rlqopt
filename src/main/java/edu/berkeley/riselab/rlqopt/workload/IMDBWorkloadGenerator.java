@@ -58,10 +58,11 @@ public class IMDBWorkloadGenerator extends WorkloadGenerator {
 
       Scanner scanner = new Scanner(new File(workloadDir));
 
-      while (scanner.hasNextLine()) {
+      while (scanner.hasNextLine() && n > 0) {
         String query = scanner.nextLine().replace(";", "").replace("!=", "<>");
         Operator nominal = sqlParser.convert(query);
         rtn.add(nominal);
+        n --;
       }
 
     } catch (Exception e) {

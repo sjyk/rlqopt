@@ -28,7 +28,7 @@ public class ModelTrainer {
             new NeuralNetConfiguration.Builder()
                 .seed(12345)
                 .weightInit(WeightInit.XAVIER_UNIFORM)
-                .updater(new Nesterovs(learningRate, 0.1))
+                .updater(new Nesterovs(learningRate, 0.25))
                 .list()
                 .layer(
                     0,
