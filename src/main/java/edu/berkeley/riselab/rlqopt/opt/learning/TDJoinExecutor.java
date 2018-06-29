@@ -147,6 +147,8 @@ public class TDJoinExecutor implements PlanningModule {
       LinkedList<Attribute> righte = leftRight[1];
 
       if (isSubList(leftAttributes, lefte) && isSubList(rightAttributes, righte)) return child;
+
+      if (isSubList(leftAttributes, righte) && isSubList(rightAttributes, lefte)) return child;
     }
 
     return null;
@@ -205,14 +207,17 @@ public class TDJoinExecutor implements PlanningModule {
           cost = out.getDouble(0);
 
           // remove
-          //          HashSet<Operator> local = (HashSet) rtn.clone();
-          //          local.remove(i);
-          //          local.remove(j);
-          //          local.add(cjv);
-          //          Operator baseline = lfdb.reorderJoin(getRemainingOperators(local, in), c);
+          /*         HashSet<Operator> local = (HashSet) rtn.clone();
+                    local.remove(i);
+                    local.remove(j);
+                    local.add(cjv);
+                    Operator baseline = lfdb.reorderJoin(getRemainingOperators(local, in), c);
           //
-          //          System.out.println(input + " : " + cost + " " +
-          // Math.log(c.estimate(baseline).operatorIOcost));
+                    System.out.println(input + " : " + cost + " " + Math.log(c.estimate(baseline).operatorIOcost));
+          */
+
+          // System.out.println(i + "," + j);
+          // cost = Math.log(c.estimate(baseline).operatorIOcost); //out.getDouble(0);*/
 
         } else {
           cost = c.estimate(cjv).operatorIOcost;

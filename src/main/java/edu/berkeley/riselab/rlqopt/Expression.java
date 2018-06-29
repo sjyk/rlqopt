@@ -1,8 +1,8 @@
 package edu.berkeley.riselab.rlqopt;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.ArrayList;
 
 /** An expression is a tree with a operator and a sequence of other expressions */
 public class Expression {
@@ -122,162 +122,124 @@ public class Expression {
         || op.equals(LESS_THAN_EQUALS));
   }
 
-
-
-  public ArrayList<Expression> getAllSingleTableExpressions()
-  {
+  public ArrayList<Expression> getAllSingleTableExpressions() {
     Expression e = this;
 
     ArrayList<Expression> rtn = new ArrayList();
 
-    if(e.op.equals(AND))
-    {
-       for (Expression child: e.children)
-         rtn.addAll(child.getAllSingleTableExpressions());
+    if (e.op.equals(AND)) {
+      for (Expression child : e.children) rtn.addAll(child.getAllSingleTableExpressions());
 
-       return rtn;
-    }
-    else
-    {
-      
+      return rtn;
+    } else {
 
-
-      if(e.op.equals(EQUALS))
-      {
-        if(e.children.get(0).noop == null && e.children.get(1) != null)
-        {
+      if (e.op.equals(EQUALS)) {
+        if (e.children.get(0).noop == null && e.children.get(1) != null) {
           rtn.add(e);
           return rtn;
         }
 
-        if(e.children.get(1).noop == null && e.children.get(0) != null)
-        {
+        if (e.children.get(1).noop == null && e.children.get(0) != null) {
           rtn.add(e);
           return rtn;
         }
 
-        if(e.children.get(1).noop == null && e.children.get(0) == null)
-        {
+        if (e.children.get(1).noop == null && e.children.get(0) == null) {
           rtn.add(e);
           return rtn;
         }
 
-          if(! e.children.get(0).noop.equals(e.children.get(1).noop))
-            return rtn;
+        if (!e.children.get(0).noop.equals(e.children.get(1).noop)) return rtn;
       }
 
       rtn.add(e);
       return rtn;
-      
     }
-    
   }
 
-
-    public ArrayList<Expression> getAllJoinTableExpressions()
-  {
+  public ArrayList<Expression> getAllJoinTableExpressions() {
 
     Expression e = this;
 
     ArrayList<Expression> rtn = new ArrayList();
 
-    if(e.op.equals(AND))
-    {
-       for (Expression child: e.children)
-         rtn.addAll(child.getAllJoinTableExpressions());
+    if (e.op.equals(AND)) {
+      for (Expression child : e.children) rtn.addAll(child.getAllJoinTableExpressions());
 
-       return rtn;
-    }
-    else
-    {
-      
-      if(e.op.equals(EQUALS))
-      {
+      return rtn;
+    } else {
 
-        if(e.children.get(0).noop == null && e.children.get(1) != null)
-        return rtn;
+      if (e.op.equals(EQUALS)) {
 
-        if(e.children.get(1).noop == null && e.children.get(0) != null)
-        return rtn;
+        if (e.children.get(0).noop == null && e.children.get(1) != null) return rtn;
 
-        if(e.children.get(1).noop == null && e.children.get(0) == null)
-          return rtn;
+        if (e.children.get(1).noop == null && e.children.get(0) != null) return rtn;
 
-          if(! e.children.get(0).noop.equals(e.children.get(1).noop))
-          {
+        if (e.children.get(1).noop == null && e.children.get(0) == null) return rtn;
+
+        if (!e.children.get(0).noop.equals(e.children.get(1).noop)) {
 
           rtn.add(e);
           return rtn;
-          }
+        }
       }
 
       return rtn;
-      
     }
-    
   }
 
   public boolean isLiteral() {
     return (children.size() == 0);
   }
 
-  
   public String toSQLString() {
 
-    if(op == null)
-      return toString();
-    
-    if (op.equals(EQUALS))
-    {
-       return " ( " + children.get(0).toString() + " = " + children.get(1).toString() + " ) ";
-    } 
+    if (op == null) return toString();
 
-    if (op.equals(GREATER_THAN))
-    {
-       return " ( " + children.get(0).toString() + " > " + children.get(1).toString() + " ) ";
+    if (op.equals(EQUALS)) {
+      return " ( " + children.get(0).toString() + " = " + children.get(1).toString() + " ) ";
     }
 
-    if (op.equals(GREATER_THAN_EQUALS))
-    {
-       return " ( " + children.get(0).toString() + " >= " + children.get(1).toString() + " ) ";
-    } 
-
-    if (op.equals(LESS_THAN))
-    {
-       return " ( " + children.get(0).toString() + " < " + children.get(1).toString() + " ) ";
+    if (op.equals(GREATER_THAN)) {
+      return " ( " + children.get(0).toString() + " > " + children.get(1).toString() + " ) ";
     }
 
-    if (op.equals(LESS_THAN_EQUALS))
-    {
-       return " ( " + children.get(0).toString() + " <= " + children.get(1).toString() + " ) ";
-    }   
+    if (op.equals(GREATER_THAN_EQUALS)) {
+      return " ( " + children.get(0).toString() + " >= " + children.get(1).toString() + " ) ";
+    }
 
-    if (op.equals(OR))
-    {
-       return " ( " + children.get(0).toSQLString() + " OR " + children.get(1).toSQLString() + " ) ";
-    }  
+    if (op.equals(LESS_THAN)) {
+      return " ( " + children.get(0).toString() + " < " + children.get(1).toString() + " ) ";
+    }
 
-    if (op.equals(AND))
-    {
-       return " ( " + children.get(0).toSQLString() + " AND " + children.get(1).toSQLString() + " ) ";
-    }  
+    if (op.equals(LESS_THAN_EQUALS)) {
+      return " ( " + children.get(0).toString() + " <= " + children.get(1).toString() + " ) ";
+    }
 
-    if (op.equals(NOT))
-    {
-       return " ( NOT ( " + children.get(0).toSQLString() + " ) ) ";
-    } 
+    if (op.equals(OR)) {
+      return " ( " + children.get(0).toSQLString() + " OR " + children.get(1).toSQLString() + " ) ";
+    }
 
-    if (op.equals(LIKE))
-    {
-       return " ( " + children.get(0).toSQLString() + " )";
-    }  
+    if (op.equals(AND)) {
+      return " ( "
+          + children.get(0).toSQLString()
+          + " AND "
+          + children.get(1).toSQLString()
+          + " ) ";
+    }
 
-    if (op.equals(IN))
-    {
-       return " ( " + children.get(0).toSQLString() + " )";
-    }    
+    if (op.equals(NOT)) {
+      return " ( NOT ( " + children.get(0).toSQLString() + " ) ) ";
+    }
+
+    if (op.equals(LIKE)) {
+      return " ( " + children.get(0).toSQLString() + " )";
+    }
+
+    if (op.equals(IN)) {
+      return " ( " + children.get(0).toSQLString() + " )";
+    }
 
     return children.get(0).toSQLString();
   }
-
 }

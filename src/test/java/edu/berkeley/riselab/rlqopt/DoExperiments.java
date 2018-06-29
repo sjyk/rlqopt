@@ -9,7 +9,7 @@ import edu.berkeley.riselab.rlqopt.opt.postgres.PostgresPlanner;
 import edu.berkeley.riselab.rlqopt.opt.quickpick.QuickPickPlanner;
 import edu.berkeley.riselab.rlqopt.opt.volcano.VolcanoPlanner;
 import edu.berkeley.riselab.rlqopt.workload.DatasetGenerator;
-import edu.berkeley.riselab.rlqopt.workload.WorkloadGeneratorEasy;
+import edu.berkeley.riselab.rlqopt.workload.IMDBWorkloadGenerator;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.apache.calcite.sql.parser.SqlParseException;
 
 /** Unit test for simple App. */
 public class DoExperiments extends TestCase {
@@ -81,7 +82,7 @@ public class DoExperiments extends TestCase {
     }
   }
 
-  public void test1() throws OperatorException {
+  /*public void test1() throws OperatorException {
     int numRels = 9;
     if (System.getProperty("numRels") != null) {
       numRels = Integer.valueOf(System.getProperty("numRels"));
@@ -109,5 +110,29 @@ public class DoExperiments extends TestCase {
     printSorted(latencies);
 
     writeLatencyCsv("planning_latencies.csv", d, planners, latencies);
+  }*/
+
+  public void test2() throws OperatorException, SqlParseException {
+    IMDBWorkloadGenerator workload =
+        new IMDBWorkloadGenerator(
+            "schematext.sql", "imdb_tables.txt", "join-order-benchmark/queries/queries.sql");
+
+    LinkedList<Planner> planners = new LinkedList<>();
+    planners.add(new NoPlanner());
+    planners.add(new RLQOpt(workload));
+    planners.add(new PostgresBushyPlanner());
+    planners.add(new PostgresPlanner());
+    planners.add(new VolcanoPlanner());
+    planners.add(new QuickPickPlanner(100));
+
+    Experiment e = new Experiment(workload, 1, 1, planners);
+    e.train();
+    e.run();
+
+    System.out.print("Improvement: ");
+    printSorted(e.getBaselineImprovement());
+    System.out.print("Planning latency: ");
+    Map<Planner, Double> latencies = e.getBaselineLatency();
+    printSorted(latencies);
   }
 }

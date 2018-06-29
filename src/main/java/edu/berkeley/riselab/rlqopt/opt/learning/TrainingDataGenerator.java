@@ -48,7 +48,12 @@ public class TrainingDataGenerator {
 
   public DataSet generateDataSet(LinkedList<Operator> workload, int t) {
 
-    for (int i = 0; i < t; i++) for (Operator query : workload) planner.plan(query, c);
+    for (int i = 0; i < t; i++) {
+      for (Operator query : workload) {
+        System.out.println(query);
+        planner.plan(query, c);
+      }
+    }
 
     LinkedList<INDArray> trainingExamples = new LinkedList();
     LinkedList<INDArray> reward = new LinkedList();

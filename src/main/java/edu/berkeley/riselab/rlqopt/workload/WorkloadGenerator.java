@@ -13,9 +13,9 @@ public abstract class WorkloadGenerator {
 
   public abstract Database getDatabase();
 
-  public abstract TableStatisticsModel getStatsModel();
+  public abstract CostModel getStatsModel();
 
-  public TableStatisticsModel getNoisyStatsModel() {
+  public CostModel getNoisyStatsModel() {
     return getStatsModel();
   }
 

@@ -34,19 +34,15 @@ public abstract class Operator {
     return relations;
   }
 
-  
   public HashSet<Attribute> getKeys() {
 
     HashSet<Attribute> keys = new HashSet();
-    LinkedList<Attribute> attrs =  getVisibleAttributes();
+    LinkedList<Attribute> attrs = getVisibleAttributes();
 
-    for(Attribute a: attrs)
-      if (a.isKey)
-        keys.add(a);
+    for (Attribute a : attrs) if (a.isKey) keys.add(a);
 
     return keys;
   }
-
 
   public LinkedList<Attribute> getVisibleAttributes() {
 

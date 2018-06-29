@@ -20,7 +20,7 @@ public class ModelTrainer {
     int numInput = db.getNumAttributes() * 3 + 2;
 
     int numOutputs = 1;
-    int nHidden = 16;
+    int nHidden = 128;
     double learningRate = 5e-1; // 1e-10;
 
     this.net =
@@ -28,7 +28,7 @@ public class ModelTrainer {
             new NeuralNetConfiguration.Builder()
                 .seed(12345)
                 .weightInit(WeightInit.XAVIER_UNIFORM)
-                .updater(new Nesterovs(learningRate, 0.25))
+                .updater(new Nesterovs(learningRate, 0.1))
                 .list()
                 .layer(
                     0,

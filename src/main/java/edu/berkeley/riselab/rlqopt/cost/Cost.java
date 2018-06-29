@@ -18,7 +18,7 @@ public class Cost {
     this.operatorCPUcost = operatorCPUcost;
   }
 
-    public Cost(double operatorIOcost, double resultCardinality,double operatorCPUcost) {
+  public Cost(double operatorIOcost, double resultCardinality, double operatorCPUcost) {
     this.operatorIOcost = (long) operatorIOcost;
     this.resultCardinality = (long) resultCardinality;
     this.operatorCPUcost = (long) operatorCPUcost;

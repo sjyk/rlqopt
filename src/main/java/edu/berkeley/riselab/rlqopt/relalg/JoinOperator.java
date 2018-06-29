@@ -1,22 +1,21 @@
 package edu.berkeley.riselab.rlqopt.relalg;
 
-import edu.berkeley.riselab.rlqopt.Expression;
 import edu.berkeley.riselab.rlqopt.Attribute;
+import edu.berkeley.riselab.rlqopt.Expression;
 import edu.berkeley.riselab.rlqopt.Operator;
 import edu.berkeley.riselab.rlqopt.OperatorException;
 import edu.berkeley.riselab.rlqopt.OperatorParameters;
-
-import java.util.LinkedList;
 import java.util.HashSet;
+import java.util.LinkedList;
 
 // implements a project operator
 public class JoinOperator extends Operator {
 
-  public final static int NN = 0;
-  public final static int KN = 1;
-  public final static  int NK = 2;
-  public final static int KK = 3;
-  public final static int IE = 4;
+  public static final int NN = 0;
+  public static final int KN = 1;
+  public static final int NK = 2;
+  public static final int KK = 3;
+  public static final int IE = 4;
 
   public JoinOperator(OperatorParameters params, Operator... source) throws OperatorException {
     super(params, source);
@@ -30,38 +29,29 @@ public class JoinOperator extends Operator {
     return true;
   }
 
+  public int getJoinType() {
 
-  public int getJoinType(){
+    if (this.params.expression.get(0).isEquality()) {
 
-    if (this.params.expression.get(0).isEquality()){
+      HashSet<Attribute> leftKeys = source.get(0).getKeys();
+      HashSet<Attribute> rightKeys = source.get(1).getKeys();
+      LinkedList<Attribute> visibleAttrs = this.params.expression.get(0).getVisibleAttributes();
 
-        HashSet<Attribute> leftKeys = source.get(0).getKeys();
-        HashSet<Attribute> rightKeys = source.get(1).getKeys();
-        LinkedList<Attribute> visibleAttrs = this.params.expression.get(0).getVisibleAttributes();
+      for (Attribute attr : visibleAttrs) {
+        if (leftKeys.contains(attr)) leftKeys.remove(attr);
 
-        for(Attribute attr: visibleAttrs)
-        {
-          if (leftKeys.contains(attr))
-            leftKeys.remove(attr);
+        if (rightKeys.contains(attr)) rightKeys.remove(attr);
+      }
+      if (leftKeys.size() == 0 && rightKeys.size() > 0) return KN;
 
-          if (rightKeys.contains(attr))
-            rightKeys.remove(attr);
-        }
-      if (leftKeys.size() == 0 && rightKeys.size() > 0)
-        return KN;
+      if (leftKeys.size() > 0 && rightKeys.size() == 0) return NK;
 
-      if (leftKeys.size() > 0 && rightKeys.size() == 0)
-        return NK;
-
-      if (leftKeys.size() == 0 && rightKeys.size() == 0)
-        return KK;
+      if (leftKeys.size() == 0 && rightKeys.size() == 0) return KK;
 
       return NN;
-
     }
 
     return IE;
-
   }
 
   public String toSQLString() {

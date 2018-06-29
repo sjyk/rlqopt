@@ -1,21 +1,19 @@
 package edu.berkeley.riselab.rlqopt.cost;
 
-import edu.berkeley.riselab.rlqopt.Attribute;
-import edu.berkeley.riselab.rlqopt.Operator;
 import edu.berkeley.riselab.rlqopt.Database;
+import edu.berkeley.riselab.rlqopt.Operator;
 import edu.berkeley.riselab.rlqopt.Relation;
 import edu.berkeley.riselab.rlqopt.relalg.*;
-import java.util.HashMap;
-import java.util.HashSet;
-
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Scanner;
 
 public class TableCardinalityModel implements CostModel {
 
   private double defaultSelectivity = 0.1;
-  private int availableMemory;
+  private long availableMemory = (long) 1e7;
   private HashMap<Relation, Long> cardinality;
 
   public TableCardinalityModel(HashMap<Relation, Long> cardinality) {
@@ -28,8 +26,8 @@ public class TableCardinalityModel implements CostModel {
       Scanner scanner = new Scanner(new File(filename));
       cardinality = new HashMap();
 
-      while(scanner.hasNext()){
-        String [] line = scanner.nextLine().trim().split(":");
+      while (scanner.hasNext()) {
+        String[] line = scanner.nextLine().trim().split(":");
         Relation r = db.getByName(line[0]);
         long r_cardinality = Long.parseLong(line[1]);
         cardinality.put(r, r_cardinality);
@@ -44,8 +42,7 @@ public class TableCardinalityModel implements CostModel {
 
     HashSet<Relation> rels = in.getVisibleRelations();
     Relation rel = null;
-    for (Relation iter: rels)
-      rel = iter;
+    for (Relation iter : rels) rel = iter;
 
     long count = cardinality.get(rel);
     return new Cost(count, count, 0);
@@ -60,7 +57,7 @@ public class TableCardinalityModel implements CostModel {
   }
 
   public Cost selectOperator(Operator in, Cost costIn) {
-    long count = (long) (costIn.resultCardinality*defaultSelectivity);
+    long count = (long) (costIn.resultCardinality * defaultSelectivity);
     return new Cost(costIn.resultCardinality, count, 0);
   }
 
@@ -71,13 +68,26 @@ public class TableCardinalityModel implements CostModel {
 
     JoinOperator jop = (JoinOperator) in;
 
-    switch(jop.getJoinType())
-    {
-      case JoinOperator.IE: return new Cost(countl + countl*countr, countl*countr, 0);
-      case JoinOperator.NN: return new Cost(countl + countl*countr, Math.max(countl,countr), 0);
-      case JoinOperator.NK: return new Cost(countl + Math.log10(countr), countl, 0);
-      case JoinOperator.KN: return new Cost(countr + Math.log10(countl), countr, 0);
-      case JoinOperator.KK: return new Cost(countl + Math.log10(countr), Math.min(countl,countr), 0);
+    // System.out.println(jop.getJoinType());
+
+    long iocost =
+        ((availableMemory > countr) && (availableMemory > countr))
+            ? countl + countr
+            : countl + countl * countr;
+
+    // System.out.println((availableMemory > countr) && (availableMemory > countr));
+
+    switch (jop.getJoinType()) {
+      case JoinOperator.IE:
+        return new Cost(iocost, countl * countr, 0);
+      case JoinOperator.NN:
+        return new Cost(iocost, countl * countr, 0);
+      case JoinOperator.NK:
+        return new Cost(countl + Math.log10(countr), Math.max(countl, countr), 0);
+      case JoinOperator.KN:
+        return new Cost(countr + Math.log10(countl), countr, 0);
+      case JoinOperator.KK:
+        return new Cost(countl + Math.log10(countr), Math.min(countl, countr), 0);
     }
 
     return new Cost(countl + countl * countr, countl * countr, 0);
@@ -85,7 +95,8 @@ public class TableCardinalityModel implements CostModel {
 
   public Cost cartesianOperator(Operator in, Cost l, Cost r) {
 
-    return new Cost(l.resultCardinality * r.resultCardinality, l.resultCardinality * r.resultCardinality, 0);
+    return new Cost(
+        l.resultCardinality * r.resultCardinality, l.resultCardinality * r.resultCardinality, 0);
   }
 
   private Cost doEstimate(Operator in) {

@@ -3,18 +3,16 @@ package edu.berkeley.riselab.rlqopt.relalg;
 import edu.berkeley.riselab.rlqopt.Attribute;
 import edu.berkeley.riselab.rlqopt.Database;
 import edu.berkeley.riselab.rlqopt.Expression;
+import edu.berkeley.riselab.rlqopt.ExpressionList;
 import edu.berkeley.riselab.rlqopt.Operator;
 import edu.berkeley.riselab.rlqopt.OperatorException;
 import edu.berkeley.riselab.rlqopt.OperatorParameters;
 import edu.berkeley.riselab.rlqopt.Relation;
-import edu.berkeley.riselab.rlqopt.ExpressionList;
-
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.LinkedList;
-
-import java.util.ArrayList;
+import java.util.List;
 import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlIdentifier;
 import org.apache.calcite.sql.SqlJoin;
@@ -255,6 +253,8 @@ public class SQL2RelAlg {
 
     name = name.toLowerCase();
 
+    if (name.contains("\'")) return null;
+
     String[] comps = name.split("\\.");
 
     if (comps.length != 2) return null;
@@ -262,9 +262,11 @@ public class SQL2RelAlg {
     String relation = name.split("\\.")[0];
     String attrName = name.split("\\.")[1];
 
+    // System.out.println(name);
+
     Relation r = activeTables.get(relation);
 
-    System.out.println(r + " , " + name + " " + r.get(attrName));
+    // System.out.println(r + " , " + name + " " + r.get(attrName));
 
     if (r == null) return null;
 
@@ -304,42 +306,44 @@ public class SQL2RelAlg {
 
   /*
 
-  public Operator makeJoins(SqlNode sqlNode) throws OperatorException {
+    public Operator makeJoins(SqlNode sqlNode) throws OperatorException {
 
-    HashMap<Relation, TableAccessOperator> activeTables = getActiveTables((SqlSelect) sqlNode);
-    ExpressionList elist =
-        new ExpressionList(gatherAllJoinExpressions((SqlSelect) sqlNode, activeTables));
+      HashMap<Relation, TableAccessOperator> activeTables = getActiveTables((SqlSelect) sqlNode);
+      ExpressionList elist =
+          new ExpressionList(gatherAllJoinExpressions((SqlSelect) sqlNode, activeTables));
 
-    if (activeTables.keySet().size() == 1) {
-      for (Relation r : activeTables.keySet()) return activeTables.get(r);
+      if (activeTables.keySet().size() == 1) {
+        for (Relation r : activeTables.keySet()) return activeTables.get(r);
+      }
+
+      OperatorParameters params = new OperatorParameters(elist);
+      LinkedList<Operator> inputOps = new LinkedList();
+
+      for (Relation r : activeTables.keySet()) inputOps.add(activeTables.get(r));
+
+      Operator[] inputOpsArray = new Operator[inputOps.size()];
+      inputOpsArray = inputOps.toArray(inputOpsArray);
+      return new KWayJoinOperator(params, inputOpsArray);
     }
 
-    OperatorParameters params = new OperatorParameters(elist);
-    LinkedList<Operator> inputOps = new LinkedList();
+    public Operator makeSelect(SqlNode sqlNode, Operator src) throws OperatorException {
 
-    for (Relation r : activeTables.keySet()) inputOps.add(activeTables.get(r));
+      HashMap<Relation, TableAccessOperator> activeTables = getActiveTables((SqlSelect) sqlNode);
+      Expression e = basicCall2Expression(sqlNode, activeTables);
 
-    Operator[] inputOpsArray = new Operator[inputOps.size()];
-    inputOpsArray = inputOps.toArray(inputOpsArray);
-    return new KWayJoinOperator(params, inputOpsArray);
-  }
+      if (e == null)
+        return src;
 
-  public Operator makeSelect(SqlNode sqlNode, Operator src) throws OperatorException {
+      ExpressionList elist = e.getExpressionList();
+      OperatorParameters params = new OperatorParameters(elist);
+      return new SelectOperator(params, src);
+    }
 
-    HashMap<Relation, TableAccessOperator> activeTables = getActiveTables((SqlSelect) sqlNode);
-    Expression e = basicCall2Expression(sqlNode, activeTables);
+  */
 
-    if (e == null)
-      return src;
-
-    ExpressionList elist = e.getExpressionList();
-    OperatorParameters params = new OperatorParameters(elist);
-    return new SelectOperator(params, src);
-  }
-
-*/
-
-  public Operator makeJoins(java.util.Collection<edu.berkeley.riselab.rlqopt.Relation> tables, ArrayList<Expression> conditions)
+  public Operator makeJoins(
+      java.util.Collection<edu.berkeley.riselab.rlqopt.Relation> tables,
+      ArrayList<Expression> conditions)
       throws OperatorException {
 
     ExpressionList elist =
@@ -356,20 +360,17 @@ public class SQL2RelAlg {
     return new KWayJoinOperator(params, inputOpsArray);
   }
 
+  public Operator makeSelect(ArrayList<Expression> conditions, Operator src)
+      throws OperatorException {
 
-  public Operator makeSelect(ArrayList<Expression> conditions, Operator src) throws OperatorException {
-
-    for(Expression child: conditions)
-    {
+    for (Expression child : conditions) {
       ExpressionList elist = child.getExpressionList();
       OperatorParameters params = new OperatorParameters(elist);
       src = new SelectOperator(params, src);
-
     }
-    
+
     return src;
   }
-
 
   public Operator convert(String sql) throws SqlParseException {
     SqlParser parser = SqlParser.create(sql);
@@ -380,8 +381,6 @@ public class SQL2RelAlg {
     ArrayList<Expression> predicates = conditions.getAllSingleTableExpressions();
     ArrayList<Expression> joinConditions = conditions.getAllJoinTableExpressions();
 
-    
-
     try {
 
       Operator j = makeJoins(activeTables.values(), joinConditions);
@@ -391,7 +390,8 @@ public class SQL2RelAlg {
 
     } catch (Exception ex) {
       ex.printStackTrace();
-    };
+    }
+    ;
 
     return null;
   }
