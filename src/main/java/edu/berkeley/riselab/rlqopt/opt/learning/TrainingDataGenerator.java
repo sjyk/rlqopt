@@ -74,7 +74,7 @@ public class TrainingDataGenerator {
 
       // System.out.println("--" + Math.log(vector[vector.length - 1].floatValue()) + "," +
       // vector[vector.length - 1].floatValue());
-      yBuffer[0] = (float) (Math.log(vector[vector.length - 1].floatValue())-38.0); // todo fix scaling
+      yBuffer[0] = (float) (vector[vector.length - 1].floatValue()/1e7); // todo fix scaling
       // System.out.println(yBuffer[0]);
 
       trainingExamples.add(Nd4j.create(xBuffer, new int[] {1, p - 1}));

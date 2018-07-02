@@ -94,8 +94,7 @@ public class TDJoinSampler implements PlanningModule {
 
     HashSet<Operator> relations = new HashSet();
 
-    localData = new LinkedList();
-
+  
     for (Operator child : in.source) {
       relations.add(child);
     }
@@ -104,9 +103,25 @@ public class TDJoinSampler implements PlanningModule {
 
     for (int i = 0; i < in.source.size() - 1; i++) {
       try {
+
+        localData = new LinkedList();
         relations = TDMerge(relations, c, in);
 
-        // System.out.println(relations.size());
+        double z = 0.0;
+        for (TrainingDataPoint t : localData) {   
+            //System.out.println(t.cost + " " + i + t.oplist[0] + t.oplist[1]);
+          System.out.println(t.cost + " " + i);
+            //trainingData.add(t);
+        }
+
+        for (TrainingDataPoint t : localData) {   
+            //t.cost /= z;
+            trainingData.add(t);
+        }
+
+        /*for (TrainingDataPoint t : localData) {   
+            trainingData.add(t);
+        }*/
 
       } catch (OperatorException opex) {
         continue;
@@ -121,10 +136,6 @@ public class TDJoinSampler implements PlanningModule {
       System.out.println("C:" + cost);
     else
       System.out.println("J:" + cost);*/
-
-    for (TrainingDataPoint t : localData) {
-      trainingData.add(t);
-    }
 
     return rtn;
   }
@@ -223,11 +234,12 @@ public class TDJoinSampler implements PlanningModule {
         local.remove(i);
         local.remove(j);
         local.add(cjv);
+
         Operator baseline = lfdb.reorderJoin(getRemainingOperators(local, in), c);
 
         // exploration
         // System.out.println(rand.nextGaussian());
-        double cost = c.estimate(baseline).operatorIOcost;
+        double cost = c.estimate(baseline).operatorIOcost + c.estimate(cjv).operatorIOcost;
 
         Operator[] trainingToJoin = new Operator[4];
         trainingToJoin[0] = i;

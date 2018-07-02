@@ -9,6 +9,7 @@ import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Scanner;
+import java.util.Random;
 
 public class TableCardinalityModel implements CostModel {
 
@@ -45,7 +46,7 @@ public class TableCardinalityModel implements CostModel {
     for (Relation iter : rels) rel = iter;
 
     long count = cardinality.get(rel);
-    return new Cost(count, count, 0);
+    return new Cost(0, count, 0);
   }
 
   public Cost projectOperator(Operator in, Cost costIn) {
@@ -68,28 +69,31 @@ public class TableCardinalityModel implements CostModel {
 
     JoinOperator jop = (JoinOperator) in;
 
-    // System.out.println(jop.getJoinType());
-
     long iocost =
         ((availableMemory > countr) && (availableMemory > countr))
             ? countl + countr
-            : countl + countl * countr;
+            : countl + ( (long) Math.max((countl/1e4),1) ) * countr;
 
     // System.out.println((availableMemory > countr) && (availableMemory > countr));
 
+    //break the symmetry for joins that are close to each other.
+    //Random rand = new Random(in.toString().hashCode());
+    //((long) (10000*rand.nextDouble()));
+
     switch (jop.getJoinType()) {
       case JoinOperator.IE:
-        return new Cost(iocost, countl * countr, 0);
+        return new Cost(iocost, 0.0, 0);
       case JoinOperator.NN:
-        return new Cost(iocost, countl * countr, 0);
+        return new Cost(iocost, countl + countr, 0);
       case JoinOperator.NK:
-        return new Cost(countl, Math.max(countl, countr), 0);
+        return new Cost(iocost, countl, 0);
       case JoinOperator.KN:
-        return new Cost(countr, countr, 0);
+        return new Cost(countr + ((long) Math.log(countl)), countr, 0);
       case JoinOperator.KK:
         return new Cost(countl, Math.min(countl, countr), 0);
     }
 
+    //System.out.println("bear");
     return new Cost(countl + countl * countr, countl * countr, 0);
   }
 

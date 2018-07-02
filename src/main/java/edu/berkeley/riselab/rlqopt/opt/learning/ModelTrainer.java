@@ -63,7 +63,7 @@ public class ModelTrainer {
     System.out.println(net.getUpdater());
 
     // Train the network on the full data set, and evaluate in periodically
-    for (int i = 0; i < 100000; i++) {
+    for (int i = 0; i < 10000; i++) {
 
       System.out.println("Iteration: " + i);
 

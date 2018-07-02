@@ -125,7 +125,7 @@ public class DoExperiments extends TestCase {
     planners.add(new VolcanoPlanner());
     planners.add(new QuickPickPlanner(100));
 
-    Experiment e = new Experiment(workload, 15, 15, planners);
+    Experiment e = new Experiment(workload, 25, 25, planners);
     e.train();
     e.run();
 
