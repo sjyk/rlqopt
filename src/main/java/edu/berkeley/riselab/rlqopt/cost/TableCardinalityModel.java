@@ -83,11 +83,11 @@ public class TableCardinalityModel implements CostModel {
       case JoinOperator.NN:
         return new Cost(iocost, countl * countr, 0);
       case JoinOperator.NK:
-        return new Cost(countl + Math.log10(countr), Math.max(countl, countr), 0);
+        return new Cost(countl, Math.max(countl, countr), 0);
       case JoinOperator.KN:
-        return new Cost(countr + Math.log10(countl), countr, 0);
+        return new Cost(countr, countr, 0);
       case JoinOperator.KK:
-        return new Cost(countl + Math.log10(countr), Math.min(countl, countr), 0);
+        return new Cost(countl, Math.min(countl, countr), 0);
     }
 
     return new Cost(countl + countl * countr, countl * countr, 0);

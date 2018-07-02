@@ -69,8 +69,8 @@ public class TrainingDataPoint {
 
     int n = allAttributes.size();
 
-    Double[] vector = new Double[n * 3 + 3];
-    for (int i = 0; i < n * 3; i++) vector[i] = 0.0;
+    Double[] vector = new Double[n * 4 + 3];
+    for (int i = 0; i < n * 4; i++) vector[i] = 0.0;
 
     //    long lhsCard = c.estimate(oplist[0]).resultCardinality;
     //    long rhsCard = c.estimate(oplist[1]).resultCardinality;
@@ -94,11 +94,16 @@ public class TrainingDataPoint {
       vector[allAttributes.indexOf(a) + 2 * n] = 1.0;
     }
 
-    vector[3 * n] = size;
+    for (Attribute a : oplist[2].getVisibleAttributes()) {
 
-    vector[3 * n + 1] = gcost;
+      vector[allAttributes.indexOf(a) + 3 * n] = 1.0;
+    }
 
-    vector[3 * n + 2] = cost;
+    vector[4 * n] = 0.0;//size;
+
+    vector[4 * n + 1] = gcost;
+
+    vector[4 * n + 2] = cost;
 
     return vector;
   }
