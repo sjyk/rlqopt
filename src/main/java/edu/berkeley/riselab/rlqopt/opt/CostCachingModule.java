@@ -10,13 +10,13 @@ public interface CostCachingModule {
 
   Map<String, Double> costCache = new HashMap<>();
 
-  default double getOrComputeIOEstimate(Operator op, CostModel c) {
+  default double getOrComputeIOEstimate_dep(Operator op, CostModel c) {
     if (op == null) {
       return c.estimate(null).operatorIOcost;
     }
     String opHash = op.toString();
     
-    Double cost = null; //costCache.get(opHash); (disable)
+    Double cost = costCache.get(opHash); 
 
     if (cost == null) {
       cost = (double) c.estimate(op).operatorIOcost;
@@ -24,4 +24,10 @@ public interface CostCachingModule {
     }
     return cost;
   }
+
+  
+  default double getOrComputeIOEstimate(Operator op, CostModel c) {
+    return (double) c.estimate(op).operatorIOcost;
+  }
+
 }
