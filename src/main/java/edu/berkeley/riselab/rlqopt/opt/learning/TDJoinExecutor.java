@@ -206,20 +206,6 @@ public class TDJoinExecutor implements PlanningModule {
           INDArray out = net.output(input, false);
           cost = out.getDouble(0);
 
-          System.out.println(input + " : " + cost);
-          // remove
-          /*         HashSet<Operator> local = (HashSet) rtn.clone();
-                    local.remove(i);
-                    local.remove(j);
-                    local.add(cjv);
-                    Operator baseline = lfdb.reorderJoin(getRemainingOperators(local, in), c);
-          //
-          System.out.println(input + " : " + cost + " " + (Math.log(c.estimate(baseline).operatorIOcost)-38.0));
-  */          
-
-          // System.out.println(i + "," + j);
-          //cost = Math.log(c.estimate(baseline).operatorIOcost); //out.getDouble(0);*/
-
         } else {
           cost = c.estimate(cjv).operatorIOcost;
         }

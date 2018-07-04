@@ -64,8 +64,8 @@ public class TableCardinalityModel implements CostModel {
 
   public Cost joinOperator(Operator in, Cost l, Cost r) {
 
-    long countr = r.resultCardinality;
-    long countl = l.resultCardinality;
+    long countl = r.resultCardinality;
+    long countr = l.resultCardinality;
 
     JoinOperator jop = (JoinOperator) in;
 

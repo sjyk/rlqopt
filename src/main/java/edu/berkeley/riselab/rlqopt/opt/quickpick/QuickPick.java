@@ -10,7 +10,10 @@ import edu.berkeley.riselab.rlqopt.Relation;
 import edu.berkeley.riselab.rlqopt.cost.CostModel;
 import edu.berkeley.riselab.rlqopt.opt.CostCachingModule;
 import edu.berkeley.riselab.rlqopt.opt.PlanningModule;
+
 import edu.berkeley.riselab.rlqopt.relalg.JoinOperator;
+import edu.berkeley.riselab.rlqopt.relalg.CartesianOperator;
+
 import edu.berkeley.riselab.rlqopt.relalg.KWayJoinOperator;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -90,6 +93,8 @@ public class QuickPick implements PlanningModule, CostCachingModule {
       LinkedList<Attribute> righte = leftRight[1];
 
       if (isSubList(leftAttributes, lefte) && isSubList(rightAttributes, righte)) return child;
+
+      if (isSubList(leftAttributes, righte) && isSubList(rightAttributes, lefte)) return child;
     }
 
     return null;
@@ -141,11 +146,17 @@ public class QuickPick implements PlanningModule, CostCachingModule {
       left = relations.get(i);
       right = relations.get(j);
       Expression e = findJoinExpression(in.params.expression, left, right);
-      // Has to have a valid edge (i, j).
-      if (e == null) continue;
+      
+      if (e == null) {
+         // OperatorParameters params = new OperatorParameters(new ExpressionList());
+         // randomJoin = new CartesianOperator(params, left, right);
+        continue;
+        
+      } else {
+          OperatorParameters params = new OperatorParameters(e.getExpressionList());
+          randomJoin = new JoinOperator(params, left, right);
+      }
 
-      OperatorParameters params = new OperatorParameters(e.getExpressionList());
-      randomJoin = new JoinOperator(params, left, right);
       break;
     }
 

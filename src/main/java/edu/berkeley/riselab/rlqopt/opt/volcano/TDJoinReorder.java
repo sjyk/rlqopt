@@ -112,6 +112,8 @@ public class TDJoinReorder implements PlanningModule {
       LinkedList<Attribute> righte = leftRight[1];
 
       if (isSubList(leftAttributes, lefte) && isSubList(rightAttributes, righte)) return child;
+
+      if (isSubList(leftAttributes, righte) && isSubList(rightAttributes, lefte)) return child;
     }
 
     return null;
@@ -131,6 +133,9 @@ public class TDJoinReorder implements PlanningModule {
 
         // don't join with self
         if (i == j) continue;
+
+        // no plans that are not left deep
+        //if (j.getVisibleRelations().size() > 1) continue;
 
         Expression e = findJoinExpression(in.params.expression, i, j);
 

@@ -19,7 +19,7 @@ public class TrainingDataGenerator {
   String output;
   CostModel c;
   TrainingPlanner planner;
-  double scaling;
+  double scaling = 1e7;
 
   public TrainingDataGenerator(Database db, String output, CostModel c, TrainingPlanner planner) {
     this.output = output;
@@ -74,7 +74,7 @@ public class TrainingDataGenerator {
 
       // System.out.println("--" + Math.log(vector[vector.length - 1].floatValue()) + "," +
       // vector[vector.length - 1].floatValue());
-      yBuffer[0] = (float) (vector[vector.length - 1].floatValue()/1e7); // todo fix scaling
+      yBuffer[0] = (float) Math.min((vector[vector.length - 1].floatValue()/scaling),100); // todo fix scaling
       // System.out.println(yBuffer[0]);
 
       trainingExamples.add(Nd4j.create(xBuffer, new int[] {1, p - 1}));

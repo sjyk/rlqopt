@@ -172,19 +172,13 @@ public class BushyJoinEnumerator implements PlanningModule, CostCachingModule {
 
         Operator cjv = getJoinOperator(i, j, in);
 
-        if (cjv instanceof CartesianOperator) continue;
-
         HashSet<Operator> local = (HashSet) rtn.clone();
         local.remove(i);
         local.remove(j);
         local.add(cjv);
         Operator baseline = lfdb.reorderJoin(getRemainingOperators(local, in), c);
 
-        // exploration
-        // System.out.println(rand.nextGaussian());
-        double cost = getOrComputeIOEstimate(baseline, c);
-
-        // System.out.println(cost);
+        double cost = getOrComputeIOEstimate(baseline, c) + c.estimate(cjv).operatorIOcost;
 
         if ((cost < minCost)) {
           minCost = cost;

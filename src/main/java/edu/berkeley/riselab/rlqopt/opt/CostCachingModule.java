@@ -15,7 +15,9 @@ public interface CostCachingModule {
       return c.estimate(null).operatorIOcost;
     }
     String opHash = op.toString();
-    Double cost = costCache.get(opHash);
+    
+    Double cost = null; //costCache.get(opHash); (disable)
+
     if (cost == null) {
       cost = (double) c.estimate(op).operatorIOcost;
       costCache.put(opHash, cost);

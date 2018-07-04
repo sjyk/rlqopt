@@ -123,9 +123,9 @@ public class DoExperiments extends TestCase {
     planners.add(new PostgresBushyPlanner());
     planners.add(new PostgresPlanner());
     planners.add(new VolcanoPlanner());
-    planners.add(new QuickPickPlanner(100));
+    planners.add(new QuickPickPlanner(1000));
 
-    Experiment e = new Experiment(workload, 25, 25, planners);
+    Experiment e = new Experiment(workload, 35, 35, planners);
     e.train();
     e.run();
 
