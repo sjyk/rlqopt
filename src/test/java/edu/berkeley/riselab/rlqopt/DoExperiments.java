@@ -13,6 +13,8 @@ import edu.berkeley.riselab.rlqopt.workload.IMDBWorkloadGenerator;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +47,51 @@ public class DoExperiments extends TestCase {
       treeMap.put(entry.getKey().toString(), entry.getValue());
     }
     System.out.println(treeMap);
+  }
+
+  // Print in the following format:
+  // query <planner 1>  ...  <planner N>
+  // <query 0 name>:  <planner 1 cost>  ...  <planner N cost>
+  // ...
+  // <query M name>:  <planner 1 cost>  ...  <planner N cost>
+  private void printPerQuery(Map<Planner, List<Double>> perQueryCost) {
+    // Collect stats.
+    List<Planner> planners =
+        perQueryCost
+            .keySet()
+            .stream()
+            // Don't print nopt.  They are all log(0) anyway.
+            .filter(planner -> !planner.getPlannerName().equals("nopt"))
+            .sorted(Comparator.comparing(Planner::getPlannerName))
+            .collect(Collectors.toList());
+    int numQueries = perQueryCost.get(planners.get(0)).size();
+
+    // costs[i] is all planner's costs for query i.
+    List<List<Double>> costs = new ArrayList<>();
+    for (int i = 0; i < numQueries; ++i) {
+      costs.add(new ArrayList<>());
+    }
+    for (Planner p : planners) {
+      List<Double> queryCostsByP = perQueryCost.get(p);
+      for (int i = 0; i < queryCostsByP.size(); ++i) {
+        costs.get(i).add(queryCostsByP.get(i));
+      }
+    }
+
+    // Print stats.
+    System.out.print("query\t");
+    for (Planner p : planners) {
+      System.out.print(p.getPlannerName() + "\t");
+    }
+    System.out.println();
+
+    for (int i = 0; i < numQueries; ++i) {
+      System.out.print("q" + i + "\t");
+      for (Double cost : costs.get(i)) {
+        System.out.printf("%.3f\t", cost);
+      }
+      System.out.println();
+    }
   }
 
   /** Write or append to a .csv file. */
@@ -124,6 +171,7 @@ public class DoExperiments extends TestCase {
     planners.add(new PostgresPlanner());
     planners.add(new VolcanoPlanner());
     planners.add(new QuickPickPlanner(1000));
+    planners.add(new QuickPickPlanner(1));
 
     Experiment e = new Experiment(workload, 35, 50, planners);
     e.train();
@@ -131,6 +179,8 @@ public class DoExperiments extends TestCase {
 
     System.out.print("Improvement: ");
     printSorted(e.getBaselineImprovement());
+    System.out.println("Per query improvement: ");
+    printPerQuery(e.getPerQueryImprovement());
     System.out.print("Planning latency: ");
     Map<Planner, Double> latencies = e.getBaselineLatency();
     printSorted(latencies);
