@@ -120,4 +120,18 @@ public class Experiment {
 
     return rtn;
   }
+
+  public Map<Planner, List<Double>> getPerQueryImprovement() {
+    Map<Planner, List<Double>> rtn = new HashMap<>();
+    for (Planner p : this.planners) {
+      LinkedList<PlanningStatistics> stats = finalCost.get(p);
+      List<Double> perQueryCost = new LinkedList<>();
+      for (PlanningStatistics queryStats : stats) {
+        // Math.log() because getBaselineImprovement() does so.
+        perQueryCost.add(Math.log(queryStats.finalCost));
+      }
+      rtn.put(p, perQueryCost);
+    }
+    return rtn;
+  }
 }
