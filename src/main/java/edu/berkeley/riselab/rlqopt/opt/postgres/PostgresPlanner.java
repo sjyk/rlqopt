@@ -15,6 +15,6 @@ public class PostgresPlanner extends Planner {
     this.preopt.add(new FlattenJoin());
     this.init.add(new EagerSelectProject());
     this.planners.add(new LeftDeepJoinReorder());
-    this.setPlannerName("postgres");
+    this.setPlannerName("left-deep");
   }
 }

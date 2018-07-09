@@ -6,6 +6,7 @@ import edu.berkeley.riselab.rlqopt.opt.bushy.PostgresBushyPlanner;
 import edu.berkeley.riselab.rlqopt.opt.learning.RLQOpt;
 import edu.berkeley.riselab.rlqopt.opt.nopt.NoPlanner;
 import edu.berkeley.riselab.rlqopt.opt.postgres.PostgresPlanner;
+import edu.berkeley.riselab.rlqopt.opt.rightdeep.RightDeepPlanner;
 import edu.berkeley.riselab.rlqopt.opt.quickpick.QuickPickPlanner;
 import edu.berkeley.riselab.rlqopt.opt.volcano.VolcanoPlanner;
 import edu.berkeley.riselab.rlqopt.workload.DatasetGenerator;
@@ -118,14 +119,16 @@ public class DoExperiments extends TestCase {
             "schematext.sql", "imdb_tables.txt", "join-order-benchmark/queries/queries.sql");
 
     LinkedList<Planner> planners = new LinkedList<>();
-    planners.add(new NoPlanner());
+    //planners.add(new NoPlanner());
     planners.add(new RLQOpt(workload));
     planners.add(new PostgresBushyPlanner());
     planners.add(new PostgresPlanner());
+    planners.add(new RightDeepPlanner());
     planners.add(new VolcanoPlanner());
     planners.add(new QuickPickPlanner(1000));
 
-    Experiment e = new Experiment(workload, 35, 50, planners);
+    //Experiment e = new Experiment(workload, 90, 113, planners);
+    Experiment e = new Experiment(workload,50, 50, planners);
     e.train();
     e.run();
 

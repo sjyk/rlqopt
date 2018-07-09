@@ -57,7 +57,7 @@ public class Experiment {
           p.plan(op.copy(), workload.getNoisyStatsModel(), workload.getStatsModel());
         }
 
-        // System.out.println(op + " " + p + " " + p.getLastPlanStats());
+        System.out.println("+++,q" + op.hashCode() + "," + op.source.size() +","+ p + "," + p.getLastPlanStats().finalCost);
 
         LinkedList<PlanningStatistics> stats = finalCost.get(p);
         stats.add(p.getLastPlanStats());

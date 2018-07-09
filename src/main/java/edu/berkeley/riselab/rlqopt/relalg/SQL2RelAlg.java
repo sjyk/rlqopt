@@ -45,7 +45,7 @@ public class SQL2RelAlg {
 
           rtn.put(relName, getSingleTable(relName));
           rtn.put(aliasName, getSingleTable(relName));
-          System.out.println(relName + " >> " + aliasName);
+          //System.out.println(relName + " >> " + aliasName);
         }
       }
     }

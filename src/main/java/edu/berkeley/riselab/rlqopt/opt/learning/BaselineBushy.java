@@ -104,22 +104,19 @@ public class BaselineBushy implements CostCachingModule {
 
     // System.out.println(costMap);
 
+    Operator argMax = null;
     for (int i = 0; i < in.source.size(); i++) {
       try {
 
         costMap = dynamicProgram(costMap, c, in);
-
-        Operator argMax = baseCase(costMap, in);
-        if (argMax != null) {
-          return argMax;
-        }
+        argMax = baseCase(costMap, in);
 
       } catch (OperatorException opex) {
         continue;
       }
     }
 
-    return null; // (Operator) costMap.values().toArray()[0];
+    return argMax; // (Operator) costMap.values().toArray()[0];
   }
 
   private Operator baseCase(HashMap<HashSet<Operator>, Operator> costMap, Operator in) {
@@ -174,8 +171,10 @@ public class BaselineBushy implements CostCachingModule {
           if ((isSubList(joinedAttributes1, left) && isSubList(joinedAttributes2, right))
               || (isSubList(joinedAttributes2, left) && isSubList(joinedAttributes1, right))) {
             OperatorParameters params = new OperatorParameters(e.getExpressionList());
+            
             JoinOperator cjv = new JoinOperator(params, op1, op2);
             result.put(union, greatest(result, c, union, cjv));
+
             break;
           }
         }

@@ -71,6 +71,8 @@ public class LeftDeepJoinReorder implements PlanningModule, CostCachingModule {
       double oldOpCost = getOrComputeIOEstimate(oldOp, c);
       double newOpCost = getOrComputeIOEstimate(newOp, c);
 
+      //System.out.println(">>>"+oldOp);
+
       if (newOpCost < oldOpCost) return newOp;
       else return oldOp;
     }
@@ -139,7 +141,7 @@ public class LeftDeepJoinReorder implements PlanningModule, CostCachingModule {
             continue;
           } else if (isSubList(joinedAttributes, left) && !key.contains(child)) {
             OperatorParameters params = new OperatorParameters(e.getExpressionList());
-            JoinOperator cjv = new JoinOperator(params, val, child);
+            JoinOperator cjv = new JoinOperator(params, child, val);
 
             HashSet<Operator> cloneset = (HashSet) key.clone();
             cloneset.add(child);

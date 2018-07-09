@@ -64,31 +64,48 @@ public class TableCardinalityModel implements CostModel {
 
   public Cost joinOperator(Operator in, Cost l, Cost r) {
 
-    long countl = r.resultCardinality;
-    long countr = l.resultCardinality;
+    long countl = l.resultCardinality;
+    long countr = r.resultCardinality;
 
     JoinOperator jop = (JoinOperator) in;
 
-    long iocost =
-        ((availableMemory > countr) && (availableMemory > countr))
-            ? countl + countr
-            : countl + ( (long) Math.max((countl/1e4),1) ) * countr;
 
-    // System.out.println((availableMemory > countr) && (availableMemory > countr));
+    long iocost = 0;
 
-    //break the symmetry for joins that are close to each other.
-    //Random rand = new Random(in.toString().hashCode());
-    //((long) (10000*rand.nextDouble()));
+    //model materialization
+
+    if ((availableMemory > countr + countl))
+      iocost = 0;
+    else if ((availableMemory > countr &&  availableMemory > countl))
+      iocost = Math.min(countl, countr);
+    else if (availableMemory > countr)
+      iocost = countl;
+    else if (availableMemory > countl)
+      iocost = countr;
+    else
+      iocost = countl + countr;
+    
+
+    //long card = (countl < 1e2 || countr < 1e2) ? countr*countl : Math.min(countr, countl);
 
     switch (jop.getJoinType()) {
       case JoinOperator.IE:
         return new Cost(iocost, 0.0, 0);
+      
       case JoinOperator.NN:
-        return new Cost(iocost, countl + countr, 0);
+        //System.out.println("nn: " + iocost + " , " + countr);
+        return new Cost(iocost,  countr+countl , 0);
+      
       case JoinOperator.NK:
         return new Cost(iocost, countl, 0);
+      
       case JoinOperator.KN:
-        return new Cost(countr + ((long) Math.log(countl)), countr, 0);
+        
+        if (in.source.get(0).getVisibleRelations().size() == 1)
+          return new Cost(countr, countr, 0);
+        else
+          return new Cost(iocost, countr, 0);
+
       case JoinOperator.KK:
         return new Cost(countl, Math.min(countl, countr), 0);
     }
@@ -116,8 +133,29 @@ public class TableCardinalityModel implements CostModel {
       return groupByOperator(in, estimate(in.source.get(0))).plus(doEstimate(in.source.get(0)));
 
     if (in instanceof JoinOperator) {
+      
+      JoinOperator jop = (JoinOperator) in;
+
       Cost left = doEstimate(in.source.get(0));
       Cost right = doEstimate(in.source.get(1));
+
+      switch (jop.getJoinType()) {
+        case JoinOperator.IE:
+          return joinOperator(in, left, right).plus(left).plus(right);
+        case JoinOperator.NN:
+          return joinOperator(in, left, right).plus(left).plus(right);
+        case JoinOperator.NK:
+          return joinOperator(in, left, right).plus(left).plus(right);
+        case JoinOperator.KN:
+
+          if (in.source.get(0).getVisibleRelations().size() == 1)
+            return joinOperator(in, left, right).plus(right);
+          else
+            return joinOperator(in, left, right).plus(left).plus(right);
+
+        case JoinOperator.KK:
+          return joinOperator(in, left, right).plus(left).plus(right);
+      }
 
       return joinOperator(in, left, right).plus(left).plus(right);
     }
