@@ -9,4 +9,5 @@ Style.  There are also Eclipse and Intellij plugins
 # Acknowledgements
 We thank the [YourKit Java profiler](https://www.yourkit.com/java/profiler/) for
 supporting our open-source
-development. ![https://www.yourkit.com/images/yklogo.png]
+development.
+![YourKit logo](https://www.yourkit.com/images/yklogo.png)
