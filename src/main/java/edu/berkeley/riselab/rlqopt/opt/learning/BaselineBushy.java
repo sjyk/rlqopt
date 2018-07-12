@@ -120,17 +120,8 @@ public class BaselineBushy implements CostCachingModule {
   }
 
   private Operator baseCase(HashMap<HashSet<Operator>, Operator> costMap, Operator in) {
-
-    for (HashSet<Operator> opList : costMap.keySet()) {
-
-      HashSet<Operator> childOps = new HashSet();
-
-      for (Operator child : in.source) childOps.add(child);
-
-      if (childOps.equals(opList)) return costMap.get(opList);
-    }
-
-    return null;
+    HashSet<Operator> childOps = new HashSet<>(in.source);
+    return costMap.get(childOps);
   }
 
   private HashMap<HashSet<Operator>, Operator> dynamicProgram(
@@ -171,7 +162,6 @@ public class BaselineBushy implements CostCachingModule {
           if ((isSubList(joinedAttributes1, left) && isSubList(joinedAttributes2, right))
               || (isSubList(joinedAttributes2, left) && isSubList(joinedAttributes1, right))) {
             OperatorParameters params = new OperatorParameters(e.getExpressionList());
-            
             JoinOperator cjv = new JoinOperator(params, op1, op2);
             result.put(union, greatest(result, c, union, cjv));
 
