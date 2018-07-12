@@ -2,8 +2,11 @@ package edu.berkeley.riselab.rlqopt.opt.learning;
 
 import edu.berkeley.riselab.rlqopt.Database;
 import edu.berkeley.riselab.rlqopt.Operator;
-import edu.berkeley.riselab.rlqopt.cost.*;
-import java.io.*;
+import edu.berkeley.riselab.rlqopt.cost.CostModel;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,14 +22,19 @@ public class TrainingDataGenerator {
   String output;
   CostModel c;
   TrainingPlanner planner;
-  double scaling = 1e7;
+  String trainingDataFile;
 
-  public TrainingDataGenerator(Database db, String output, CostModel c, TrainingPlanner planner) {
+  public TrainingDataGenerator(
+      Database db, String output, CostModel c, TrainingPlanner planner, String trainingDataFile) {
     this.output = output;
     this.db = db;
     this.c = c;
     this.planner = planner;
-    // this.scaling = scaling;
+    this.trainingDataFile = trainingDataFile;
+  }
+
+  public TrainingDataGenerator(Database db, String output, CostModel c, TrainingPlanner planner) {
+    this(db, output, c, planner, null);
   }
 
   public void generateFile(LinkedList<Operator> workload, int t) {
@@ -44,6 +52,25 @@ public class TrainingDataGenerator {
     } catch (IOException ex) {
     }
     ;
+  }
+
+  /** Returns non-null iff "this.trainingDataFile" points to a well-formed file. */
+  public DataSet loadDataSet() {
+    if (this.trainingDataFile == null) return null;
+    DataSet dataSet = null;
+    try {
+      dataSet = new DataSet();
+      dataSet.load(new File(this.trainingDataFile));
+      System.out.println(
+          "Dataset loaded from file: "
+              + trainingDataFile
+              + "; numExamples "
+              + dataSet.numExamples());
+    } catch (Exception e) {
+      // Pass-through.
+    }
+    if (dataSet == null || dataSet.numExamples() == 0) return null;
+    return dataSet;
   }
 
   public DataSet generateDataSet(LinkedList<Operator> workload, int t) {
@@ -72,26 +99,39 @@ public class TrainingDataGenerator {
 
       if (Double.isInfinite(vector[vector.length - 1].floatValue())) continue;
 
-      // System.out.println("--" + Math.log(vector[vector.length - 1].floatValue()) + "," +
-      // vector[vector.length - 1].floatValue());
-      yBuffer[0] = (float) Math.min((vector[vector.length - 1].floatValue()/scaling),100); // todo fix scaling
-      // System.out.println(yBuffer[0]);
+      yBuffer[0] = vector[vector.length - 1].floatValue();
 
       trainingExamples.add(Nd4j.create(xBuffer, new int[] {1, p - 1}));
       reward.add(Nd4j.create(yBuffer, new int[] {1, 1}));
     }
 
     int n = trainingExamples.size();
+    System.out.println("dataset size " + n);
+    INDArray batchedExamples = Nd4j.create(trainingExamples, new int[] {n, p - 1});
+    INDArray batchedLabels = Nd4j.create(reward, new int[] {n, 1});
 
-    return new DataSet(
-        Nd4j.create(trainingExamples, new int[] {n, p - 1}), Nd4j.create(reward, new int[] {n, 1}));
+    DataSet dataSet = new DataSet(batchedExamples, batchedLabels);
+
+    // Save dataset without normalization.
+    if (this.trainingDataFile != null) {
+      dataSet.save(new File(trainingDataFile));
+      System.out.println("Dataset saved to file: " + trainingDataFile);
+    }
+
+    // Normalize.
+    DataNormalizer.normalize(dataSet);
+    return dataSet;
+  }
+
+  public DataSetIterator generateDataSetIterator(DataSet dataSet) {
+    List<DataSet> listDs = dataSet.asList();
+    // Use the full dataset as one batch.
+    return new ListDataSetIterator(listDs, listDs.size()); // todo hyperparameter
   }
 
   public DataSetIterator generateDataSetIterator(LinkedList<Operator> workload, int t) {
-
     DataSet dataSet = generateDataSet(workload, t);
-    List<DataSet> listDs = dataSet.asList();
-    return new ListDataSetIterator(listDs, 1000); // todo hyperparameter
+    return generateDataSetIterator(dataSet);
   }
 
   public DataSetIterator generateDataSetIterator(Operator query, int t) {

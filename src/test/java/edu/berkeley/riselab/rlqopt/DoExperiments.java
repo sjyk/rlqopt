@@ -165,9 +165,16 @@ public class DoExperiments extends TestCase {
         new IMDBWorkloadGenerator(
             "schematext.sql", "imdb_tables.txt", "join-order-benchmark/queries/queries.sql");
 
+    final int numTraining = 50;
+    final int numTesting = 50;
+
+    // When non-null: load from this file without re-generation, or generate once and persist it.
+    // Pass null to disable this caching behavior.
+    String trainingDataPath = "job-" + numTraining + ".dat";
+
     LinkedList<Planner> planners = new LinkedList<>();
-    //planners.add(new NoPlanner());
-    planners.add(new RLQOpt(workload));
+    planners.add(new NoPlanner());
+    planners.add(new RLQOpt(workload, trainingDataPath));
     planners.add(new PostgresBushyPlanner());
     planners.add(new PostgresPlanner());
     planners.add(new RightDeepPlanner());
@@ -176,14 +183,14 @@ public class DoExperiments extends TestCase {
     planners.add(new QuickPickPlanner(1));
 
     //Experiment e = new Experiment(workload, 90, 113, planners);
-    Experiment e = new Experiment(workload,50, 50, planners);
+    Experiment e = new Experiment(workload,numTraining, numTesting, planners);
     e.train();
     e.run();
 
-    System.out.print("Improvement: ");
-    printSorted(e.getBaselineImprovement());
     System.out.println("Per query improvement: ");
     printPerQuery(e.getPerQueryImprovement());
+    System.out.print("Improvement: ");
+    printSorted(e.getBaselineImprovement());
     System.out.print("Planning latency: ");
     Map<Planner, Double> latencies = e.getBaselineLatency();
     printSorted(latencies);

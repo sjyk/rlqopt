@@ -163,7 +163,6 @@ public class TDJoinExecutor implements PlanningModule {
 
   public HashSet<Operator> TDMerge(HashSet<Operator> relations, CostModel c, Operator in)
       throws OperatorException {
-
     double minCost = Double.MAX_VALUE;
     Operator[] pairToJoin = new Operator[3];
     HashSet<Operator> rtn = (HashSet) relations.clone();
@@ -203,9 +202,10 @@ public class TDJoinExecutor implements PlanningModule {
           TrainingDataPoint tpd =
               new TrainingDataPoint(currentPair, 0.0, 0.0, (double) relations.size());
           INDArray input = tpd.featurizeND4j(db, c);
-          INDArray out = net.output(input, false);
-          cost = out.getDouble(0);
 
+          INDArray out =
+              DataNormalizer.revertLabel(net.output(DataNormalizer.transformFeature(input), false));
+          cost = out.getDouble(0);
         } else {
           cost = c.estimate(cjv).operatorIOcost;
         }
