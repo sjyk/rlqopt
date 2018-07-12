@@ -28,11 +28,13 @@ public class ExpressionList extends LinkedList<Expression> {
     for (String attr : r) this.add(r.get(attr).getExpression());
   }
 
-  public LinkedList<Attribute> getAllVisibleAttributes() {
-
-    LinkedList<Attribute> visibleAttrs = new LinkedList<Attribute>();
-    for (Expression e : this) visibleAttrs.addAll(e.getVisibleAttributes());
-
+  public LinkedList<Attribute> getAllVisibleAttributes(LinkedList<Attribute> visibleAttrs) {
+    for (Expression e : this) e.getVisibleAttributes(visibleAttrs);
     return visibleAttrs;
+  }
+
+  public LinkedList<Attribute> getAllVisibleAttributes() {
+    LinkedList<Attribute> visibleAttrs = new LinkedList<>();
+    return getAllVisibleAttributes(visibleAttrs);
   }
 }

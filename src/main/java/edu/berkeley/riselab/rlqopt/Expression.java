@@ -57,18 +57,19 @@ public class Expression {
     return new ExpressionList(this);
   }
 
-  public LinkedList<Attribute> getVisibleAttributes() {
-    LinkedList<Attribute> visibleAttrs = new LinkedList<Attribute>();
-
+  public LinkedList<Attribute> getVisibleAttributes(LinkedList<Attribute> visibleAttrs) {
     // base case
     if (this.op == null) {
       visibleAttrs.add(this.noop);
       return visibleAttrs;
     }
-
-    for (Expression e : children) visibleAttrs.addAll(e.getVisibleAttributes());
-
+    for (Expression e : children) e.getVisibleAttributes(visibleAttrs);
     return visibleAttrs;
+  }
+
+  public LinkedList<Attribute> getVisibleAttributes() {
+    LinkedList<Attribute> visibleAttrs = new LinkedList<Attribute>();
+    return getVisibleAttributes(visibleAttrs);
   }
 
   public HashSet<Attribute> getVisibleAttributeSet() {
