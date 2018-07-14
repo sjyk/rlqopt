@@ -44,28 +44,21 @@ public abstract class Operator {
     return keys;
   }
 
-  public LinkedList<Attribute> getVisibleAttributes() {
-
-    LinkedList<Attribute> visibleAttrs = new LinkedList<Attribute>();
-
+  public LinkedList<Attribute> getVisibleAttributes(LinkedList<Attribute> visibleAttrs) {
     if (this instanceof TableAccessOperator) {
-
-      visibleAttrs.addAll(params.expression.getAllVisibleAttributes());
-      return visibleAttrs;
-
+      return params.expression.getAllVisibleAttributes(visibleAttrs);
     } else if (this instanceof ProjectOperator) {
-
-      visibleAttrs.addAll(params.expression.getAllVisibleAttributes());
-      return visibleAttrs;
+      return params.expression.getAllVisibleAttributes(visibleAttrs);
     } else if (this instanceof GroupByOperator) {
-
-      visibleAttrs.addAll(params.secondary_expression.getAllVisibleAttributes());
-      return visibleAttrs;
+      return params.secondary_expression.getAllVisibleAttributes(visibleAttrs);
     }
-
-    for (Operator o : source) visibleAttrs.addAll(o.getVisibleAttributes());
-
+    for (Operator o : source) o.getVisibleAttributes(visibleAttrs);
     return visibleAttrs;
+  }
+
+  public LinkedList<Attribute> getVisibleAttributes() {
+    LinkedList<Attribute> visibleAttrs = new LinkedList<Attribute>();
+    return getVisibleAttributes(visibleAttrs);
   }
 
   // Validates the inputs to the operator
