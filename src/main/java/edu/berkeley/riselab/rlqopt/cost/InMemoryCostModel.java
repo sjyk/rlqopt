@@ -10,18 +10,17 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Scanner;
 
-public class TableCardinalityModel implements CostModel {
+public class InMemoryCostModel implements CostModel {
 
   private double defaultSelectivity = 0.1;
-  private long availableMemory = (long) 1e7;
   private HashMap<Relation, Long> cardinality;
   private HashMap<HashSet<Relation>, Long> pairs;
 
-  public TableCardinalityModel(HashMap<Relation, Long> cardinality) {
+  public InMemoryCostModel(HashMap<Relation, Long> cardinality) {
     this.cardinality = cardinality;
   }
 
-  public TableCardinalityModel(Database db, String filename) {
+  public InMemoryCostModel(Database db, String filename) {
     try {
 
       Scanner scanner = new Scanner(new File(filename + "/imdb_tables.txt"));

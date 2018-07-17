@@ -13,7 +13,7 @@ import java.util.Scanner;
 public class IMDBWorkloadGenerator extends WorkloadGenerator {
 
   private Database db;
-  private TableCardinalityModel tm;
+  private InMemoryCostModel tm;
   private String workloadDir;
   private SQL2RelAlg sqlParser;
 
@@ -22,7 +22,7 @@ public class IMDBWorkloadGenerator extends WorkloadGenerator {
     super();
 
     db = new Database(dbschema);
-    tm = new TableCardinalityModel(db, tablestats);
+    tm = new InMemoryCostModel(db, tablestats);
     this.workloadDir = workloadDir;
     sqlParser = new SQL2RelAlg(db);
   }
