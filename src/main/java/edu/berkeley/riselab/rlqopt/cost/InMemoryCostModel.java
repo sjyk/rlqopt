@@ -147,7 +147,8 @@ public class InMemoryCostModel implements CostModel {
       return selectOperator(in, doEstimate(in.source.get(0))).plus(doEstimate(in.source.get(0)));
 
     if (in instanceof GroupByOperator)
-      return groupByOperator(in, estimate(in.source.get(0))).plus(doEstimate(in.source.get(0)));
+      return groupByOperator(in, doEstimate(in.source.get(0))).plus(doEstimate(in.source.get(0)));
+
 
     Cost left = doEstimate(in.source.get(0));
     Cost right = doEstimate(in.source.get(1));
