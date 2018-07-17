@@ -14,7 +14,7 @@ public class IndexJoinOperator extends JoinOperator {
   // override
   public boolean isValid(OperatorParameters params, Operator... source) {
 
-    if (source.length != 2 || getJoinType(params,source) != JoinOperator.KN || source[0].getVisibleRelations().size() != 1) return false;
+    if (source.length != 2 || source[0].getVisibleRelations().size() != 1) return false;
 
     return true;
   }

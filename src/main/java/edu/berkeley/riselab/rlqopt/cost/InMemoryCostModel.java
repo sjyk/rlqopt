@@ -128,7 +128,7 @@ public class InMemoryCostModel implements CostModel {
 
     long iocost = 0;
 
-    return new Cost(0, card, 0);
+    return new Cost(countr, card, 0);
   }
 
   public Cost cartesianOperator(Operator in, Cost l, Cost r) {

@@ -140,7 +140,7 @@ public class JoinOperator extends Operator {
 
   // equalities over join ops ignore physical imp
   public int hashCode() {
-    return this.getVisibleRelations().hashCode();
+    return this.getVisibleAttributes().hashCode();
   }
 
   public boolean equals(Object other) {
