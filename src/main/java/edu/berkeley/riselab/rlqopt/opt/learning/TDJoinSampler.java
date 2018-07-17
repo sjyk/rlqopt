@@ -7,9 +7,12 @@ import edu.berkeley.riselab.rlqopt.Operator;
 import edu.berkeley.riselab.rlqopt.OperatorException;
 import edu.berkeley.riselab.rlqopt.OperatorParameters;
 import edu.berkeley.riselab.rlqopt.Relation;
-import edu.berkeley.riselab.rlqopt.cost.*;
+import edu.berkeley.riselab.rlqopt.cost.CostModel;
+import edu.berkeley.riselab.rlqopt.opt.CostCache;
 import edu.berkeley.riselab.rlqopt.opt.PlanningModule;
-import edu.berkeley.riselab.rlqopt.relalg.*;
+import edu.berkeley.riselab.rlqopt.relalg.CartesianOperator;
+import edu.berkeley.riselab.rlqopt.relalg.JoinOperator;
+import edu.berkeley.riselab.rlqopt.relalg.KWayJoinOperator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -17,7 +20,7 @@ import java.util.Random;
 
 // this implements one transformation
 // of the plan match, discount
-public class TDJoinSampler implements PlanningModule {
+public class TDJoinSampler extends PlanningModule {
 
   boolean resetPerSession;
   Random rand;
@@ -26,9 +29,11 @@ public class TDJoinSampler implements PlanningModule {
   LinkedList<TrainingDataPoint> localData;
   BaselineBushy lfdb;
 
+  private CostCache costCache = new CostCache();
+
   public TDJoinSampler(double alpha) {
 
-    this.rand = new Random();
+    this.rand = new Random(1234);
     this.alpha = alpha;
     trainingData = new LinkedList();
     lfdb = new BaselineBushy();
@@ -94,7 +99,6 @@ public class TDJoinSampler implements PlanningModule {
 
     HashSet<Operator> relations = new HashSet();
 
-  
     for (Operator child : in.source) {
       relations.add(child);
     }
@@ -108,18 +112,18 @@ public class TDJoinSampler implements PlanningModule {
         relations = TDMerge(relations, c, in);
 
         double z = 0.0;
-        for (TrainingDataPoint t : localData) {   
-            //System.out.println(t.cost + " " + i + t.oplist[0] + t.oplist[1]);
+        for (TrainingDataPoint t : localData) {
+          // System.out.println(t.cost + " " + i + t.oplist[0] + t.oplist[1]);
           System.out.println(t.cost + " " + i);
-            //trainingData.add(t);
+          // trainingData.add(t);
         }
 
-        for (TrainingDataPoint t : localData) {   
-            //t.cost /= z;
-            trainingData.add(t);
+        for (TrainingDataPoint t : localData) {
+          // t.cost /= z;
+          trainingData.add(t);
         }
 
-        /*for (TrainingDataPoint t : localData) {   
+        /*for (TrainingDataPoint t : localData) {
             trainingData.add(t);
         }*/
 
@@ -130,7 +134,7 @@ public class TDJoinSampler implements PlanningModule {
 
     Operator rtn = (Operator) relations.toArray()[0];
     // System.out.println(rtn);
-    double cost = c.estimate(rtn).operatorIOcost;
+    //    double cost = c.estimate(rtn).operatorIOcost;
 
     /*if (rtn instanceof CartesianOperator)
       System.out.println("C:" + cost);
@@ -239,7 +243,9 @@ public class TDJoinSampler implements PlanningModule {
 
         // exploration
         // System.out.println(rand.nextGaussian());
-        double cost = c.estimate(baseline).operatorIOcost + c.estimate(cjv).operatorIOcost;
+        double cost =
+            costCache.getOrComputeIOEstimate(baseline, c, this.name)
+                + costCache.getOrComputeIOEstimate(cjv, c, this.name);
 
         Operator[] trainingToJoin = new Operator[4];
         trainingToJoin[0] = i;
@@ -253,7 +259,7 @@ public class TDJoinSampler implements PlanningModule {
 
         if ((cost < minCost) && !egreedy) {
           minCost = cost;
-          minGreedyCost = Math.log(c.estimate(cjv).operatorIOcost);
+          //          minGreedyCost = Math.log(c.estimate(cjv).operatorIOcost);
           pairToJoin[0] = i;
           pairToJoin[1] = j;
           pairToJoin[2] = cjv;

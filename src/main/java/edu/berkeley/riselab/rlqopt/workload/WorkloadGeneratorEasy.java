@@ -26,7 +26,7 @@ public class WorkloadGeneratorEasy extends WorkloadGenerator {
 
     db = ds.getDatabase();
     ts = ds.getStats();
-    rand = new Random();
+    rand = new Random(1234);
   }
 
   public TableStatisticsModel getStatsModel() {
