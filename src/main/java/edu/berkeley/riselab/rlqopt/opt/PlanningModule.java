@@ -1,12 +1,13 @@
 package edu.berkeley.riselab.rlqopt.opt;
 
 import edu.berkeley.riselab.rlqopt.Operator;
-import edu.berkeley.riselab.rlqopt.cost.*;
+import edu.berkeley.riselab.rlqopt.cost.CostModel;
 
-// this implements one transformation
-// of the plan
-public interface PlanningModule {
+public abstract class PlanningModule {
+
+  /** Propagated by the encapsulating Planner. */
+  public String name = null;
 
   // takes an operator returns an equivalent operator
-  public Operator apply(Operator in, CostModel c);
+  public abstract Operator apply(Operator in, CostModel c);
 }

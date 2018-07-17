@@ -7,7 +7,7 @@ import edu.berkeley.riselab.rlqopt.OperatorException;
 import edu.berkeley.riselab.rlqopt.OperatorParameters;
 import edu.berkeley.riselab.rlqopt.Relation;
 import edu.berkeley.riselab.rlqopt.cost.*;
-import edu.berkeley.riselab.rlqopt.opt.CostCachingModule;
+import edu.berkeley.riselab.rlqopt.opt.CostCache;
 import edu.berkeley.riselab.rlqopt.opt.PlanningModule;
 import edu.berkeley.riselab.rlqopt.relalg.*;
 import java.util.HashMap;
@@ -16,11 +16,11 @@ import java.util.LinkedList;
 
 // this implements one transformation
 // of the plan match
-public class RightDeepJoinReorder implements PlanningModule, CostCachingModule {
+public class RightDeepJoinReorder extends PlanningModule {
 
   boolean resetPerSession;
 
-  public RightDeepJoinReorder() {}
+  private CostCache costCache = new CostCache();
 
   private LinkedList<Attribute>[] getLeftRightAttributes(Expression e) {
 
@@ -68,8 +68,8 @@ public class RightDeepJoinReorder implements PlanningModule, CostCachingModule {
     if (!map.containsKey(key)) return newOp;
     else {
       Operator oldOp = map.get(key);
-      double oldOpCost = getOrComputeIOEstimate(oldOp, c);
-      double newOpCost = getOrComputeIOEstimate(newOp, c);
+      double oldOpCost = costCache.getOrComputeIOEstimate(oldOp, c, this.name);
+      double newOpCost = costCache.getOrComputeIOEstimate(newOp, c, this.name);
 
       //System.out.println(">>>"+oldOp);
 
@@ -112,6 +112,10 @@ public class RightDeepJoinReorder implements PlanningModule, CostCachingModule {
         continue;
       }
     }
+
+
+    System.out.print("right deep: ");
+    costCache.report();
 
     return (Operator) costMap.values().toArray()[0];
   }

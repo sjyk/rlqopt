@@ -7,7 +7,8 @@ import edu.berkeley.riselab.rlqopt.OperatorException;
 import edu.berkeley.riselab.rlqopt.OperatorParameters;
 import edu.berkeley.riselab.rlqopt.Relation;
 import edu.berkeley.riselab.rlqopt.cost.CostModel;
-import edu.berkeley.riselab.rlqopt.opt.CostCachingModule;
+import edu.berkeley.riselab.rlqopt.opt.CostCache;
+import edu.berkeley.riselab.rlqopt.opt.PlanningModule;
 import edu.berkeley.riselab.rlqopt.relalg.JoinOperator;
 import edu.berkeley.riselab.rlqopt.relalg.KWayJoinOperator;
 import java.util.HashMap;
@@ -16,11 +17,11 @@ import java.util.LinkedList;
 
 // this implements one transformation
 // of the plan match
-public class BaselineBushy implements CostCachingModule {
+public class BaselineBushy extends PlanningModule {
 
   boolean resetPerSession;
 
-  public BaselineBushy() {}
+  private CostCache costCache = new CostCache();
 
   private LinkedList<Attribute>[] getLeftRightAttributes(Expression e) {
 
@@ -68,8 +69,8 @@ public class BaselineBushy implements CostCachingModule {
     if (!map.containsKey(key)) return newOp;
     else {
       Operator oldOp = map.get(key);
-      double oldOpCost = getOrComputeIOEstimate(oldOp, c);
-      double newOpCost = getOrComputeIOEstimate(newOp, c);
+      double oldOpCost = costCache.getOrComputeIOEstimate(oldOp, c, this.name);
+      double newOpCost = costCache.getOrComputeIOEstimate(newOp, c, this.name);
 
       if (newOpCost < oldOpCost) return newOp;
       else return oldOp;

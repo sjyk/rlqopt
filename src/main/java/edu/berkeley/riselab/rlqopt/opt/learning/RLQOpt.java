@@ -20,6 +20,10 @@ public class RLQOpt extends Planner implements Trainable {
   TrainingDataGenerator tgen;
   ModelTrainer model;
 
+  public void reportInferenceNumEvals() {
+    learner.reportInferenceNumEvals();
+  }
+
   public RLQOpt(WorkloadGenerator w) {
 
     super(new LinkedList(), new LinkedList(), new LinkedList());

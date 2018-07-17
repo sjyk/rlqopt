@@ -69,6 +69,7 @@ public class Planner {
 
   protected void setPlannerName(String name) {
     this.name = name;
+    for (PlanningModule planningModule : this.planners) planningModule.name = name;
   }
 
   public String getPlannerName() {

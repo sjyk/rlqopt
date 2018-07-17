@@ -9,6 +9,7 @@ import edu.berkeley.riselab.rlqopt.OperatorException;
 import edu.berkeley.riselab.rlqopt.OperatorParameters;
 import edu.berkeley.riselab.rlqopt.Relation;
 import edu.berkeley.riselab.rlqopt.cost.*;
+import edu.berkeley.riselab.rlqopt.opt.CostCache;
 import edu.berkeley.riselab.rlqopt.opt.PlanningModule;
 import edu.berkeley.riselab.rlqopt.relalg.*;
 import java.util.HashMap;
@@ -20,7 +21,7 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 
 // this implements one transformation
 // of the plan match, discount
-public class TDJoinExecutor implements PlanningModule {
+public class TDJoinExecutor extends PlanningModule {
 
   boolean resetPerSession;
   Random rand;
@@ -29,12 +30,14 @@ public class TDJoinExecutor implements PlanningModule {
   LinkedList<TrainingDataPoint> localData;
   MultiLayerNetwork net;
   Database db;
-
   BaselineLeftDeep lfdb;
+  private CostCache costCache = new CostCache();
+
+  int numNetEvals = 0;
 
   public TDJoinExecutor(Database db) {
 
-    this.rand = new Random();
+    this.rand = new Random(1234);
     this.alpha = alpha;
     this.db = db;
     trainingData = new LinkedList();
@@ -205,9 +208,10 @@ public class TDJoinExecutor implements PlanningModule {
 
           INDArray out =
               DataNormalizer.revertLabel(net.output(DataNormalizer.transformFeature(input), false));
+          ++numNetEvals;
           cost = out.getDouble(0);
         } else {
-          cost = c.estimate(cjv).operatorIOcost;
+          cost = costCache.getOrComputeIOEstimate(cjv, c, this.name);
         }
 
         // if (Double.isNaN(cost)) cost = c.estimate(cjv).operatorIOcost;
