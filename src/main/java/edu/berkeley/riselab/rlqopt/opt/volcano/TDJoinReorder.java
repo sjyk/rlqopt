@@ -7,20 +7,22 @@ import edu.berkeley.riselab.rlqopt.Operator;
 import edu.berkeley.riselab.rlqopt.OperatorException;
 import edu.berkeley.riselab.rlqopt.OperatorParameters;
 import edu.berkeley.riselab.rlqopt.Relation;
-import edu.berkeley.riselab.rlqopt.cost.*;
+import edu.berkeley.riselab.rlqopt.cost.CostModel;
+import edu.berkeley.riselab.rlqopt.opt.CostCache;
 import edu.berkeley.riselab.rlqopt.opt.PlanningModule;
-import edu.berkeley.riselab.rlqopt.relalg.*;
+import edu.berkeley.riselab.rlqopt.relalg.JoinOperator;
+import edu.berkeley.riselab.rlqopt.relalg.KWayJoinOperator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 
 // this implements one transformation
 // of the plan match
-public class TDJoinReorder implements PlanningModule {
+public class TDJoinReorder extends PlanningModule {
 
   boolean resetPerSession;
 
-  public TDJoinReorder() {}
+  private CostCache costCache = new CostCache();
 
   private LinkedList<Attribute>[] getLeftRightAttributes(Expression e) {
 
@@ -135,7 +137,7 @@ public class TDJoinReorder implements PlanningModule {
         if (i == j) continue;
 
         // no plans that are not left deep
-        //if (j.getVisibleRelations().size() > 1) continue;
+        // if (j.getVisibleRelations().size() > 1) continue;
 
         Expression e = findJoinExpression(in.params.expression, i, j);
 
@@ -143,7 +145,7 @@ public class TDJoinReorder implements PlanningModule {
 
         OperatorParameters params = new OperatorParameters(e.getExpressionList());
         JoinOperator cjv = new JoinOperator(params, i, j);
-        double cost = c.estimate(cjv).operatorIOcost;
+        double cost = costCache.getOrComputeIOEstimate(cjv, c, this.name);
 
         if (cost < minCost) {
           minCost = cost;

@@ -4,13 +4,15 @@ import edu.berkeley.riselab.rlqopt.experiments.Experiment;
 import edu.berkeley.riselab.rlqopt.opt.Planner;
 import edu.berkeley.riselab.rlqopt.opt.bushy.PostgresBushyPlanner;
 import edu.berkeley.riselab.rlqopt.opt.learning.RLQOpt;
+import edu.berkeley.riselab.rlqopt.opt.minselect.MinSelectPlanner;
 import edu.berkeley.riselab.rlqopt.opt.nopt.NoPlanner;
 import edu.berkeley.riselab.rlqopt.opt.postgres.PostgresPlanner;
-import edu.berkeley.riselab.rlqopt.opt.rightdeep.RightDeepPlanner;
 import edu.berkeley.riselab.rlqopt.opt.quickpick.QuickPickPlanner;
+import edu.berkeley.riselab.rlqopt.opt.rightdeep.RightDeepPlanner;
 import edu.berkeley.riselab.rlqopt.opt.volcano.VolcanoPlanner;
 import edu.berkeley.riselab.rlqopt.workload.DatasetGenerator;
 import edu.berkeley.riselab.rlqopt.workload.IMDBWorkloadGenerator;
+import edu.berkeley.riselab.rlqopt.workload.WorkloadGenerator;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -167,23 +169,26 @@ public class DoExperiments extends TestCase {
 
     final int numTraining = 50;
     final int numTesting = 50;
+    //    final int numTraining = 80;
+    //    final int numTesting = 113;
 
     // When non-null: load from this file without re-generation, or generate once and persist it.
     // Pass null to disable this caching behavior.
     String trainingDataPath = "job-" + numTraining + ".dat";
 
     LinkedList<Planner> planners = new LinkedList<>();
-    planners.add(new NoPlanner());
+    //        planners.add(new NoPlanner());
     planners.add(new RLQOpt(workload, trainingDataPath));
     planners.add(new PostgresBushyPlanner());
-    planners.add(new PostgresPlanner());
     planners.add(new RightDeepPlanner());
+    planners.add(new PostgresPlanner());
     planners.add(new VolcanoPlanner());
     planners.add(new QuickPickPlanner(1000));
     planners.add(new QuickPickPlanner(1));
+    planners.add(new MinSelectPlanner());
 
-    //Experiment e = new Experiment(workload, 90, 113, planners);
-    Experiment e = new Experiment(workload,numTraining, numTesting, planners);
+    // Experiment e = new Experiment(workload, 90, 113, planners);
+    Experiment e = new Experiment(workload, numTraining, numTesting, planners);
     e.train();
     e.run();
 
@@ -194,5 +199,18 @@ public class DoExperiments extends TestCase {
     System.out.print("Planning latency: ");
     Map<Planner, Double> latencies = e.getBaselineLatency();
     printSorted(latencies);
+
+    reportNumEvaluations(workload, planners);
+  }
+
+  void reportNumEvaluations(WorkloadGenerator workload, List<Planner> planners) {
+    workload.getStatsModel().reportNumEvaluations();
+    for (Planner p : planners) {
+      if (p instanceof RLQOpt) {
+        RLQOpt learning = (RLQOpt) p;
+        learning.reportInferenceNumEvals();
+        break;
+      }
+    }
   }
 }

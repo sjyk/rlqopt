@@ -8,6 +8,7 @@ import edu.berkeley.riselab.rlqopt.OperatorException;
 import edu.berkeley.riselab.rlqopt.OperatorParameters;
 import edu.berkeley.riselab.rlqopt.Relation;
 import edu.berkeley.riselab.rlqopt.cost.CostModel;
+import edu.berkeley.riselab.rlqopt.opt.CostCache;
 import edu.berkeley.riselab.rlqopt.opt.PlanningModule;
 import edu.berkeley.riselab.rlqopt.relalg.JoinOperator;
 import edu.berkeley.riselab.rlqopt.relalg.KWayJoinOperator;
@@ -17,9 +18,9 @@ import java.util.LinkedList;
 
 // this implements one transformation
 // of the plan match
-public class MinSelect implements PlanningModule {
+public class MinSelect extends PlanningModule {
 
-  public MinSelect() {}
+  private CostCache costCache = new CostCache();
 
   private LinkedList<Attribute>[] getLeftRightAttributes(Expression e) {
 
@@ -96,7 +97,7 @@ public class MinSelect implements PlanningModule {
 
       if (currPlan == null) {
         for (Operator baseRel : relations) {
-          double card = c.estimate(baseRel).resultCardinality;
+          double card = costCache.getOrComputeCardinality(baseRel, c, this.name);
           if (card < minSelectivity) {
             currPlan = baseRel;
             bestRel = baseRel;
@@ -112,9 +113,9 @@ public class MinSelect implements PlanningModule {
           JoinOperator newJoin = new JoinOperator(params, currPlan, baseRel);
 
           double card =
-              c.estimate(newJoin).resultCardinality
-                  / (c.estimate(currPlan).resultCardinality
-                      * c.estimate(baseRel).resultCardinality);
+              costCache.getOrComputeCardinality(newJoin, c, this.name)
+                  / (costCache.getOrComputeCardinality(currPlan, c, this.name)
+                      * costCache.getOrComputeCardinality(baseRel, c, this.name));
 
           if (card < minSelectivity) {
             currPlan = newJoin;
