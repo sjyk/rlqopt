@@ -116,6 +116,17 @@ public class LeftDeepJoinReorder implements PlanningModule, CostCachingModule {
     return (Operator) costMap.values().toArray()[0];
   }
 
+  private Operator physicalOperatorSelection(OperatorParameters params, Operator child, Operator val, CostModel c) throws OperatorException
+  {
+     HashJoinOperator join1 = new HashJoinOperator(params, child, val);
+     IndexJoinOperator join2 = new IndexJoinOperator(params, child, val);
+
+     if (join2.isValid() && getOrComputeIOEstimate(join2, c) < getOrComputeIOEstimate(join1, c))
+      return join2;
+
+     return join1;
+  }
+
   private HashMap<HashSet<Operator>, Operator> dynamicProgram(
       HashMap<HashSet<Operator>, Operator> costMap, CostModel c, Operator in)
       throws OperatorException {
@@ -141,6 +152,7 @@ public class LeftDeepJoinReorder implements PlanningModule, CostCachingModule {
             continue;
           } else if (isSubList(joinedAttributes, left) && !key.contains(child)) {
             OperatorParameters params = new OperatorParameters(e.getExpressionList());
+            
             JoinOperator cjv = new JoinOperator(params, child, val);
 
             HashSet<Operator> cloneset = (HashSet) key.clone();

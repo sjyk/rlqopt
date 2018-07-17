@@ -16,6 +16,7 @@ public class TableCardinalityModel implements CostModel {
   private double defaultSelectivity = 0.1;
   private long availableMemory = (long) 1e7;
   private HashMap<Relation, Long> cardinality;
+  private HashMap<HashSet<Relation>, Long> pairs;
 
   public TableCardinalityModel(HashMap<Relation, Long> cardinality) {
     this.cardinality = cardinality;
@@ -24,8 +25,9 @@ public class TableCardinalityModel implements CostModel {
   public TableCardinalityModel(Database db, String filename) {
     try {
 
-      Scanner scanner = new Scanner(new File(filename));
+      Scanner scanner = new Scanner(new File(filename+"/imdb_tables.txt"));
       cardinality = new HashMap();
+      pairs = new HashMap();
 
       while (scanner.hasNext()) {
         String[] line = scanner.nextLine().trim().split(":");
@@ -33,6 +35,33 @@ public class TableCardinalityModel implements CostModel {
         long r_cardinality = Long.parseLong(line[1]);
         cardinality.put(r, r_cardinality);
       }
+
+      scanner.close();
+
+      scanner = new Scanner(new File(filename+"/pairs.csv"));
+
+      while (scanner.hasNext()) {
+        String[] line = scanner.nextLine().split(",");
+
+        String t1 = line[0].trim();
+        Relation r = db.getByName(t1);
+
+        String t2 = line[1].trim();
+        Relation s = db.getByName(t2);
+
+        HashSet<Relation> rels = new HashSet();
+        rels.add(r);
+        rels.add(s);
+
+        long card = Long.parseLong(line[2].trim());
+
+        pairs.put(rels, card);
+      }
+
+      scanner.close();
+
+      //System.out.println(cardinality);
+      //System.out.println(pairs);
 
     } catch (FileNotFoundException e) {
       e.printStackTrace();
@@ -46,7 +75,7 @@ public class TableCardinalityModel implements CostModel {
     for (Relation iter : rels) rel = iter;
 
     long count = cardinality.get(rel);
-    return new Cost(0, count, 0);
+    return new Cost(count, count, 0);
   }
 
   public Cost projectOperator(Operator in, Cost costIn) {
@@ -62,57 +91,50 @@ public class TableCardinalityModel implements CostModel {
     return new Cost(costIn.resultCardinality, count, 0);
   }
 
-  public Cost joinOperator(Operator in, Cost l, Cost r) {
+  public long getJoinCardinality(Operator in, Cost l, Cost r){
+    long countl = l.resultCardinality;
+    long countr = r.resultCardinality;
+
+    Relation el = in.params.expression.get(0).children.get(0).noop.relation;
+    Relation er = in.params.expression.get(0).children.get(1).noop.relation;
+    HashSet<Relation> rels = new HashSet();
+    rels.add(el);
+    rels.add(er);
+    long cartCard = cardinality.get(el)*cardinality.get(er);
+    long pairCard = pairs.get(rels);
+    double rf = (pairCard + 0.)/cartCard;
+
+    JoinOperator jop = (JoinOperator) in;
+    
+    return (long) (rf*(countl*countr));
+  }
+
+
+  public Cost hashJoinOperator(Operator in, Cost l, Cost r) {
 
     long countl = l.resultCardinality;
     long countr = r.resultCardinality;
 
-    JoinOperator jop = (JoinOperator) in;
+    long card = getJoinCardinality(in,l,r);
 
+    long iocost = 3*(countl + countr) + card;
 
-    long iocost = 0;
-
-    //model materialization
-
-    if ((availableMemory > countr + countl))
-      iocost = 0;
-    else if ((availableMemory > countr &&  availableMemory > countl))
-      iocost = Math.min(countl, countr);
-    else if (availableMemory > countr)
-      iocost = countl;
-    else if (availableMemory > countl)
-      iocost = countr;
-    else
-      iocost = countl + countr;
-    
-
-    //long card = (countl < 1e2 || countr < 1e2) ? countr*countl : Math.min(countr, countl);
-
-    switch (jop.getJoinType()) {
-      case JoinOperator.IE:
-        return new Cost(iocost, 0.0, 0);
-      
-      case JoinOperator.NN:
-        //System.out.println("nn: " + iocost + " , " + countr);
-        return new Cost(iocost,  countr+countl , 0);
-      
-      case JoinOperator.NK:
-        return new Cost(iocost, countl, 0);
-      
-      case JoinOperator.KN:
-        
-        if (in.source.get(0).getVisibleRelations().size() == 1)
-          return new Cost(countr, countr, 0);
-        else
-          return new Cost(iocost, countr, 0);
-
-      case JoinOperator.KK:
-        return new Cost(countl, Math.min(countl, countr), 0);
-    }
-
-    //System.out.println("bear");
-    return new Cost(countl + countl * countr, countl * countr, 0);
+    return new Cost(iocost, card, 0);
   }
+
+
+  public Cost indexJoinOperator(Operator in, Cost l, Cost r) {
+
+    long countl = l.resultCardinality;
+    long countr = r.resultCardinality;
+
+    long card = getJoinCardinality(in,l,r);
+
+    long iocost = card;
+
+    return new Cost(iocost, card, 0);
+  }
+
 
   public Cost cartesianOperator(Operator in, Cost l, Cost r) {
 
@@ -132,32 +154,22 @@ public class TableCardinalityModel implements CostModel {
     if (in instanceof GroupByOperator)
       return groupByOperator(in, estimate(in.source.get(0))).plus(doEstimate(in.source.get(0)));
 
-    if (in instanceof JoinOperator) {
-      
+    Cost left = doEstimate(in.source.get(0));
+    Cost right = doEstimate(in.source.get(1));
+
+    if (in instanceof HashJoinOperator) {
       JoinOperator jop = (JoinOperator) in;
+      return hashJoinOperator(in, left, right).plus(left).plus(right);
+    }
 
-      Cost left = doEstimate(in.source.get(0));
-      Cost right = doEstimate(in.source.get(1));
+    if (in instanceof IndexJoinOperator) {
+      JoinOperator jop = (JoinOperator) in;
+      return indexJoinOperator(in, left, right).plus(left).plus(right);
+    }
 
-      switch (jop.getJoinType()) {
-        case JoinOperator.IE:
-          return joinOperator(in, left, right).plus(left).plus(right);
-        case JoinOperator.NN:
-          return joinOperator(in, left, right).plus(left).plus(right);
-        case JoinOperator.NK:
-          return joinOperator(in, left, right).plus(left).plus(right);
-        case JoinOperator.KN:
-
-          if (in.source.get(0).getVisibleRelations().size() == 1)
-            return joinOperator(in, left, right).plus(right);
-          else
-            return joinOperator(in, left, right).plus(left).plus(right);
-
-        case JoinOperator.KK:
-          return joinOperator(in, left, right).plus(left).plus(right);
-      }
-
-      return joinOperator(in, left, right).plus(left).plus(right);
+    if (in instanceof JoinOperator) {
+      JoinOperator jop = (JoinOperator) in;
+      return hashJoinOperator(in, left, right).plus(left).plus(right);
     }
 
     if (in instanceof CartesianOperator)
@@ -170,7 +182,6 @@ public class TableCardinalityModel implements CostModel {
 
   public Cost estimate(Operator in) {
     Cost runningCost = doEstimate(in);
-    runningCost.operatorIOcost += runningCost.resultCardinality;
 
     if (runningCost.operatorIOcost < 0) runningCost.operatorIOcost = Long.MAX_VALUE;
 

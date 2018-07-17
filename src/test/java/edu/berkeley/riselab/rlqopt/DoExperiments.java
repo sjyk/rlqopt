@@ -163,24 +163,26 @@ public class DoExperiments extends TestCase {
   public void test2() throws OperatorException, SqlParseException {
     IMDBWorkloadGenerator workload =
         new IMDBWorkloadGenerator(
-            "schematext.sql", "imdb_tables.txt", "join-order-benchmark/queries/queries.sql");
+            "schematext.sql", "tablestats", "join-order-benchmark/queries/queries.sql");
 
     final int numTraining = 50;
     final int numTesting = 50;
 
     // When non-null: load from this file without re-generation, or generate once and persist it.
     // Pass null to disable this caching behavior.
-    String trainingDataPath = "job-" + numTraining + ".dat";
+    String trainingDataPath = null;//"job-" + numTraining + ".dat";
 
     LinkedList<Planner> planners = new LinkedList<>();
     planners.add(new NoPlanner());
-    planners.add(new RLQOpt(workload, trainingDataPath));
+    planners.add(new PostgresPlanner());
+    
+    /*planners.add(new RLQOpt(workload, trainingDataPath));
     planners.add(new PostgresBushyPlanner());
     planners.add(new PostgresPlanner());
     planners.add(new RightDeepPlanner());
     planners.add(new VolcanoPlanner());
     planners.add(new QuickPickPlanner(1000));
-    planners.add(new QuickPickPlanner(1));
+    planners.add(new QuickPickPlanner(1));*/
 
     //Experiment e = new Experiment(workload, 90, 113, planners);
     Experiment e = new Experiment(workload,numTraining, numTesting, planners);
