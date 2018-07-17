@@ -54,6 +54,31 @@ public class JoinOperator extends Operator {
     return IE;
   }
 
+  public int getJoinType(OperatorParameters params, Operator... source) {
+
+    if (params.expression.get(0).isEquality()) {
+
+      HashSet<Attribute> leftKeys = source[0].getKeys();
+      HashSet<Attribute> rightKeys = source[1].getKeys();
+      LinkedList<Attribute> visibleAttrs = params.expression.get(0).getVisibleAttributes();
+
+      for (Attribute attr : visibleAttrs) {
+        if (leftKeys.contains(attr)) leftKeys.remove(attr);
+
+        if (rightKeys.contains(attr)) rightKeys.remove(attr);
+      }
+      if (leftKeys.size() == 0 && rightKeys.size() > 0) return KN;
+
+      if (leftKeys.size() > 0 && rightKeys.size() == 0) return NK;
+
+      if (leftKeys.size() == 0 && rightKeys.size() == 0) return KK;
+
+      return NN;
+    }
+
+    return IE;
+  }
+
   public String toSQLString() {
     String className = this.getClass().getSimpleName();
 
@@ -73,4 +98,15 @@ public class JoinOperator extends Operator {
 
     return "(" + prefix + ") as " + className + hashCode();
   }
+
+  //equalities over join ops ignore physical imp
+  public int hashCode(){
+     return this.getVisibleRelations().hashCode();
+  }
+
+  public boolean equals(Object other){
+     JoinOperator op = (JoinOperator) other;
+     return op.hashCode() == this.hashCode();
+  }
+
 }

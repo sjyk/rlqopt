@@ -99,7 +99,7 @@ public class TrainingDataPoint {
       vector[allAttributes.indexOf(a) + 3 * n] = 1.0;
     }
 
-    vector[4 * n] = 0.0;//size;
+    vector[4 * n] = 0.0; // size;
 
     vector[4 * n + 1] = gcost;
 

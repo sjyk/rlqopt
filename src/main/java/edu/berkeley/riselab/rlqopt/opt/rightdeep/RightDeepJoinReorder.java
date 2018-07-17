@@ -6,7 +6,7 @@ import edu.berkeley.riselab.rlqopt.Operator;
 import edu.berkeley.riselab.rlqopt.OperatorException;
 import edu.berkeley.riselab.rlqopt.OperatorParameters;
 import edu.berkeley.riselab.rlqopt.Relation;
-import edu.berkeley.riselab.rlqopt.cost.*;
+import edu.berkeley.riselab.rlqopt.cost.CostModel;
 import edu.berkeley.riselab.rlqopt.opt.CostCache;
 import edu.berkeley.riselab.rlqopt.opt.PlanningModule;
 import edu.berkeley.riselab.rlqopt.relalg.*;
@@ -14,13 +14,16 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 
+
+// this implements one transformation
+// of the plan match
 // this implements one transformation
 // of the plan match
 public class RightDeepJoinReorder extends PlanningModule {
 
   boolean resetPerSession;
 
-  private CostCache costCache = new CostCache();
+  protected CostCache costCache = new CostCache();
 
   private LinkedList<Attribute>[] getLeftRightAttributes(Expression e) {
 
@@ -71,7 +74,7 @@ public class RightDeepJoinReorder extends PlanningModule {
       double oldOpCost = costCache.getOrComputeIOEstimate(oldOp, c, this.name);
       double newOpCost = costCache.getOrComputeIOEstimate(newOp, c, this.name);
 
-      //System.out.println(">>>"+oldOp);
+      // System.out.println(">>>"+oldOp);
 
       if (newOpCost < oldOpCost) return newOp;
       else return oldOp;
@@ -105,7 +108,7 @@ public class RightDeepJoinReorder extends PlanningModule {
 
     // System.out.println(costMap);
 
-    for (int i = 0; i < in.source.size() - 1; i++) {
+    for (int i = 0; i < in.source.size()-1; i++) {
       try {
         costMap = dynamicProgram(costMap, c, in);
       } catch (OperatorException opex) {
@@ -113,11 +116,26 @@ public class RightDeepJoinReorder extends PlanningModule {
       }
     }
 
+    //System.out.print("left deep: ");
+    //costCache.report();
 
-    System.out.print("right deep: ");
-    costCache.report();
+    //System.out.println("end");
+    //System.out.println("end: " + costMap.size());
 
     return (Operator) costMap.values().toArray()[0];
+  }
+
+  private JoinOperator physicalOperatorSelection(
+      OperatorParameters params, Operator child, Operator val, CostModel c)
+      throws OperatorException {
+
+    HashJoinOperator join1 = new HashJoinOperator(params, val, child);
+    IndexJoinOperator join2 = new IndexJoinOperator(params, val, child);
+
+    if (join2.isValid() && costCache.getOrComputeIOEstimate(join2, c, this.name) < costCache.getOrComputeIOEstimate(join1, c, this.name))
+      return join2;
+
+    return join1;
   }
 
   private HashMap<HashSet<Operator>, Operator> dynamicProgram(
@@ -145,7 +163,8 @@ public class RightDeepJoinReorder extends PlanningModule {
             continue;
           } else if (isSubList(joinedAttributes, left) && !key.contains(child)) {
             OperatorParameters params = new OperatorParameters(e.getExpressionList());
-            JoinOperator cjv = new JoinOperator(params, val, child);
+
+            JoinOperator cjv = physicalOperatorSelection(params, child, val,c);
 
             HashSet<Operator> cloneset = (HashSet) key.clone();
             cloneset.add(child);
@@ -157,7 +176,7 @@ public class RightDeepJoinReorder extends PlanningModule {
 
           } else if (isSubList(joinedAttributes, right) && !key.contains(child)) {
             OperatorParameters params = new OperatorParameters(e.getExpressionList());
-            JoinOperator cjv = new JoinOperator(params, val, child);
+            JoinOperator cjv = physicalOperatorSelection(params, child, val, c);
             HashSet<Operator> cloneset = (HashSet) key.clone();
             cloneset.add(child);
             result.put(cloneset, greatest(result, c, cloneset, cjv));

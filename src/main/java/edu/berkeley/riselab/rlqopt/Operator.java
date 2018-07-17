@@ -17,7 +17,7 @@ public abstract class Operator {
   /** An operator takes as input a number of source operators. Throws an OperatorException */
   public Operator(OperatorParameters params, Operator... source) throws OperatorException {
 
-    if (!isValid(params, source)) throw new OperatorException(source);
+    //if (!isValid(params, source)) throw new OperatorException(source);
 
     // init the operator
     this.source = new LinkedList<Operator>();

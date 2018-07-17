@@ -8,12 +8,9 @@ import edu.berkeley.riselab.rlqopt.OperatorException;
 import edu.berkeley.riselab.rlqopt.OperatorParameters;
 import edu.berkeley.riselab.rlqopt.Relation;
 import edu.berkeley.riselab.rlqopt.cost.CostModel;
-import edu.berkeley.riselab.rlqopt.opt.CostCachingModule;
+import edu.berkeley.riselab.rlqopt.opt.CostCache;
 import edu.berkeley.riselab.rlqopt.opt.PlanningModule;
-
 import edu.berkeley.riselab.rlqopt.relalg.JoinOperator;
-import edu.berkeley.riselab.rlqopt.relalg.CartesianOperator;
-
 import edu.berkeley.riselab.rlqopt.relalg.KWayJoinOperator;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,10 +19,11 @@ import java.util.List;
 import java.util.Random;
 import org.apache.calcite.util.Pair;
 
-public class QuickPick implements PlanningModule, CostCachingModule {
+public class QuickPick extends PlanningModule {
 
   private int numTrajectories;
   private Random random;
+  private CostCache costCache = new CostCache();
 
   QuickPick(int numTrajectories) {
     this.numTrajectories = numTrajectories;
@@ -122,7 +120,7 @@ public class QuickPick implements PlanningModule, CostCachingModule {
   // "relations" is a forest.
   private double totalCost(List<Operator> relations, CostModel c) {
     double cost = 0;
-    for (Operator rel : relations) cost += getOrComputeIOEstimate(rel, c);
+    for (Operator rel : relations) cost += costCache.getOrComputeIOEstimate(rel, c, this.name);
     return cost;
   }
 
@@ -131,7 +129,7 @@ public class QuickPick implements PlanningModule, CostCachingModule {
       throws OperatorException {
     if (relations.size() == 1) {
       Operator finalJoin = (Operator) (relations.toArray()[0]);
-      return new Pair<>(finalJoin, getOrComputeIOEstimate(finalJoin, c));
+      return new Pair<>(finalJoin, costCache.getOrComputeIOEstimate(finalJoin, c, this.name));
     }
     // Pick a random & valid edge (i, j) to join.
     int n = relations.size();
@@ -146,22 +144,22 @@ public class QuickPick implements PlanningModule, CostCachingModule {
       left = relations.get(i);
       right = relations.get(j);
       Expression e = findJoinExpression(in.params.expression, left, right);
-      
+
       if (e == null) {
-         // OperatorParameters params = new OperatorParameters(new ExpressionList());
-         // randomJoin = new CartesianOperator(params, left, right);
+        // OperatorParameters params = new OperatorParameters(new ExpressionList());
+        // randomJoin = new CartesianOperator(params, left, right);
         continue;
-        
+
       } else {
-          OperatorParameters params = new OperatorParameters(e.getExpressionList());
-          randomJoin = new JoinOperator(params, left, right);
+        OperatorParameters params = new OperatorParameters(e.getExpressionList());
+        randomJoin = new JoinOperator(params, left, right);
       }
 
       break;
     }
 
     // Optimization.
-    if (getOrComputeIOEstimate(randomJoin, c) >= bestCost) {
+    if (costCache.getOrComputeIOEstimate(randomJoin, c,this.name) >= bestCost) {
       return null;
     }
 

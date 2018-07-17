@@ -1,4 +1,4 @@
-package edu.berkeley.riselab.rlqopt.opt.bushy;
+package edu.berkeley.riselab.rlqopt.opt.zigzag;
 
 import edu.berkeley.riselab.rlqopt.Attribute;
 import edu.berkeley.riselab.rlqopt.Expression;
@@ -9,7 +9,7 @@ import edu.berkeley.riselab.rlqopt.OperatorParameters;
 import edu.berkeley.riselab.rlqopt.Relation;
 import edu.berkeley.riselab.rlqopt.cost.*;
 import edu.berkeley.riselab.rlqopt.opt.PlanningModule;
-import edu.berkeley.riselab.rlqopt.opt.learning.BaselineBushy;
+import edu.berkeley.riselab.rlqopt.opt.learning.BaselineZigZag;
 import edu.berkeley.riselab.rlqopt.relalg.*;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,14 +17,14 @@ import java.util.LinkedList;
 
 // this implements one transformation
 // of the plan match, discount
-public class BushyJoinEnumerator extends PlanningModule {
+public class ZigZagEnumerator extends PlanningModule {
 
   boolean resetPerSession;
   double alpha;
-  BaselineBushy lfdb;
+  BaselineZigZag lfdb;
 
-  public BushyJoinEnumerator() {
-    lfdb = new BaselineBushy();
+  public ZigZagEnumerator() {
+    lfdb = new BaselineZigZag();
   }
 
   private LinkedList<Attribute>[] getLeftRightAttributes(Expression e) {

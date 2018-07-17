@@ -9,8 +9,7 @@ import edu.berkeley.riselab.rlqopt.Relation;
 import edu.berkeley.riselab.rlqopt.cost.CostModel;
 import edu.berkeley.riselab.rlqopt.opt.CostCache;
 import edu.berkeley.riselab.rlqopt.opt.PlanningModule;
-import edu.berkeley.riselab.rlqopt.relalg.JoinOperator;
-import edu.berkeley.riselab.rlqopt.relalg.KWayJoinOperator;
+import edu.berkeley.riselab.rlqopt.relalg.*;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -125,6 +124,19 @@ public class BaselineBushy extends PlanningModule {
     return costMap.get(childOps);
   }
 
+  private JoinOperator physicalOperatorSelection(
+      OperatorParameters params, Operator child, Operator val, CostModel c)
+      throws OperatorException {
+
+    HashJoinOperator join1 = new HashJoinOperator(params, child, val);
+    IndexJoinOperator join2 = new IndexJoinOperator(params, child, val);
+
+    if (join2.isValid() && costCache.getOrComputeIOEstimate(join2, c, this.name) < costCache.getOrComputeIOEstimate(join1, c, this.name))
+      return join2;
+
+    return join1;
+  }
+
   private HashMap<HashSet<Operator>, Operator> dynamicProgram(
       HashMap<HashSet<Operator>, Operator> costMap, CostModel c, Operator in)
       throws OperatorException {
@@ -163,7 +175,7 @@ public class BaselineBushy extends PlanningModule {
           if ((isSubList(joinedAttributes1, left) && isSubList(joinedAttributes2, right))
               || (isSubList(joinedAttributes2, left) && isSubList(joinedAttributes1, right))) {
             OperatorParameters params = new OperatorParameters(e.getExpressionList());
-            JoinOperator cjv = new JoinOperator(params, op1, op2);
+            JoinOperator cjv = physicalOperatorSelection(params, op1, op2, c);
             result.put(union, greatest(result, c, union, cjv));
 
             break;
