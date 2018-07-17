@@ -16,8 +16,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 
-// this implements one transformation
-// of the plan match
 public class MinSelect extends PlanningModule {
 
   private CostCache costCache = new CostCache();
@@ -110,17 +108,17 @@ public class MinSelect extends PlanningModule {
           if (e == null) continue;
 
           OperatorParameters params = new OperatorParameters(e.getExpressionList());
-          JoinOperator newJoin = new JoinOperator(params, currPlan, baseRel);
+          for (Operator newJoin : JoinOperator.allValidPhysicalJoins(params, currPlan, baseRel)) {
+            double card =
+                costCache.getOrComputeCardinality(newJoin, c, this.name)
+                    / (costCache.getOrComputeCardinality(currPlan, c, this.name)
+                        * costCache.getOrComputeCardinality(baseRel, c, this.name));
 
-          double card =
-              costCache.getOrComputeCardinality(newJoin, c, this.name)
-                  / (costCache.getOrComputeCardinality(currPlan, c, this.name)
-                      * costCache.getOrComputeCardinality(baseRel, c, this.name));
-
-          if (card < minSelectivity) {
-            currPlan = newJoin;
-            bestRel = baseRel;
-            minSelectivity = card;
+            if (card < minSelectivity) {
+              currPlan = newJoin;
+              bestRel = baseRel;
+              minSelectivity = card;
+            }
           }
         }
       }

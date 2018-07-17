@@ -26,7 +26,7 @@ public interface CostModel {
   }
 
   default void reportNumEvaluations() {
-    System.out.print("# Plans evaluated by cost model: ");
+    System.out.print("Num (sub)plans evaluated by cost model: ");
     Map<String, Long> treeMap = new TreeMap<>();
     for (Map.Entry<String, Long> entry : numEvaluatedPlans.entrySet()) {
       treeMap.put(entry.getKey(), entry.getValue());

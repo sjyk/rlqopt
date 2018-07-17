@@ -67,7 +67,10 @@ public class Experiment {
                 + ","
                 + p.getLastPlanStats().finalCost);
 
-        System.out.println(op + "+++---\n" +p.plan(op.copy(), workload.getStatsModel(), workload.getStatsModel()));
+        System.out.println(
+            op
+                + "+++---\n"
+                + p.plan(op.copy(), workload.getStatsModel(), workload.getStatsModel()));
 
         LinkedList<PlanningStatistics> stats = finalCost.get(p);
         stats.add(p.getLastPlanStats());

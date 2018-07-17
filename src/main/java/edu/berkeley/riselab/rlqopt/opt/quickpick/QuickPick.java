@@ -152,14 +152,14 @@ public class QuickPick extends PlanningModule {
 
       } else {
         OperatorParameters params = new OperatorParameters(e.getExpressionList());
-        randomJoin = new JoinOperator(params, left, right);
+        randomJoin = JoinOperator.randomValidPhysicalJoin(random, params, left, right);
       }
 
       break;
     }
 
     // Optimization.
-    if (costCache.getOrComputeIOEstimate(randomJoin, c,this.name) >= bestCost) {
+    if (costCache.getOrComputeIOEstimate(randomJoin, c, this.name) >= bestCost) {
       return null;
     }
 

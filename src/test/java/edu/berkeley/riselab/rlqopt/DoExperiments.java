@@ -3,9 +3,11 @@ package edu.berkeley.riselab.rlqopt;
 import edu.berkeley.riselab.rlqopt.experiments.Experiment;
 import edu.berkeley.riselab.rlqopt.opt.Planner;
 import edu.berkeley.riselab.rlqopt.opt.learning.RLQOpt;
+import edu.berkeley.riselab.rlqopt.opt.minselect.MinSelectPlanner;
 import edu.berkeley.riselab.rlqopt.opt.nopt.NoPlanner;
 import edu.berkeley.riselab.rlqopt.opt.postgres.PostgresPlanner;
 import edu.berkeley.riselab.rlqopt.opt.bushy.PostgresBushyPlanner;
+import edu.berkeley.riselab.rlqopt.opt.quickpick.QuickPickPlanner;
 import edu.berkeley.riselab.rlqopt.opt.zigzag.ZigZagPlanner;
 import edu.berkeley.riselab.rlqopt.opt.rightdeep.RightDeepPlanner;
 import edu.berkeley.riselab.rlqopt.workload.DatasetGenerator;
@@ -180,6 +182,9 @@ public class DoExperiments extends TestCase {
     planners.add(new RightDeepPlanner());
     planners.add(new ZigZagPlanner());
     planners.add(new PostgresBushyPlanner());
+    planners.add(new MinSelectPlanner());
+    planners.add(new QuickPickPlanner(1000));
+    planners.add(new QuickPickPlanner(1));
 
     /*planners.add(new RLQOpt(workload, trainingDataPath));
     //        planners.add(new NoPlanner());

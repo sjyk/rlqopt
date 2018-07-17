@@ -1,6 +1,6 @@
 package edu.berkeley.riselab.rlqopt;
 
-import edu.berkeley.riselab.rlqopt.cost.TableCardinalityModel;
+import edu.berkeley.riselab.rlqopt.cost.InMemoryCostModel;
 import edu.berkeley.riselab.rlqopt.opt.bushy.PostgresBushyPlanner;
 import edu.berkeley.riselab.rlqopt.opt.volcano.VolcanoPlanner;
 import edu.berkeley.riselab.rlqopt.relalg.SQL2RelAlg;
@@ -27,7 +27,7 @@ public class SQLTest extends TestCase {
 
   public void test1() throws SqlParseException {
     Database db = new Database("schematext.sql");
-    TableCardinalityModel tm = new TableCardinalityModel(db, "imdb_tables.txt");
+    InMemoryCostModel tm = new InMemoryCostModel(db, "imdb_tables.txt");
 
     // System.out.println(db);
 

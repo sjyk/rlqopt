@@ -5,8 +5,12 @@ import edu.berkeley.riselab.rlqopt.Expression;
 import edu.berkeley.riselab.rlqopt.Operator;
 import edu.berkeley.riselab.rlqopt.OperatorException;
 import edu.berkeley.riselab.rlqopt.OperatorParameters;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
 
 // implements a project operator
 public class JoinOperator extends Operator {
@@ -16,6 +20,41 @@ public class JoinOperator extends Operator {
   public static final int NK = 2;
   public static final int KK = 3;
   public static final int IE = 4;
+
+  // Must be kept consistent with {random,all}ValidPhysicalJoin() below.
+  private static final List<String> physicalJoins =
+      Arrays.asList("HashJoinOperator", "IndexJoinOperator");
+
+  public static List<Operator> allValidPhysicalJoins(
+      OperatorParameters params, Operator left, Operator right) throws OperatorException {
+    List<Operator> validJoins = new ArrayList<>();
+    for (String physicalName : physicalJoins) {
+      switch (physicalName) {
+        case "HashJoinOperator":
+          validJoins.add(
+              new HashJoinOperator(
+                  params, left, right)); // By default assume all hash joins are valid.
+          break;
+        case "IndexJoinOperator":
+          IndexJoinOperator indexJoinOperator = new IndexJoinOperator(params, left, right);
+          if (indexJoinOperator.isValid()) {
+            validJoins.add(indexJoinOperator);
+          }
+          break;
+        default:
+          assert false; // Should not happen.
+      }
+    }
+    return validJoins;
+  }
+
+  public static Operator randomValidPhysicalJoin(
+      Random random, OperatorParameters params, Operator left, Operator right)
+      throws OperatorException {
+    List<Operator> validJoins = allValidPhysicalJoins(params, left, right);
+    assert !validJoins.isEmpty();
+    return validJoins.get(random.nextInt(validJoins.size()));
+  }
 
   public JoinOperator(OperatorParameters params, Operator... source) throws OperatorException {
     super(params, source);
@@ -99,14 +138,14 @@ public class JoinOperator extends Operator {
     return "(" + prefix + ") as " + className + hashCode();
   }
 
-  //equalities over join ops ignore physical imp
-  public int hashCode(){
-     return this.getVisibleRelations().hashCode();
+  // equalities over join ops ignore physical imp
+  public int hashCode() {
+    return this.getVisibleRelations().hashCode();
   }
 
-  public boolean equals(Object other){
-     JoinOperator op = (JoinOperator) other;
-     return op.hashCode() == this.hashCode();
+  public boolean equals(Object other) {
+    if (!(other instanceof JoinOperator)) return false;
+    JoinOperator op = (JoinOperator) other;
+    return op.hashCode() == this.hashCode();
   }
-
 }
