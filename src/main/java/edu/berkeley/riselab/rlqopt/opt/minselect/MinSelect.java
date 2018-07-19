@@ -82,12 +82,9 @@ public class MinSelect extends PlanningModule {
   public Operator reorderJoin(Operator in, CostModel c) throws OperatorException {
     Operator currPlan = null;
 
-    HashSet<Operator> relations = new HashSet();
-    for (Operator child : in.source) {
-      relations.add(child);
-    }
+    HashSet<Operator> relations = new HashSet<>(in.source);
 
-    while (!relations.isEmpty()) {
+    while (relations.size() > 1) {
       // Invariant: reduce set size by 1.
 
       double minSelectivity = Double.MAX_VALUE;
@@ -122,7 +119,8 @@ public class MinSelect extends PlanningModule {
           }
         }
       }
-      relations.remove(bestRel);
+      // Assert true to test "bestRel" is indeed contained in "relations".
+      assert relations.remove(bestRel);
     }
 
     return currPlan;
