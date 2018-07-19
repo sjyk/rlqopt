@@ -17,7 +17,7 @@ public class ModelTrainer {
   MultiLayerNetwork net;
 
   public ModelTrainer(Database db) {
-    int numInput = db.getNumAttributes() * 4 + 2;
+    int numInput = db.getNumAttributes() * 3 + 3;
     int numOutputs = 1;
     int nHidden = 128;
 
@@ -33,14 +33,14 @@ public class ModelTrainer {
                     new DenseLayer.Builder()
                         .nIn(numInput)
                         .nOut(nHidden)
-                        .activation(Activation.SIGMOID)
+                        .activation(Activation.RELU)
                         .build())
                 .layer(
                     1,
                     new DenseLayer.Builder()
                         .nIn(nHidden)
                         .nOut(nHidden / 2)
-                        .activation(Activation.SIGMOID)
+                        .activation(Activation.RELU)
                         .build())
                 .layer(
                     2,
@@ -61,7 +61,7 @@ public class ModelTrainer {
     System.out.println(net.getUpdater());
 
     // Epochs.
-    for (int i = 0; i < 5000; i++) {
+    for (int i = 0; i < 10000; i++) {
       iterator.reset();
       net.fit(iterator);
     }

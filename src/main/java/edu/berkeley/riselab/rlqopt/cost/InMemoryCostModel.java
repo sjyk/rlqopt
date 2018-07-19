@@ -3,6 +3,7 @@ package edu.berkeley.riselab.rlqopt.cost;
 import edu.berkeley.riselab.rlqopt.Database;
 import edu.berkeley.riselab.rlqopt.Operator;
 import edu.berkeley.riselab.rlqopt.Relation;
+import edu.berkeley.riselab.rlqopt.Attribute;
 import edu.berkeley.riselab.rlqopt.relalg.*;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -64,6 +65,11 @@ public class InMemoryCostModel implements CostModel {
     } catch (FileNotFoundException e) {
       e.printStackTrace();
     }
+  }
+
+  
+  public double cardinality(Attribute a){
+    return cardinality.get(a.relation)/36244344.0;
   }
 
   public Cost tableAccessOperator(Operator in) {

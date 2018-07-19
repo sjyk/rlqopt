@@ -49,7 +49,7 @@ public class RLQOpt extends Planner implements Trainable {
     if (dataSet != null) {
       // Dataset loaded from file.
       // We need to make sure the newly loaded dataset is standardized.
-      DataNormalizer.normalize(dataSet);
+      //DataNormalizer.normalize(dataSet);
       iter = tgen.generateDataSetIterator(dataSet);
     } else {
       // Generate dataset from scratch.

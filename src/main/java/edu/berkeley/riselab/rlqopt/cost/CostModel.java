@@ -1,6 +1,7 @@
 package edu.berkeley.riselab.rlqopt.cost;
 
 import edu.berkeley.riselab.rlqopt.Operator;
+import edu.berkeley.riselab.rlqopt.Attribute;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -32,5 +33,9 @@ public interface CostModel {
       treeMap.put(entry.getKey(), entry.getValue());
     }
     System.out.println(treeMap);
+  }
+
+  default double cardinality(Attribute a){
+    return 1.0;
   }
 }

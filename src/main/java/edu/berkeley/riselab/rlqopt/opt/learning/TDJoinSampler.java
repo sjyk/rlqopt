@@ -111,15 +111,16 @@ public class TDJoinSampler extends PlanningModule {
         localData = new LinkedList();
         relations = TDMerge(relations, c, in);
 
-        double z = 0.0;
-        for (TrainingDataPoint t : localData) {
+        double z = 1e5;
+        /*for (TrainingDataPoint t : localData) {
           // System.out.println(t.cost + " " + i + t.oplist[0] + t.oplist[1]);
-          System.out.println(t.cost + " " + i);
+          //System.out.println(t.cost + " " + i);
           // trainingData.add(t);
-        }
+          z = Math.min(z, t.cost);
+        }*/
 
         for (TrainingDataPoint t : localData) {
-          // t.cost /= z;
+          t.cost = Math.log(t.cost / z);
           trainingData.add(t);
         }
 
@@ -230,22 +231,33 @@ public class TDJoinSampler extends PlanningModule {
         // don't join with self
         if (i == j) continue;
 
-        Operator cjv = getJoinOperator(i, j, in);
+        Operator dummy = getJoinOperator(i, j, in);
 
-        if (cjv instanceof CartesianOperator) continue;
+        if (dummy instanceof CartesianOperator) continue;
+
+        int indicator = 0;
+        for (Operator cjv: JoinOperator.allValidPhysicalJoins(dummy.params, i,j)){
 
         HashSet<Operator> local = (HashSet) rtn.clone();
         local.remove(i);
         local.remove(j);
         local.add(cjv);
 
+
+        //if there are more then 10 rels just short circuit
+        if (relations.size() > 10){
+          rtn.remove(i);
+          rtn.remove(j);
+          rtn.add(cjv);
+          return rtn;
+        }
+
+
         Operator baseline = lfdb.reorderJoin(getRemainingOperators(local, in), c);
 
         // exploration
         // System.out.println(rand.nextGaussian());
-        double cost =
-            costCache.getOrComputeIOEstimate(baseline, c, this.name)
-                + costCache.getOrComputeIOEstimate(cjv, c, this.name);
+        double cost = costCache.getOrComputeIOEstimate(baseline, c, this.name);
 
         Operator[] trainingToJoin = new Operator[4];
         trainingToJoin[0] = i;
@@ -253,9 +265,9 @@ public class TDJoinSampler extends PlanningModule {
         trainingToJoin[2] = cjv;
         trainingToJoin[3] = in.copy();
 
-        localData.add(new TrainingDataPoint(trainingToJoin, cost, 0.0, relations.size() + 0.0));
+        localData.add(new TrainingDataPoint(trainingToJoin, cost, indicator + 0.0, relations.size() + 0.0));
 
-        // System.out.println(cost);
+        //System.out.println(i + "," + j + " "+ indicator+ "=>" + cost);
 
         if ((cost < minCost) && !egreedy) {
           minCost = cost;
@@ -264,6 +276,10 @@ public class TDJoinSampler extends PlanningModule {
           pairToJoin[1] = j;
           pairToJoin[2] = cjv;
           pairToJoin[3] = in.copy();
+        }
+
+        indicator ++;
+
         }
       }
     }

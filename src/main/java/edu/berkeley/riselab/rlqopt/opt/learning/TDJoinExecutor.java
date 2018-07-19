@@ -180,17 +180,15 @@ public class TDJoinExecutor extends PlanningModule {
 
         Expression e = findJoinExpression(in.params.expression, i, j);
 
-        Operator cjv;
-
         if (e == null) {
-          // OperatorParameters params = new OperatorParameters(new ExpressionList());
-          // cjv = new CartesianOperator(params, i, j);
           continue;
+        } 
 
-        } else {
-          OperatorParameters params = new OperatorParameters(e.getExpressionList());
-          cjv = new JoinOperator(params, i, j);
-        }
+
+        OperatorParameters params = new OperatorParameters(e.getExpressionList());
+        
+        int indicator = 0;
+        for(Operator cjv: JoinOperator.allValidPhysicalJoins(params, i,j)){
 
         // exploration
         Operator[] currentPair = new Operator[4];
@@ -203,13 +201,24 @@ public class TDJoinExecutor extends PlanningModule {
 
         if (net != null) {
           TrainingDataPoint tpd =
-              new TrainingDataPoint(currentPair, 0.0, 0.0, (double) relations.size());
+              new TrainingDataPoint(currentPair, 0.0, indicator+ 0.0, (double) relations.size());
           INDArray input = tpd.featurizeND4j(db, c);
 
           INDArray out =
               DataNormalizer.revertLabel(net.output(DataNormalizer.transformFeature(input), false));
+          //INDArray out = net.output(input, false);
           ++numNetEvals;
           cost = out.getDouble(0);
+
+
+          HashSet<Operator> local = (HashSet) rtn.clone();
+          local.remove(i);
+          local.remove(j);
+          local.add(cjv);
+          double actual = c.estimate(lfdb.reorderJoin(getRemainingOperators(local, in), c)).operatorIOcost;
+
+          System.out.println("Predicted: " + cost + ", " + actual + " /// "+ i.getVisibleRelations() + ", "+ j.getVisibleRelations() + " " + relations.size() + "..." + indicator);
+
         } else {
           cost = costCache.getOrComputeIOEstimate(cjv, c, this.name);
         }
@@ -222,8 +231,12 @@ public class TDJoinExecutor extends PlanningModule {
           pairToJoin[1] = j;
           pairToJoin[2] = cjv;
         }
+        indicator ++;
+        }
       }
     }
+
+    //System.out.println(minCost + " :: => :: " + pairToJoin[2]);
 
     rtn.remove(pairToJoin[0]);
     rtn.remove(pairToJoin[1]);
