@@ -40,13 +40,19 @@
             <version>1.2.4</version>
         </dependency>
 
-
         <dependency>
             <groupId>org.nd4j</groupId>
             <artifactId>nd4j-api-parent</artifactId>
-            <version>0.9.1</version>
+            <version>1.0.0-beta</version>
             <type>pom</type>
         </dependency>
+        <dependency>
+            <groupId>org.nd4j</groupId>
+            <artifactId>nd4j-native</artifactId>
+            <version>1.0.0-beta</version>
+            <classifier>macosx-x86_64-avx2</classifier>
+        </dependency>
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
