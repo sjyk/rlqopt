@@ -25,7 +25,7 @@ public class ModelTrainer {
         new MultiLayerNetwork(
             new NeuralNetConfiguration.Builder()
                 .seed(12345)
-                .weightInit(WeightInit.XAVIER)
+                .weightInit(WeightInit.RELU_UNIFORM)
                 .updater(new Adam())
                 .list()
                 .layer(
@@ -56,7 +56,7 @@ public class ModelTrainer {
 
   public MultiLayerNetwork train(DataSetIterator iterator) {
     net.init();
-    net.setListeners(new ScoreIterationListener(10));
+    net.setListeners(new ScoreIterationListener(100));
 
     System.out.println(net.getUpdater());
 

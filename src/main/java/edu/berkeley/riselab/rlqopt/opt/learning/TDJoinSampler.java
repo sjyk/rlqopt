@@ -111,7 +111,6 @@ public class TDJoinSampler extends PlanningModule {
         localData = new LinkedList();
         relations = TDMerge(relations, c, in);
 
-        double z = 1e5;
         /*for (TrainingDataPoint t : localData) {
           // System.out.println(t.cost + " " + i + t.oplist[0] + t.oplist[1]);
           //System.out.println(t.cost + " " + i);
@@ -120,7 +119,9 @@ public class TDJoinSampler extends PlanningModule {
         }*/
 
         for (TrainingDataPoint t : localData) {
-          t.cost = Math.log(t.cost / z);
+          // Use log() since it's normal for costs to vary from 10^5 to 10^11.  This significantly
+          // reduces the optimization difficulty during training.
+          t.cost = Math.log(t.cost);
           trainingData.add(t);
         }
 
