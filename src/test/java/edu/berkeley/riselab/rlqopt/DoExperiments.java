@@ -167,8 +167,8 @@ public class DoExperiments extends TestCase {
         new IMDBWorkloadGenerator(
             "schematext.sql", "tablestats", "join-order-benchmark/queries/queries.sql");
 
-    final int numTraining = 20;
-    final int numTesting = 20;
+    final int numTraining = 10;
+    final int numTesting = 10;
     //    final int numTraining = 80;
     //    final int numTesting = 113;
 
@@ -178,6 +178,7 @@ public class DoExperiments extends TestCase {
 
     LinkedList<Planner> planners = new LinkedList<>();
     planners.add(new NoPlanner());
+    planners.add(new PostgresPlanner());
     planners.add(new PostgresPlanner());
     planners.add(new RightDeepPlanner());
     planners.add(new ZigZagPlanner());

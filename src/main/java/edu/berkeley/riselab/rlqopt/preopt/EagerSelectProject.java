@@ -39,12 +39,15 @@ public class EagerSelectProject implements InitRewrite {
 
     LinkedList<Attribute> s_attrList = in.params.expression.getAllVisibleAttributes();
     LinkedList<Attribute> t_attrList = probe.params.expression.getAllVisibleAttributes();
-    for (Attribute s : s_attrList) {
+
+    //System.out.println( + " " + t_attrList);
+
+    /*for (Attribute s : s_attrList) {
       for (Attribute t : t_attrList) {
         if (!s.relation.equals(t.relation)) return false;
       }
-    }
-    return true;
+    }*/
+    return s_attrList.get(0).relation.equals(t_attrList.get(0).relation);
   }
 
   /**

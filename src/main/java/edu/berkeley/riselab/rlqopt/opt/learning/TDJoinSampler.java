@@ -99,7 +99,10 @@ public class TDJoinSampler extends PlanningModule {
 
     HashSet<Operator> relations = new HashSet();
 
+    //System.out.println("///dd///: " + in);
+
     for (Operator child : in.source) {
+      //System.out.println("///dd///" + child);
       relations.add(child);
     }
 

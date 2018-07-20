@@ -4,6 +4,7 @@ import edu.berkeley.riselab.rlqopt.Database;
 import edu.berkeley.riselab.rlqopt.Operator;
 import edu.berkeley.riselab.rlqopt.Relation;
 import edu.berkeley.riselab.rlqopt.Attribute;
+import edu.berkeley.riselab.rlqopt.Expression;
 import edu.berkeley.riselab.rlqopt.relalg.*;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -16,6 +17,8 @@ public class InMemoryCostModel implements CostModel {
   private double defaultSelectivity = 0.1;
   private HashMap<Relation, Long> cardinality;
   private HashMap<HashSet<Relation>, Long> pairs;
+  private HashMap<String, Long> predicates;
+  public boolean handleSelections = false;
 
   public InMemoryCostModel(HashMap<Relation, Long> cardinality) {
     this.cardinality = cardinality;
@@ -27,6 +30,7 @@ public class InMemoryCostModel implements CostModel {
       Scanner scanner = new Scanner(new File(filename + "/imdb_tables.txt"));
       cardinality = new HashMap();
       pairs = new HashMap();
+      predicates = new HashMap();
 
       while (scanner.hasNext()) {
         String[] line = scanner.nextLine().trim().split(":");
@@ -59,12 +63,29 @@ public class InMemoryCostModel implements CostModel {
 
       scanner.close();
 
+
+      scanner = new Scanner(new File(filename + "/predicates.csv"));
+
+      while (scanner.hasNext()) {
+        String line = scanner.nextLine();
+        int index = line.lastIndexOf(":");
+        String t1 = line.substring(0,index).trim();
+        long card = Long.parseLong(line.substring(index+1).trim());
+
+        predicates.put(t1, card);
+      }
+
       // System.out.println(cardinality);
       // System.out.println(pairs);
 
     } catch (FileNotFoundException e) {
       e.printStackTrace();
     }
+  }
+
+  public InMemoryCostModel(Database db, String filename, boolean handleSelections) {
+    this(db,filename);
+    this.handleSelections = handleSelections;
   }
 
   
@@ -91,7 +112,19 @@ public class InMemoryCostModel implements CostModel {
   }
 
   public Cost selectOperator(Operator in, Cost costIn) {
-    long count = (long) (costIn.resultCardinality * defaultSelectivity);
+    Expression expr = in.params.expression.get(0);
+
+    double rf = 1.0;
+
+    if(handleSelections && predicates.containsKey(expr.op))
+    {
+      long predicateCount = predicates.get(expr.op);
+      long tableCount = cardinality.get(expr.children.get(0).noop.relation);
+      rf = (predicateCount + 0.0)/tableCount;
+    }
+
+    long count = (long) (rf*costIn.resultCardinality);
+
     return new Cost(costIn.resultCardinality, count, 0);
   }
 

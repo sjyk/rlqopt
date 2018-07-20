@@ -103,7 +103,7 @@ public class TrainingDataPoint {
 
     vector[3 * n + 1] = gcost;
 
-    vector[3 * n + 2] = (c.estimate(oplist[0]).resultCardinality -  c.estimate(oplist[1]).resultCardinality + 0.0)/1e7;
+    vector[3 * n + 2] = 0.0;//(c.estimate(oplist[0]).resultCardinality -  c.estimate(oplist[1]).resultCardinality + 0.0)/1e7;
 
     vector[3 * n + 3] = cost;
 
