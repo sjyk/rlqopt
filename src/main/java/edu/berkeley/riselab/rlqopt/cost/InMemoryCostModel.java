@@ -18,7 +18,7 @@ public class InMemoryCostModel implements CostModel {
   private HashMap<Relation, Long> cardinality;
   private HashMap<HashSet<Relation>, Long> pairs;
   private HashMap<String, Long> predicates;
-  public boolean handleSelections = false;
+  public boolean handleSelections = true;
 
   public InMemoryCostModel(HashMap<Relation, Long> cardinality) {
     this.cardinality = cardinality;
@@ -90,7 +90,7 @@ public class InMemoryCostModel implements CostModel {
 
   
   public double cardinality(Attribute a){
-    return cardinality.get(a.relation)/36244344.0;
+    return cardinality.get(a.relation);
   }
 
   public Cost tableAccessOperator(Operator in) {
