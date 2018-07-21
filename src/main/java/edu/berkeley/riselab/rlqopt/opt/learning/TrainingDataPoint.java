@@ -22,6 +22,8 @@ public class TrainingDataPoint {
   public Double size = 0.0;
 
   private final boolean selectivityScaling = true;
+  private final boolean queryGraphFeatures = true;
+
 
   public TrainingDataPoint(Operator[] oplist, Double cost) {
 
@@ -86,13 +88,15 @@ public class TrainingDataPoint {
     }
 
 
-    for (Attribute a : oplist[3].getVisibleAttributes()) {
+    if (queryGraphFeatures){
+      for (Attribute a : oplist[3].getVisibleAttributes()) {
 
       if (selectivityScaling)
         vector[allAttributes.indexOf(a) + 2 * n] = cardMap.get(a);
       else
         vector[allAttributes.indexOf(a) + 2 * n] = 1.0;
 
+      }
     }
 
 
