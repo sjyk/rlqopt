@@ -17,17 +17,25 @@ public class TrainingDataPoint {
   public Double gcost = 0.0;
   public Double size = 0.0;
 
-  private final boolean selectivityScaling = false;
-  private final boolean queryGraphFeatures = true;
+  private static boolean selectivityScaling = false;
+  private static boolean queryGraphFeatures = true;
+  static {
+    if (System.getProperty("selScaling") != null) {
+      selectivityScaling = Boolean.valueOf(System.getProperty("selScaling"));
+    }
+    if (System.getProperty("queryGraph") != null) {
+      queryGraphFeatures = Boolean.valueOf(System.getProperty("queryGraph"));
+    }
+    System.out.println("selectivityScaling = " + selectivityScaling);
+    System.out.println("queryGraphFeatures = " + queryGraphFeatures);
+  }
 
   public TrainingDataPoint(Operator[] oplist, Double cost) {
-
     this.oplist = oplist;
     this.cost = cost;
   }
 
   public TrainingDataPoint(Operator[] oplist, Double cost, Double greedyCost, Double size) {
-
     this.oplist = oplist;
     this.cost = cost;
     this.size = size;

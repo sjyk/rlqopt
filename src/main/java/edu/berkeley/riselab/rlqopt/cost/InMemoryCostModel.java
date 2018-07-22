@@ -25,6 +25,11 @@ public class InMemoryCostModel implements CostModel {
   }
 
   public InMemoryCostModel(Database db, String filename) {
+    if (System.getProperty("hasSelection") != null) {
+      handleSelections = Boolean.valueOf(System.getProperty("hasSelection"));
+    }
+    System.out.println("handleSelections = " + handleSelections);
+
     try {
 
       Scanner scanner = new Scanner(new File(filename + "/imdb_tables.txt"));

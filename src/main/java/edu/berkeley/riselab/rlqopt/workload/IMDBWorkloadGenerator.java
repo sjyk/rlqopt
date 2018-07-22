@@ -28,8 +28,12 @@ public class IMDBWorkloadGenerator extends WorkloadGenerator {
     switch (cm) {
       case MEMORY:
         tm = new InMemoryCostModel(db, tablestats);
+        System.out.println("Using InMemoryCostModel");
+        break;
       case DISK:
         tm = new DiskCostModel(db, tablestats);
+        System.out.println("Using DiskCostModel");
+        break;
     }
     this.workloadDir = workloadDir;
     sqlParser = new SQL2RelAlg(db);
