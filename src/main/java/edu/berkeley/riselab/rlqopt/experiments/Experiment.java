@@ -27,7 +27,7 @@ public class Experiment {
   LinkedList<Operator> trainWorkload;
   // If non-zero, train on templates with join graphs <= this number.  On testing, test on queries
   // with graphs > this number.  Set to 0 to disable.
-  final int kWayJoinThreshold = 10;
+  final int kWayJoinThreshold = 0;
 
   public Experiment(
       WorkloadGenerator workload, int numTraining, int numTest, List<Planner> planners) {
