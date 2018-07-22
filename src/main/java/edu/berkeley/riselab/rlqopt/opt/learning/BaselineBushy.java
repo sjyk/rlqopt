@@ -131,8 +131,9 @@ public class BaselineBushy extends PlanningModule {
     HashJoinOperator join1 = new HashJoinOperator(params, child, val);
     IndexJoinOperator join2 = new IndexJoinOperator(params, child, val);
 
-    if (join2.isValid() && costCache.getOrComputeIOEstimate(join2, c, this.name) < costCache.getOrComputeIOEstimate(join1, c, this.name))
-      return join2;
+    if (join2.isValid()
+        && costCache.getOrComputeIOEstimate(join2, c, this.name)
+            < costCache.getOrComputeIOEstimate(join1, c, this.name)) return join2;
 
     return join1;
   }

@@ -371,38 +371,32 @@ public class SQL2RelAlg {
     return src;
   }
 
-  private ArrayList<Expression> getIMDBExpressions(String sql, HashMap<String, Relation> activeTables)
-  {
-    int clauseStart = sql.indexOf("WHERE")+5;
+  private ArrayList<Expression> getIMDBExpressions(
+      String sql, HashMap<String, Relation> activeTables) {
+    int clauseStart = sql.indexOf("WHERE") + 5;
     String whereClause = sql.substring(clauseStart);
-    String [] clauses = whereClause.split("AND");
+    String[] clauses = whereClause.split("AND");
     ArrayList<Expression> expressions = new ArrayList();
 
-    for (int i = 0; i< clauses.length; i++){
+    for (int i = 0; i < clauses.length; i++) {
 
-       if (clauses[i].contains(".id") || clauses[i].contains("_id"))
-          continue;
+      if (clauses[i].contains(".id") || clauses[i].contains("_id")) continue;
 
+      // String
 
+      Attribute attr = null;
+      for (String tName : activeTables.keySet())
+        if (clauses[i].contains(" " + tName + ".")) {
+          String attrExpr = clauses[i].substring(clauses[i].indexOf(tName)).split(" ")[0];
+          attr = getAttribute(attrExpr, activeTables);
+          break;
+        }
 
-       //String 
-
-       Attribute attr = null;
-       for (String tName: activeTables.keySet())
-          if (clauses[i].contains(" "+tName+"."))
-          {
-            String attrExpr = clauses[i].substring(clauses[i].indexOf(tName)).split(" ")[0];
-            attr =  getAttribute(attrExpr, activeTables);
-            break;
-          } 
-
-       if (attr != null){
-          Expression wrapper = new Expression(clauses[i].trim(), new Expression(attr));
-          expressions.add(wrapper);
-       }
-
+      if (attr != null) {
+        Expression wrapper = new Expression(clauses[i].trim(), new Expression(attr));
+        expressions.add(wrapper);
+      }
     }
-
 
     return expressions;
   }

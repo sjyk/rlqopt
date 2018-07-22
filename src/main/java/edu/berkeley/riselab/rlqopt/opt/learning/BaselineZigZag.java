@@ -131,8 +131,9 @@ public class BaselineZigZag extends PlanningModule {
     HashJoinOperator join1 = new HashJoinOperator(params, child, val);
     IndexJoinOperator join2 = new IndexJoinOperator(params, child, val);
 
-    if (join2.isValid() && costCache.getOrComputeIOEstimate(join2, c, this.name) < costCache.getOrComputeIOEstimate(join1, c, this.name))
-      return join2;
+    if (join2.isValid()
+        && costCache.getOrComputeIOEstimate(join2, c, this.name)
+            < costCache.getOrComputeIOEstimate(join1, c, this.name)) return join2;
 
     return join1;
   }
@@ -160,7 +161,8 @@ public class BaselineZigZag extends PlanningModule {
         // figure out if this is an eligible pair
         if (intersection.size() > 0) continue;
 
-        if (! (op1.getVisibleRelations().size() == 1 || op2.getVisibleRelations().size() == 1)) continue;
+        if (!(op1.getVisibleRelations().size() == 1 || op2.getVisibleRelations().size() == 1))
+          continue;
 
         for (Expression e : in.params.expression) {
           LinkedList<Attribute>[] leftRight = getLeftRightAttributes(e);

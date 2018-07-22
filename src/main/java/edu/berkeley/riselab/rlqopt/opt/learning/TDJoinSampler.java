@@ -99,10 +99,10 @@ public class TDJoinSampler extends PlanningModule {
 
     HashSet<Operator> relations = new HashSet();
 
-    //System.out.println("///dd///: " + in);
+    // System.out.println("///dd///: " + in);
 
     for (Operator child : in.source) {
-      //System.out.println("///dd///" + child);
+      // System.out.println("///dd///" + child);
       relations.add(child);
     }
 
@@ -240,48 +240,45 @@ public class TDJoinSampler extends PlanningModule {
         if (dummy instanceof CartesianOperator) continue;
 
         int indicator = 0;
-        for (Operator cjv: JoinOperator.allValidPhysicalJoins(dummy.params, i,j)){
+        for (Operator cjv : JoinOperator.allValidPhysicalJoins(dummy.params, i, j)) {
 
-        HashSet<Operator> local = (HashSet) rtn.clone();
-        local.remove(i);
-        local.remove(j);
-        local.add(cjv);
+          HashSet<Operator> local = (HashSet) rtn.clone();
+          local.remove(i);
+          local.remove(j);
+          local.add(cjv);
 
+          Operator baseline = null;
 
-        Operator baseline = null;
+          // if there are more then 10 rels just short circuit
+          if (relations.size() > 10) baseline = cjv;
+          else baseline = lfdb.reorderJoin(getRemainingOperators(local, in), c);
 
-        //if there are more then 10 rels just short circuit
-        if (relations.size() > 10)
-          baseline = cjv;
-        else
-          baseline = lfdb.reorderJoin(getRemainingOperators(local, in), c);
-        
+          // exploration
+          // System.out.println(rand.nextGaussian());
+          double cost = costCache.getOrComputeIOEstimate(baseline, c, this.name);
 
-        // exploration
-        // System.out.println(rand.nextGaussian());
-        double cost = costCache.getOrComputeIOEstimate(baseline, c, this.name);
+          Operator[] trainingToJoin = new Operator[4];
+          trainingToJoin[0] = i;
+          trainingToJoin[1] = j;
+          trainingToJoin[2] = cjv;
+          trainingToJoin[3] = in.copy();
 
-        Operator[] trainingToJoin = new Operator[4];
-        trainingToJoin[0] = i;
-        trainingToJoin[1] = j;
-        trainingToJoin[2] = cjv;
-        trainingToJoin[3] = in.copy();
+          if (relations.size() <= 10)
+            localData.add(
+                new TrainingDataPoint(
+                    trainingToJoin, cost, indicator + 0.0, relations.size() + 0.0));
 
-        if (relations.size() <= 10)
-          localData.add(new TrainingDataPoint(trainingToJoin, cost, indicator + 0.0, relations.size() + 0.0));
+          // System.out.println(i + "," + j + " "+ indicator+ "=>" + cost);
 
-        //System.out.println(i + "," + j + " "+ indicator+ "=>" + cost);
+          if ((cost < minCost) && !egreedy) {
+            minCost = cost;
+            pairToJoin[0] = i;
+            pairToJoin[1] = j;
+            pairToJoin[2] = cjv;
+            pairToJoin[3] = in.copy();
+          }
 
-        if ((cost < minCost) && !egreedy) {
-          minCost = cost;
-          pairToJoin[0] = i;
-          pairToJoin[1] = j;
-          pairToJoin[2] = cjv;
-          pairToJoin[3] = in.copy();
-        }
-
-        indicator ++;
-
+          indicator++;
         }
       }
     }

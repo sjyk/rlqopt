@@ -1,10 +1,10 @@
 package edu.berkeley.riselab.rlqopt.cost;
 
+import edu.berkeley.riselab.rlqopt.Attribute;
 import edu.berkeley.riselab.rlqopt.Database;
+import edu.berkeley.riselab.rlqopt.Expression;
 import edu.berkeley.riselab.rlqopt.Operator;
 import edu.berkeley.riselab.rlqopt.Relation;
-import edu.berkeley.riselab.rlqopt.Attribute;
-import edu.berkeley.riselab.rlqopt.Expression;
 import edu.berkeley.riselab.rlqopt.relalg.*;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -63,14 +63,13 @@ public class InMemoryCostModel implements CostModel {
 
       scanner.close();
 
-
       scanner = new Scanner(new File(filename + "/predicates.csv"));
 
       while (scanner.hasNext()) {
         String line = scanner.nextLine();
         int index = line.lastIndexOf(":");
-        String t1 = line.substring(0,index).trim();
-        long card = Long.parseLong(line.substring(index+1).trim());
+        String t1 = line.substring(0, index).trim();
+        long card = Long.parseLong(line.substring(index + 1).trim());
 
         predicates.put(t1, card);
       }
@@ -84,12 +83,11 @@ public class InMemoryCostModel implements CostModel {
   }
 
   public InMemoryCostModel(Database db, String filename, boolean handleSelections) {
-    this(db,filename);
+    this(db, filename);
     this.handleSelections = handleSelections;
   }
 
-  
-  public double cardinality(Attribute a){
+  public double cardinality(Attribute a) {
     return cardinality.get(a.relation);
   }
 
@@ -116,14 +114,13 @@ public class InMemoryCostModel implements CostModel {
 
     double rf = 1.0;
 
-    if(handleSelections && predicates.containsKey(expr.op))
-    {
+    if (handleSelections && predicates.containsKey(expr.op)) {
       long predicateCount = predicates.get(expr.op);
       long tableCount = cardinality.get(expr.children.get(0).noop.relation);
-      rf = (predicateCount + 0.0)/tableCount;
+      rf = (predicateCount + 0.0) / tableCount;
     }
 
-    long count = (long) (rf*costIn.resultCardinality);
+    long count = (long) (rf * costIn.resultCardinality);
 
     return new Cost(costIn.resultCardinality, count, 0);
   }
@@ -187,7 +184,6 @@ public class InMemoryCostModel implements CostModel {
 
     if (in instanceof GroupByOperator)
       return groupByOperator(in, doEstimate(in.source.get(0))).plus(doEstimate(in.source.get(0)));
-
 
     Cost left = doEstimate(in.source.get(0));
     Cost right = doEstimate(in.source.get(1));

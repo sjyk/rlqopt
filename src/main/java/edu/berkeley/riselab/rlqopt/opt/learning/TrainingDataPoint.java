@@ -3,11 +3,7 @@ package edu.berkeley.riselab.rlqopt.opt.learning;
 import edu.berkeley.riselab.rlqopt.Attribute;
 import edu.berkeley.riselab.rlqopt.Database;
 import edu.berkeley.riselab.rlqopt.Operator;
-import edu.berkeley.riselab.rlqopt.OperatorException;
-import edu.berkeley.riselab.rlqopt.OperatorParameters;
-import edu.berkeley.riselab.rlqopt.Relation;
 import edu.berkeley.riselab.rlqopt.cost.*;
-import edu.berkeley.riselab.rlqopt.relalg.TableAccessOperator;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -23,7 +19,6 @@ public class TrainingDataPoint {
 
   private final boolean selectivityScaling = false;
   private final boolean queryGraphFeatures = true;
-
 
   public TrainingDataPoint(Operator[] oplist, Double cost) {
 
@@ -43,16 +38,15 @@ public class TrainingDataPoint {
     return Arrays.toString(oplist) + " => " + cost;
   }
 
-  private HashMap<Attribute, Double> calculateSelCardinality(Database db, Operator in, CostModel c) {
+  private HashMap<Attribute, Double> calculateSelCardinality(
+      Database db, Operator in, CostModel c) {
 
     HashMap<Attribute, Long> selCard = new HashMap<>();
 
-    for (Operator op: in.source)
-    {
+    for (Operator op : in.source) {
       long cardinality = c.estimate(op).resultCardinality;
 
-      for (Attribute attr: op.getVisibleAttributes())
-        selCard.put(attr, cardinality);
+      for (Attribute attr : op.getVisibleAttributes()) selCard.put(attr, cardinality);
     }
 
     LinkedList<Attribute> allAttributes = db.getAllAttributes();
@@ -60,8 +54,7 @@ public class TrainingDataPoint {
 
     for (Attribute a : allAttributes) {
 
-      if (selCard.containsKey(a))
-        rtn.put(a, (selCard.get(a) + 0.0)/c.cardinality(a));
+      if (selCard.containsKey(a)) rtn.put(a, (selCard.get(a) + 0.0) / c.cardinality(a));
     }
 
     return rtn;
@@ -72,8 +65,7 @@ public class TrainingDataPoint {
     LinkedList<Attribute> allAttributes = db.getAllAttributes();
     HashMap<Attribute, Double> cardMap = new HashMap();
 
-    if (selectivityScaling)
-      cardMap = calculateSelCardinality(db, oplist[3], c);
+    if (selectivityScaling) cardMap = calculateSelCardinality(db, oplist[3], c);
 
     int n = allAttributes.size();
 
@@ -83,7 +75,6 @@ public class TrainingDataPoint {
     for (Attribute a : oplist[0].getVisibleAttributes()) {
 
       vector[allAttributes.indexOf(a)] = 1.0;
-
     }
 
     for (Attribute a : oplist[1].getVisibleAttributes()) {
@@ -91,20 +82,15 @@ public class TrainingDataPoint {
       vector[allAttributes.indexOf(a) + n] = 1.0;
     }
 
-
-    if (queryGraphFeatures){
+    if (queryGraphFeatures) {
       for (Attribute a : oplist[3].getVisibleAttributes()) {
 
-      if (selectivityScaling)
-        vector[allAttributes.indexOf(a) + 2 * n] = cardMap.get(a);
-      else
-        vector[allAttributes.indexOf(a) + 2 * n] = 1.0;
-
+        if (selectivityScaling) vector[allAttributes.indexOf(a) + 2 * n] = cardMap.get(a);
+        else vector[allAttributes.indexOf(a) + 2 * n] = 1.0;
       }
     }
 
-
-    vector[3 * n] =  size;
+    vector[3 * n] = size;
 
     vector[3 * n + 1] = gcost;
 
