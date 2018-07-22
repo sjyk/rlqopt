@@ -179,7 +179,6 @@ public class DoExperiments extends TestCase {
     LinkedList<Planner> planners = new LinkedList<>();
     planners.add(new NoPlanner());
     planners.add(new PostgresPlanner());
-    planners.add(new PostgresPlanner());
     planners.add(new RightDeepPlanner());
     planners.add(new ZigZagPlanner());
     planners.add(new PostgresBushyPlanner());
@@ -206,7 +205,7 @@ public class DoExperiments extends TestCase {
     System.out.println("Per query improvement: ");
     printPerQuery(e.getPerQueryImprovement());
     System.out.print("Improvement: ");
-    printSorted(e.getBaselineImprovement());
+    printPerQuery(e.getPerQueryLatency());
     System.out.print("Planning latency: ");
     Map<Planner, Double> latencies = e.getBaselineLatency();
     printSorted(latencies);

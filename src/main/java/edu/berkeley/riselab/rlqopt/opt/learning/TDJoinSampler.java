@@ -248,16 +248,14 @@ public class TDJoinSampler extends PlanningModule {
         local.add(cjv);
 
 
+        Operator baseline = null;
+
         //if there are more then 10 rels just short circuit
-        if (relations.size() > 10){
-          rtn.remove(i);
-          rtn.remove(j);
-          rtn.add(cjv);
-          return rtn;
-        }
-
-
-        Operator baseline = lfdb.reorderJoin(getRemainingOperators(local, in), c);
+        if (relations.size() > 10)
+          baseline = cjv;
+        else
+          baseline = lfdb.reorderJoin(getRemainingOperators(local, in), c);
+        
 
         // exploration
         // System.out.println(rand.nextGaussian());
@@ -269,13 +267,13 @@ public class TDJoinSampler extends PlanningModule {
         trainingToJoin[2] = cjv;
         trainingToJoin[3] = in.copy();
 
-        localData.add(new TrainingDataPoint(trainingToJoin, cost, indicator + 0.0, relations.size() + 0.0));
+        if (relations.size() <= 10)
+          localData.add(new TrainingDataPoint(trainingToJoin, cost, indicator + 0.0, relations.size() + 0.0));
 
         //System.out.println(i + "," + j + " "+ indicator+ "=>" + cost);
 
         if ((cost < minCost) && !egreedy) {
           minCost = cost;
-          //          minGreedyCost = Math.log(c.estimate(cjv).operatorIOcost);
           pairToJoin[0] = i;
           pairToJoin[1] = j;
           pairToJoin[2] = cjv;

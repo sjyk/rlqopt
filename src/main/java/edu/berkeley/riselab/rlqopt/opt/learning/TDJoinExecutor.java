@@ -204,20 +204,23 @@ public class TDJoinExecutor extends PlanningModule {
               new TrainingDataPoint(currentPair, 0.0, indicator+ 0.0, (double) relations.size());
           INDArray input = tpd.featurizeND4j(db, c);
 
+          //long now = System.nanoTime();
           INDArray out =
               DataNormalizer.revertLabel(net.output(DataNormalizer.transformFeature(input), false));
+          //System.out.println("Inference time: " + (System.nanoTime()-now));
+
           //INDArray out = net.output(input, false);
           ++numNetEvals;
           cost = out.getDouble(0);
 
 
-          HashSet<Operator> local = (HashSet) rtn.clone();
+          /*HashSet<Operator> local = (HashSet) rtn.clone();
           local.remove(i);
           local.remove(j);
           local.add(cjv);
-          double actual = c.estimate(lfdb.reorderJoin(getRemainingOperators(local, in), c)).operatorIOcost;
+          double actual = c.estimate(lfdb.reorderJoin(getRemainingOperators(local, in), c)).operatorIOcost;*/
 
-          System.out.println("Predicted: " + cost + ", " + actual + " /// "+ i.getVisibleRelations() + ", "+ j.getVisibleRelations() + " " + relations.size() + "..." + indicator);
+          //System.out.println("Predicted: " + cost + ", " + actual + " /// "+ i.getVisibleRelations() + ", "+ j.getVisibleRelations() + " " + relations.size() + "..." + indicator);
 
         } else {
           cost = costCache.getOrComputeIOEstimate(cjv, c, this.name);

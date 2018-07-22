@@ -21,7 +21,7 @@ public class TrainingDataPoint {
   public Double gcost = 0.0;
   public Double size = 0.0;
 
-  private final boolean selectivityScaling = true;
+  private final boolean selectivityScaling = false;
   private final boolean queryGraphFeatures = true;
 
 
@@ -50,6 +50,7 @@ public class TrainingDataPoint {
     for (Operator op: in.source)
     {
       long cardinality = c.estimate(op).resultCardinality;
+
       for (Attribute attr: op.getVisibleAttributes())
         selCard.put(attr, cardinality);
     }
@@ -69,7 +70,10 @@ public class TrainingDataPoint {
   public Double[] featurize(Database db, CostModel c) {
 
     LinkedList<Attribute> allAttributes = db.getAllAttributes();
-    HashMap<Attribute, Double> cardMap = calculateSelCardinality(db, oplist[3], c);
+    HashMap<Attribute, Double> cardMap = new HashMap();
+
+    if (selectivityScaling)
+      cardMap = calculateSelCardinality(db, oplist[3], c);
 
     int n = allAttributes.size();
 
