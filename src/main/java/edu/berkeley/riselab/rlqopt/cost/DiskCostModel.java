@@ -1,16 +1,17 @@
 package edu.berkeley.riselab.rlqopt.cost;
 
-import edu.berkeley.riselab.rlqopt.Database;
-import edu.berkeley.riselab.rlqopt.Operator;
 import edu.berkeley.riselab.rlqopt.Attribute;
+import edu.berkeley.riselab.rlqopt.Database;
+import edu.berkeley.riselab.rlqopt.Expression;
+import edu.berkeley.riselab.rlqopt.Operator;
 import edu.berkeley.riselab.rlqopt.Relation;
 import edu.berkeley.riselab.rlqopt.relalg.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Scanner;
 import java.util.LinkedList;
+import java.util.Scanner;
 
 public class DiskCostModel implements CostModel {
 
@@ -18,6 +19,9 @@ public class DiskCostModel implements CostModel {
   private double memory = 1e6;
   private HashMap<Relation, Long> cardinality;
   private HashMap<HashSet<Relation>, Long> pairs;
+  private HashMap<String, Long> predicates;
+
+  public boolean handleSelections = false;
 
   public DiskCostModel(HashMap<Relation, Long> cardinality) {
     this.cardinality = cardinality;
@@ -29,6 +33,7 @@ public class DiskCostModel implements CostModel {
       Scanner scanner = new Scanner(new File(filename + "/imdb_tables.txt"));
       cardinality = new HashMap();
       pairs = new HashMap();
+      predicates = new HashMap();
 
       while (scanner.hasNext()) {
         String[] line = scanner.nextLine().trim().split(":");
@@ -61,12 +66,32 @@ public class DiskCostModel implements CostModel {
 
       scanner.close();
 
+      scanner = new Scanner(new File(filename + "/predicates.csv"));
+
+      while (scanner.hasNext()) {
+        String line = scanner.nextLine();
+        int index = line.lastIndexOf(":");
+        String t1 = line.substring(0, index).trim();
+        long card = Long.parseLong(line.substring(index + 1).trim());
+
+        predicates.put(t1, card);
+      }
+
       // System.out.println(cardinality);
       // System.out.println(pairs);
 
     } catch (FileNotFoundException e) {
       e.printStackTrace();
     }
+  }
+
+  public DiskCostModel(Database db, String filename, boolean handleSelections) {
+    this(db, filename);
+    this.handleSelections = handleSelections;
+  }
+
+  public double cardinality(Attribute a) {
+    return cardinality.get(a.relation);
   }
 
   public Cost tableAccessOperator(Operator in) {
@@ -88,7 +113,18 @@ public class DiskCostModel implements CostModel {
   }
 
   public Cost selectOperator(Operator in, Cost costIn) {
-    long count = (long) (costIn.resultCardinality * defaultSelectivity);
+    Expression expr = in.params.expression.get(0);
+
+    double rf = 1.0;
+
+    if (handleSelections && predicates.containsKey(expr.op)) {
+      long predicateCount = predicates.get(expr.op);
+      long tableCount = cardinality.get(expr.children.get(0).noop.relation);
+      rf = (predicateCount + 0.0) / tableCount;
+    }
+
+    long count = (long) (rf * costIn.resultCardinality);
+
     return new Cost(costIn.resultCardinality, count, 0);
   }
 
@@ -110,38 +146,30 @@ public class DiskCostModel implements CostModel {
     return (long) (rf * (countl * countr));
   }
 
-  private boolean streamable(Operator in, Cost l){
-    
-    Operator leftOp = in.source.get(1);
-    Operator rightOp = in.source.get(0);
+  private boolean streamable(Operator in, Cost l) {
 
-    if (leftOp instanceof HashJoinOperator && l.resultCardinality < memory)
-    {
-       Operator build = leftOp.source.get(0);
+    Operator leftOp = in.source.get(0);
+    Operator rightOp = in.source.get(1);
 
-       if (build.getVisibleRelations().size() != 1)
-         return false;
+    if (leftOp instanceof HashJoinOperator) {
+      Operator build = leftOp.source.get(0);
 
+      LinkedList<Attribute> expressionAttrs = leftOp.params.expression.getAllVisibleAttributes();
+      LinkedList<Attribute> opAttrs = build.getVisibleAttributes();
+      Attribute hashAttr = null;
 
-       LinkedList<Attribute> expressionAttrs = leftOp.params.expression.getAllVisibleAttributes();
-       LinkedList<Attribute> opAttrs = build.getVisibleAttributes();
-       Attribute hashAttr = null;
-
-       for (Attribute i: expressionAttrs)
-       {  if (opAttrs.contains(i))
-          {
-            hashAttr = i;
-            break;
-          }
+      for (Attribute i : expressionAttrs) {
+        if (opAttrs.contains(i)) {
+          hashAttr = i;
+          break;
         }
-       
+      }
 
-       if (hashAttr != null && in.params.expression.getAllVisibleAttributes().contains(hashAttr))
-         return true;
+      if (hashAttr != null && in.params.expression.getAllVisibleAttributes().contains(hashAttr))
+        return true;
     }
 
     return false;
-
   }
 
   public Cost hashJoinOperator(Operator in, Cost l, Cost r) {
@@ -151,15 +179,13 @@ public class DiskCostModel implements CostModel {
 
     long card = getJoinCardinality(in, l, r);
 
-    long iocost = 0;
+    long iocost = -countr;
 
-    if (! streamable(in, r) )
-      iocost = 5*countr + 5*countl;
+    if (!streamable(in, r)) iocost = 3 * countr + 3 * countl;
 
     return new Cost(iocost, card, 0);
   }
 
-  //this is just a nested loop join
   public Cost indexJoinOperator(Operator in, Cost l, Cost r) {
 
     long countl = l.resultCardinality;
@@ -190,7 +216,6 @@ public class DiskCostModel implements CostModel {
     if (in instanceof GroupByOperator)
       return groupByOperator(in, doEstimate(in.source.get(0))).plus(doEstimate(in.source.get(0)));
 
-
     Cost left = doEstimate(in.source.get(0));
     Cost right = doEstimate(in.source.get(1));
 
@@ -199,14 +224,16 @@ public class DiskCostModel implements CostModel {
       return hashJoinOperator(in, left, right).plus(left).plus(right);
     }
 
-    if (in instanceof IndexJoinOperator) {
+    /*if (in instanceof IndexJoinOperator) {
       JoinOperator jop = (JoinOperator) in;
-      return indexJoinOperator(in, left, right).plus(right).plus(left);
+      return indexJoinOperator(in, left, right).plus(right).;
     }
+    Acts as a nested loop join
+    */
 
     if (in instanceof JoinOperator) {
       JoinOperator jop = (JoinOperator) in;
-      return hashJoinOperator(in, left, right).plus(left).plus(right);
+      return indexJoinOperator(in, left, right).plus(left).plus(right);
     }
 
     if (in instanceof CartesianOperator)

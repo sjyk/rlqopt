@@ -182,61 +182,65 @@ public class TDJoinExecutor extends PlanningModule {
 
         if (e == null) {
           continue;
-        } 
-
+        }
 
         OperatorParameters params = new OperatorParameters(e.getExpressionList());
-        
+
         int indicator = 0;
-        for(Operator cjv: JoinOperator.allValidPhysicalJoins(params, i,j)){
+        for (Operator cjv : JoinOperator.allValidPhysicalJoins(params, i, j)) {
 
-        // exploration
-        Operator[] currentPair = new Operator[4];
-        currentPair[0] = i;
-        currentPair[1] = j;
-        currentPair[2] = cjv;
-        currentPair[3] = in.copy();
+          // exploration
+          Operator[] currentPair = new Operator[4];
+          currentPair[0] = i;
+          currentPair[1] = j;
+          currentPair[2] = cjv;
+          currentPair[3] = in.copy();
 
-        double cost;
+          double cost;
 
-        if (net != null) {
-          TrainingDataPoint tpd =
-              new TrainingDataPoint(currentPair, 0.0, indicator+ 0.0, (double) relations.size());
-          INDArray input = tpd.featurizeND4j(db, c);
+          if (net != null) {
+            TrainingDataPoint tpd =
+                new TrainingDataPoint(currentPair, 0.0, indicator + 0.0, (double) relations.size());
+            INDArray input = tpd.featurizeND4j(db, c);
 
-          INDArray out =
-              DataNormalizer.revertLabel(net.output(DataNormalizer.transformFeature(input), false));
-          //INDArray out = net.output(input, false);
-          ++numNetEvals;
-          cost = out.getDouble(0);
+            // long now = System.nanoTime();
+            INDArray out =
+                DataNormalizer.revertLabel(
+                    net.output(DataNormalizer.transformFeature(input), false));
+            // System.out.println("Inference time: " + (System.nanoTime()-now));
 
+            // INDArray out = net.output(input, false);
+            ++numNetEvals;
+            cost = out.getDouble(0);
 
-          HashSet<Operator> local = (HashSet) rtn.clone();
-          local.remove(i);
-          local.remove(j);
-          local.add(cjv);
-          double actual = c.estimate(lfdb.reorderJoin(getRemainingOperators(local, in), c)).operatorIOcost;
+            /*HashSet<Operator> local = (HashSet) rtn.clone();
+            local.remove(i);
+            local.remove(j);
+            local.add(cjv);
+            double actual = c.estimate(lfdb.reorderJoin(getRemainingOperators(local, in), c)).operatorIOcost;*/
 
-          System.out.println("Predicted: " + cost + ", " + actual + " /// "+ i.getVisibleRelations() + ", "+ j.getVisibleRelations() + " " + relations.size() + "..." + indicator);
+            // System.out.println("Predicted: " + cost + ", " + actual + " /// "+
+            // i.getVisibleRelations() + ", "+ j.getVisibleRelations() + " " + relations.size() +
+            // "..." + indicator);
 
-        } else {
-          cost = costCache.getOrComputeIOEstimate(cjv, c, this.name);
-        }
+          } else {
+            cost = costCache.getOrComputeIOEstimate(cjv, c, this.name);
+          }
 
-        // if (Double.isNaN(cost)) cost = c.estimate(cjv).operatorIOcost;
+          // if (Double.isNaN(cost)) cost = c.estimate(cjv).operatorIOcost;
 
-        if (cost < minCost) {
-          minCost = cost;
-          pairToJoin[0] = i;
-          pairToJoin[1] = j;
-          pairToJoin[2] = cjv;
-        }
-        indicator ++;
+          if (cost < minCost) {
+            minCost = cost;
+            pairToJoin[0] = i;
+            pairToJoin[1] = j;
+            pairToJoin[2] = cjv;
+          }
+          indicator++;
         }
       }
     }
 
-    //System.out.println(minCost + " :: => :: " + pairToJoin[2]);
+    // System.out.println(minCost + " :: => :: " + pairToJoin[2]);
 
     rtn.remove(pairToJoin[0]);
     rtn.remove(pairToJoin[1]);

@@ -2,14 +2,13 @@ package edu.berkeley.riselab.rlqopt;
 
 import edu.berkeley.riselab.rlqopt.experiments.Experiment;
 import edu.berkeley.riselab.rlqopt.opt.Planner;
+import edu.berkeley.riselab.rlqopt.opt.bushy.PostgresBushyPlanner;
 import edu.berkeley.riselab.rlqopt.opt.learning.RLQOpt;
-import edu.berkeley.riselab.rlqopt.opt.minselect.MinSelectPlanner;
 import edu.berkeley.riselab.rlqopt.opt.nopt.NoPlanner;
 import edu.berkeley.riselab.rlqopt.opt.postgres.PostgresPlanner;
-import edu.berkeley.riselab.rlqopt.opt.bushy.PostgresBushyPlanner;
 import edu.berkeley.riselab.rlqopt.opt.quickpick.QuickPickPlanner;
-import edu.berkeley.riselab.rlqopt.opt.zigzag.ZigZagPlanner;
 import edu.berkeley.riselab.rlqopt.opt.rightdeep.RightDeepPlanner;
+import edu.berkeley.riselab.rlqopt.opt.zigzag.ZigZagPlanner;
 import edu.berkeley.riselab.rlqopt.workload.DatasetGenerator;
 import edu.berkeley.riselab.rlqopt.workload.IMDBWorkloadGenerator;
 import edu.berkeley.riselab.rlqopt.workload.WorkloadGenerator;
@@ -165,10 +164,13 @@ public class DoExperiments extends TestCase {
   public void test2() throws OperatorException, SqlParseException {
     IMDBWorkloadGenerator workload =
         new IMDBWorkloadGenerator(
-            "schematext.sql", "tablestats", "join-order-benchmark/queries/queries.sql");
+            "schematext.sql",
+            "tablestats",
+            "join-order-benchmark/queries/queries.sql",
+            IMDBWorkloadGenerator.MEMORY);
 
-    final int numTraining = 20;
-    final int numTesting = 20;
+    final int numTraining = 10;
+    final int numTesting = 10;
     //    final int numTraining = 80;
     //    final int numTesting = 113;
 
@@ -182,7 +184,7 @@ public class DoExperiments extends TestCase {
     planners.add(new RightDeepPlanner());
     planners.add(new ZigZagPlanner());
     planners.add(new PostgresBushyPlanner());
-    //planners.add(new MinSelectPlanner());
+    // planners.add(new MinSelectPlanner());
     planners.add(new QuickPickPlanner(1000));
     planners.add(new QuickPickPlanner(1));
     planners.add(new RLQOpt(workload, trainingDataPath));
@@ -205,7 +207,7 @@ public class DoExperiments extends TestCase {
     System.out.println("Per query improvement: ");
     printPerQuery(e.getPerQueryImprovement());
     System.out.print("Improvement: ");
-    printSorted(e.getBaselineImprovement());
+    printPerQuery(e.getPerQueryLatency());
     System.out.print("Planning latency: ");
     Map<Planner, Double> latencies = e.getBaselineLatency();
     printSorted(latencies);

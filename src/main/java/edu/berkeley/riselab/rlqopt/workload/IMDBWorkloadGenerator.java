@@ -13,16 +13,24 @@ import java.util.Scanner;
 public class IMDBWorkloadGenerator extends WorkloadGenerator {
 
   private Database db;
-  private InMemoryCostModel tm;
+  private CostModel tm;
   private String workloadDir;
   private SQL2RelAlg sqlParser;
 
-  public IMDBWorkloadGenerator(String dbschema, String tablestats, String workloadDir) {
+  public static final int MEMORY = 0;
+  public static final int DISK = 1;
+  public static final int MATERIALIZATION = 2;
 
+  public IMDBWorkloadGenerator(String dbschema, String tablestats, String workloadDir, int cm) {
     super();
-
     db = new Database(dbschema);
-    tm = new InMemoryCostModel(db, tablestats);
+
+    switch (cm) {
+      case MEMORY:
+        tm = new InMemoryCostModel(db, tablestats);
+      case DISK:
+        tm = new DiskCostModel(db, tablestats);
+    }
     this.workloadDir = workloadDir;
     sqlParser = new SQL2RelAlg(db);
   }

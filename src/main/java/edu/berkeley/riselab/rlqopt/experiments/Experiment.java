@@ -197,4 +197,18 @@ public class Experiment {
     }
     return rtn;
   }
+
+  public Map<Planner, List<Double>> getPerQueryLatency() {
+    Map<Planner, List<Double>> rtn = new HashMap<>();
+    for (Planner p : this.planners) {
+      LinkedList<PlanningStatistics> stats = finalCost.get(p);
+      List<Double> perQueryCost = new LinkedList<>();
+      for (PlanningStatistics queryStats : stats) {
+        // Math.log() because getBaselineImprovement() does so.
+        perQueryCost.add(((double) queryStats.planning / 1e6));
+      }
+      rtn.put(p, perQueryCost);
+    }
+    return rtn;
+  }
 }

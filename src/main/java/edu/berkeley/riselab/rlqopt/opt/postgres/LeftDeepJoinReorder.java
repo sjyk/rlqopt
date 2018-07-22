@@ -105,7 +105,7 @@ public class LeftDeepJoinReorder extends PlanningModule {
 
     // System.out.println(costMap);
 
-    for (int i = 0; i < in.source.size()-1; i++) {
+    for (int i = 0; i < in.source.size() - 1; i++) {
       try {
         costMap = dynamicProgram(costMap, c, in);
       } catch (OperatorException opex) {
@@ -113,11 +113,11 @@ public class LeftDeepJoinReorder extends PlanningModule {
       }
     }
 
-    //System.out.print("left deep: ");
-    //costCache.report();
+    // System.out.print("left deep: ");
+    // costCache.report();
 
-    //System.out.println("end");
-    //System.out.println("end: " + costMap.size());
+    // System.out.println("end");
+    // System.out.println("end: " + costMap.size());
 
     return (Operator) costMap.values().toArray()[0];
   }
@@ -129,8 +129,9 @@ public class LeftDeepJoinReorder extends PlanningModule {
     HashJoinOperator join1 = new HashJoinOperator(params, child, val);
     IndexJoinOperator join2 = new IndexJoinOperator(params, child, val);
 
-    if (join2.isValid() && costCache.getOrComputeIOEstimate(join2, c, this.name) < costCache.getOrComputeIOEstimate(join1, c, this.name))
-      return join2;
+    if (join2.isValid()
+        && costCache.getOrComputeIOEstimate(join2, c, this.name)
+            < costCache.getOrComputeIOEstimate(join1, c, this.name)) return join2;
 
     return join1;
   }
@@ -161,7 +162,7 @@ public class LeftDeepJoinReorder extends PlanningModule {
           } else if (isSubList(joinedAttributes, left) && !key.contains(child)) {
             OperatorParameters params = new OperatorParameters(e.getExpressionList());
 
-            JoinOperator cjv = physicalOperatorSelection(params, child, val,c);
+            JoinOperator cjv = physicalOperatorSelection(params, child, val, c);
 
             HashSet<Operator> cloneset = (HashSet) key.clone();
             cloneset.add(child);

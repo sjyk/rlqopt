@@ -1,0 +1,669 @@
+  ci.note  like '%(voice)%' and ci.note like '%(uncredited)%' :32288
+  cn.country_code  = '[ru]' :1361
+  rt.role  = 'actor' :1
+  t.production_year > 2005 :1012920
+  ci.note  like '%(producer)%' :1435439
+  cn.country_code  = '[ru]' :1361
+  rt.role  = 'actor' :1
+  t.production_year > 2010 :391666
+  ci.note  like '%(producer)%' :1435439
+  cn.country_code  = '[us]' :84843
+  t.production_year > 1990 :1749032
+  cn.country_code !='[pl]' :210031
+  (cn.name LIKE '%Film%' OR cn.name LIKE '%Warner%') :53957
+  ct.kind ='production companies' :1
+  k.keyword ='sequel' :1
+  lt.link LIKE '%follow%' :2
+  mc.note IS NULL :1271989
+  t.production_year BETWEEN 1950 and 2000 :910581
+  cn.country_code !='[pl]' :210031
+  (cn.name LIKE '%Film%' OR cn.name LIKE '%Warner%') :53957
+  ct.kind ='production companies' :1
+  k.keyword ='sequel' :1
+  lt.link LIKE '%follows%' :1
+  mc.note IS NULL :1271989
+  t.production_year  = 1998 and t.title like '%Money%' :36
+  cn.country_code  !='[pl]' and (cn.name like '20th Century Fox%' or cn.name like 'Twentieth Century Fox%') :89
+  ct.kind  != 'production companies' and ct.kind is not NULL :3
+  k.keyword  in ('sequel', 'revenge', 'based-on-novel') :3
+  mc.note  is not NULL :1337140
+  t.production_year  > 1950 :2287271
+  cn.country_code  !='[pl]' :210031
+  ct.kind  != 'production companies' and ct.kind is not NULL :3
+  k.keyword  in ('sequel', 'revenge', 'based-on-novel') :3
+  mc.note  is not NULL :1337140
+  t.production_year  > 1950 :2287271
+  cn.country_code  = '[us]' :84843
+  ct.kind  = 'production companies' :1
+  it1.info = 'genres' :1
+  it2.info = 'rating' :1
+  mi.info  in ('Drama', 'Horror') :274644
+  mi_idx.info  > '8.0' :52629
+  t.production_year  between 2005 and 2008 :445860
+  cn.country_code ='[us]' :84843
+  ct.kind  is not NULL and (ct.kind ='production companies' or ct.kind = 'distributors') :2
+  it1.info ='budget' :1
+  it2.info ='bottom 10 rank' :1
+  t.production_year >2000 :1381453
+  (t.title LIKE 'Birdemic%' OR t.title LIKE '%Movie%') :3645
+  cn.country_code  = '[us]' :84843
+  ct.kind  = 'production companies' :1
+  it1.info = 'genres' :1
+  it2.info = 'rating' :1
+  mi.info  in ('Drama', 'Horror', 'Western', 'Family') :327313
+  mi_idx.info  > '7.0' :192839
+  t.production_year  between 2000 and 2010 :1042800
+  cn.country_code ='[de]' :9775
+  ct.kind ='production companies' :1
+  it.info ='rating' :1
+  it2.info ='release dates' :1
+  kt.kind ='movie' :1
+  cn.country_code ='[us]' :84843
+  ct.kind ='production companies' :1
+  it.info ='rating' :1
+  it2.info ='release dates' :1
+  kt.kind ='movie' :1
+  t.title  != '' :2528312
+  (t.title LIKE '%Champion%' OR t.title LIKE '%Loser%') :2218
+  cn.country_code ='[us]' :84843
+  ct.kind ='production companies' :1
+  it.info ='rating' :1
+  it2.info ='release dates' :1
+  kt.kind ='movie' :1
+  t.title  != '' :2528312
+  (t.title LIKE 'Champion%' OR t.title LIKE 'Loser%') :294
+  cn.country_code ='[us]' :84843
+  ct.kind ='production companies' :1
+  it.info ='rating' :1
+  it2.info ='release dates' :1
+  kt.kind ='movie' :1
+  it1.info  = 'countries' :1
+  it2.info  = 'rating' :1
+  k.keyword  in ('murder', 'murder-in-title', 'blood', 'violence') :3
+  kt.kind  = 'movie' :1
+  mi.info IN ('Sweden', 'Norway', 'Germany', 'Denmark', 'Swedish', 'Denish', 'Norwegian', 'German', 'USA', 'American') :706674
+  mi_idx.info  < '8.5' :1337634
+  t.production_year  > 2010 :391666
+  it1.info  = 'countries' :1
+  it2.info  = 'rating' :1
+  k.keyword  in ('murder', 'murder-in-title') :1
+  kt.kind  = 'movie' :1
+  mi.info IN ('Sweden', 'Norway', 'Germany', 'Denmark', 'Swedish', 'Denish', 'Norwegian', 'German', 'USA', 'American') :706674
+  mi_idx.info  > '6.0' :373409
+  t.production_year  > 2010 and (t.title like '%murder%' or t.title like '%Murder%' or t.title like '%Mord%') :455
+  it1.info  = 'countries' :1
+  it2.info  = 'rating' :1
+  k.keyword  is not null and k.keyword in ('murder', 'murder-in-title', 'blood', 'violence') :3
+  kt.kind  in ('movie', 'episode') :2
+  mi.info IN ('Sweden', 'Norway', 'Germany', 'Denmark', 'Swedish', 'Danish', 'Norwegian', 'German', 'USA', 'American') :716210
+  mi_idx.info  < '8.5' :1337634
+  t.production_year  > 2005 :1012920
+  cn.country_code  = '[us]' :84843
+  it1.info  = 'release dates' :1
+  mc.note  like '%(200%)%' and mc.note like '%(worldwide)%' :61664
+  mi.note  like '%internet%' :10810
+  mi.info  like 'USA:% 200%' :348788
+  t.production_year  > 2000 :1381453
+  cn.country_code  = '[us]' and cn.name = 'YouTube' :1
+  it1.info  = 'release dates' :1
+  mc.note  like '%(200%)%' and mc.note like '%(worldwide)%' :61664
+  mi.note  like '%internet%' :10810
+  mi.info  like 'USA:% 200%' :348788
+  t.production_year  between 2005 and 2010 :716259
+  cn.country_code  = '[us]' :84843
+  it1.info  = 'release dates' :1
+  mi.note  like '%internet%' :10810
+  mi.info  is not NULL and (mi.info like 'USA:% 199%' or mi.info like 'USA:% 200%') :439823
+  t.production_year  > 1990 :1749032
+  cn.country_code  = '[us]' :84843
+  it1.info  = 'release dates' :1
+  mi.note  like '%internet%' :10810
+  t.production_year  > 1990 :1749032
+  cn.country_code ='[us]' :84843
+  k.keyword ='character-name-in-title' :1
+  t.episode_nr >= 50 :223753
+  t.episode_nr < 100 :946906
+  cn.country_code ='[us]' :84843
+  k.keyword ='character-name-in-title' :1
+  cn.country_code ='[us]' :84843
+  k.keyword ='character-name-in-title' :1
+  t.episode_nr < 100 :946906
+  cn.country_code ='[us]' :84843
+  k.keyword ='character-name-in-title' :1
+  t.episode_nr >= 5 :848064
+  t.episode_nr < 100 :946906
+  cn.country_code ='[us]' :84843
+  k.keyword ='character-name-in-title' :1
+  n.name  LIKE 'B%' :343399
+  k.keyword ='character-name-in-title' :1
+  n.name  LIKE 'Z%' :36174
+  k.keyword ='character-name-in-title' :1
+  n.name  LIKE 'X%' :2664
+  k.keyword ='character-name-in-title' :1
+  n.name  LIKE '%Bert%' :5216
+  cn.country_code ='[us]' :84843
+  k.keyword ='character-name-in-title' :1
+  k.keyword ='character-name-in-title' :1
+  n.name  LIKE '%B%' :536716
+  ci.note  in ('(producer)', '(executive producer)') :2379271
+  it1.info  = 'budget' :1
+  it2.info  = 'votes' :1
+  n.gender  = 'm' :1739579
+  n.name like '%Tim%' :15502
+  ci.note  in ('(writer)', '(head writer)', '(written by)', '(story)', '(story editor)') :1244716
+  it1.info  = 'genres' :1
+  it2.info  = 'rating' :1
+  mi.info  in ('Horror', 'Thriller') and mi.note is NULL :73047
+  mi_idx.info  > '8.0' :52629
+  n.gender  is not null :2701134
+  n.gender = 'f' :961555
+  t.production_year  between 2008 and 2014 :784488
+  ci.note  in ('(writer)', '(head writer)', '(written by)', '(story)', '(story editor)') :1244716
+  it1.info  = 'genres' :1
+  it2.info  = 'votes' :1
+  mi.info  in ('Horror', 'Action', 'Sci-Fi', 'Thriller', 'Crime', 'War') :188971
+  n.gender  = 'm' :1739579
+  ci.note  in ('(voice)', '(voice: Japanese version)', '(voice) (uncredited)', '(voice: English version)') :867477
+  cn.country_code ='[us]' :84843
+  it.info  = 'release dates' :1
+  mc.note  is not NULL and (mc.note like '%(USA)%' or mc.note like '%(worldwide)%') :590994
+  mi.info  is not null and (mi.info like 'Japan:%200%' or mi.info like 'USA:%200%') :451104
+  n.gender ='f' :961555
+  n.name like '%Ang%' :15803
+  rt.role ='actress' :1
+  t.production_year  between 2005 and 2009 :574556
+  ci.note  = '(voice)' :713828
+  cn.country_code ='[us]' :84843
+  it.info  = 'release dates' :1
+  mc.note  like '%(200%)%' and (mc.note like '%(USA)%' or mc.note like '%(worldwide)%') :198519
+  mi.info  is not null and (mi.info like 'Japan:%2007%' or mi.info like 'USA:%2008%') :69478
+  n.gender ='f' :961555
+  n.name like '%Angel%' :12221
+  rt.role ='actress' :1
+  t.production_year  between 2007 and 2008 and t.title like '%Kung%Fu%Panda%' :7
+  ci.note  in ('(voice)', '(voice: Japanese version)', '(voice) (uncredited)', '(voice: English version)') :867477
+  cn.country_code ='[us]' :84843
+  it.info  = 'release dates' :1
+  mi.info  is not null and (mi.info like 'Japan:%200%' or mi.info like 'USA:%200%') :451104
+  n.gender ='f' :961555
+  n.name like '%An%' :163621
+  rt.role ='actress' :1
+  t.production_year  > 2000 :1381453
+  ci.note  in ('(voice)', '(voice: Japanese version)', '(voice) (uncredited)', '(voice: English version)') :867477
+  cn.country_code ='[us]' :84843
+  it.info  = 'release dates' :1
+  n.gender ='f' :961555
+  rt.role ='actress' :1
+  t.production_year  > 2000 :1381453
+  ct.kind = 'production companies' :1
+  it.info = 'top 250 rank' :1
+  mc.note  not like '%(as Metro-Goldwyn-Mayer Pictures)%' and (mc.note like '%(co-production)%' or mc.note like '%(presents)%') :28889
+  ct.kind = 'production companies' :1
+  it.info = 'bottom 10 rank' :1
+  mc.note  not like '%(as Metro-Goldwyn-Mayer Pictures)%' :1337088
+  t.production_year between 2005 and 2010 :716259
+  ct.kind = 'production companies' :1
+  it.info = 'top 250 rank' :1
+  mc.note  not like '%(as Metro-Goldwyn-Mayer Pictures)%' and mc.note like '%(co-production)%' :17816
+  t.production_year >2010 :391666
+  ct.kind = 'production companies' :1
+  it.info = 'bottom 10 rank' :1
+  mc.note  not like '%(as Metro-Goldwyn-Mayer Pictures)%' :1337088
+  t.production_year >2000 :1381453
+  cct1.kind  = 'cast' :1
+  cct2.kind  like '%complete%' :2
+  chn.name  not like '%Sherlock%' and (chn.name like '%Tony%Stark%' or chn.name like '%Iron%Man%') :30
+  k.keyword  in ('superhero', 'sequel', 'second-part', 'marvel-comics', 'based-on-comic', 'tv-special', 'fight', 'violence') :8
+  kt.kind  = 'movie' :1
+  t.production_year  > 1950 :2287271
+  cct1.kind  = 'cast' :1
+  cct2.kind  like '%complete%' :2
+  chn.name  not like '%Sherlock%' and (chn.name like '%Tony%Stark%' or chn.name like '%Iron%Man%') :30
+  k.keyword  in ('superhero', 'sequel', 'second-part', 'marvel-comics', 'based-on-comic', 'tv-special', 'fight', 'violence') :8
+  kt.kind  = 'movie' :1
+  n.name  LIKE '%Downey%Robert%' :2
+  t.production_year  > 2000 :1381453
+  cct1.kind  = 'cast' :1
+  cct2.kind  like '%complete%' :2
+  chn.name  is not NULL and (chn.name like '%man%' or chn.name like '%Man%') :180152
+  k.keyword  in ('superhero', 'marvel-comics', 'based-on-comic', 'tv-special', 'fight', 'violence', 'magnet', 'web', 'claw', 'laser') :10
+  kt.kind  = 'movie' :1
+  t.production_year  > 2000 :1381453
+  cn.country_code !='[pl]' :210031
+  (cn.name LIKE '%Film%' OR cn.name LIKE '%Warner%') :53957
+  ct.kind ='production companies' :1
+  k.keyword ='sequel' :1
+  lt.link LIKE '%follow%' :2
+  mc.note IS NULL :1271989
+  mi.info IN ('Sweden', 'Norway', 'Germany', 'Denmark', 'Swedish', 'Denish', 'Norwegian', 'German') :153897
+  t.production_year BETWEEN 1950 and 2000 :910581
+  cn.country_code !='[pl]' :210031
+  (cn.name LIKE '%Film%' OR cn.name LIKE '%Warner%') :53957
+  ct.kind ='production companies' :1
+  k.keyword ='sequel' :1
+  lt.link LIKE '%follow%' :2
+  mc.note IS NULL :1271989
+  mi.info IN ('Germany', 'German') :116559
+  t.production_year BETWEEN 2000 and 2010 :1042800
+  cn.country_code !='[pl]' :210031
+  (cn.name LIKE '%Film%' OR cn.name LIKE '%Warner%') :53957
+  ct.kind ='production companies' :1
+  k.keyword ='sequel' :1
+  lt.link LIKE '%follow%' :2
+  mc.note IS NULL :1271989
+  mi.info IN ('Sweden', 'Norway', 'Germany', 'Denmark', 'Swedish', 'Denish', 'Norwegian', 'German', 'English') :936223
+  t.production_year BETWEEN 1950 and 2010 :1900368
+  cn.country_code  != '[us]' :126230
+  it1.info  = 'countries' :1
+  it2.info  = 'rating' :1
+  k.keyword  in ('murder', 'murder-in-title', 'blood', 'violence') :3
+  kt.kind  in ('movie', 'episode') :2
+  mc.note  not like '%(USA)%' and mc.note like '%(200%)%' :303271
+  mi.info IN ('Germany', 'German', 'USA', 'American') :669336
+  mi_idx.info  < '7.0' :1172960
+  t.production_year  > 2008 :662065
+  cn.country_code  != '[us]' :126230
+  it1.info  = 'countries' :1
+  it2.info  = 'rating' :1
+  k.keyword  in ('murder', 'murder-in-title', 'blood', 'violence') :3
+  kt.kind  in ('movie', 'episode') :2
+  mc.note  not like '%(USA)%' and mc.note like '%(200%)%' :303271
+  mi.info IN ('Germany', 'German', 'USA', 'American') :669336
+  mi_idx.info  < '7.0' :1172960
+  t.production_year  > 2009 :533369
+  cn.country_code  != '[us]' :126230
+  it1.info  = 'countries' :1
+  it2.info  = 'rating' :1
+  k.keyword  in ('murder', 'murder-in-title', 'blood', 'violence') :3
+  kt.kind  in ('movie', 'episode') :2
+  mc.note  not like '%(USA)%' and mc.note like '%(200%)%' :303271
+  mi.info IN ('Sweden', 'Norway', 'Germany', 'Denmark', 'Swedish', 'Danish', 'Norwegian', 'German', 'USA', 'American') :716210
+  mi_idx.info  < '8.5' :1337634
+  t.production_year  > 2005 :1012920
+  cn.country_code  != '[us]' :126230
+  it1.info  = 'countries' :1
+  it2.info  = 'rating' :1
+  k.keyword  in ('murder', 'murder-in-title', 'blood', 'violence') :3
+  kt.kind  in ('movie', 'episode') :2
+  mi.info IN ('Sweden', 'Norway', 'Germany', 'Denmark', 'Swedish', 'Danish', 'Norwegian', 'German', 'USA', 'American') :716210
+  mi_idx.info  < '8.5' :1337634
+  t.production_year  > 2005 :1012920
+  cct1.kind  = 'complete+verified' :1
+  cn.country_code  = '[us]' :84843
+  it1.info  = 'release dates' :1
+  kt.kind  in ('movie') :1
+  mi.note  like '%internet%' :10810
+  mi.info  is not NULL and (mi.info like 'USA:% 199%' or mi.info like 'USA:% 200%') :439823
+  t.production_year  > 2000 :1381453
+  cct1.kind  = 'complete+verified' :1
+  cn.country_code  = '[us]' :84843
+  it1.info  = 'release dates' :1
+  k.keyword  in ('nerd', 'loner', 'alienation', 'dignity') :4
+  kt.kind  in ('movie') :1
+  mi.note  like '%internet%' :10810
+  mi.info  like 'USA:% 200%' :348788
+  t.production_year  > 2000 :1381453
+  cct1.kind  = 'complete+verified' :1
+  cn.country_code  = '[us]' :84843
+  it1.info  = 'release dates' :1
+  kt.kind  in ('movie', 'tv movie', 'video movie', 'video game') :4
+  mi.note  like '%internet%' :10810
+  mi.info  is not NULL and (mi.info like 'USA:% 199%' or mi.info like 'USA:% 200%') :439823
+  t.production_year  > 1990 :1749032
+  ci.note  in ('(voice)', '(voice: Japanese version)', '(voice) (uncredited)', '(voice: English version)') :867477
+  cn.country_code ='[us]' :84843
+  it.info  = 'release dates' :1
+  k.keyword  in ('hero', 'martial-arts', 'hand-to-hand-combat') :3
+  mi.info  is not null and (mi.info like 'Japan:%201%' or mi.info like 'USA:%201%') :301247
+  n.gender ='f' :961555
+  n.name like '%An%' :163621
+  rt.role ='actress' :1
+  t.production_year  > 2010 :391666
+  ci.note  in ('(voice)', '(voice: Japanese version)', '(voice) (uncredited)', '(voice: English version)') :867477
+  cn.country_code ='[us]' :84843
+  cn.name  = 'DreamWorks Animation' :1
+  it.info  = 'release dates' :1
+  k.keyword  in ('hero', 'martial-arts', 'hand-to-hand-combat', 'computer-animated-movie') :3
+  mi.info  is not null and (mi.info like 'Japan:%201%' or mi.info like 'USA:%201%') :301247
+  n.gender ='f' :961555
+  n.name like '%An%' :163621
+  rt.role ='actress' :1
+  t.production_year  > 2010 :391666
+  t.title like 'Kung Fu Panda%' :15
+  ci.note  in ('(writer)', '(head writer)', '(written by)', '(story)', '(story editor)') :1244716
+  it1.info  = 'genres' :1
+  it2.info  = 'votes' :1
+  k.keyword  in ('murder', 'blood', 'gore', 'death', 'female-nudity') :5
+  mi.info  = 'Horror' :30801
+  n.gender  = 'm' :1739579
+  ci.note  in ('(writer)', '(head writer)', '(written by)', '(story)', '(story editor)') :1244716
+  it1.info  = 'genres' :1
+  it2.info  = 'votes' :1
+  k.keyword  in ('murder', 'blood', 'gore', 'death', 'female-nudity') :5
+  mi.info  = 'Horror' :30801
+  n.gender   = 'm' :1739579
+  t.production_year  > 2010 :391666
+  t.title  like 'Vampire%' :284
+  ci.note  in ('(writer)', '(head writer)', '(written by)', '(story)', '(story editor)') :1244716
+  it1.info  = 'genres' :1
+  it2.info  = 'votes' :1
+  k.keyword  in ('murder', 'violence', 'blood', 'gore', 'death', 'female-nudity', 'hospital') :7
+  mi.info  in ('Horror', 'Action', 'Sci-Fi', 'Thriller', 'Crime', 'War') :188971
+  n.gender   = 'm' :1739579
+  cct1.kind  = 'cast' :1
+  cct2.kind  like '%complete%' :2
+  chn.name  is not NULL and (chn.name like '%man%' or chn.name like '%Man%') :180152
+  it2.info  = 'rating' :1
+  k.keyword  in ('superhero', 'marvel-comics', 'based-on-comic', 'tv-special', 'fight', 'violence', 'magnet', 'web', 'claw', 'laser') :10
+  kt.kind  = 'movie' :1
+  mi_idx.info  > '7.0' :192839
+  t.production_year  > 2000 :1381453
+  cct1.kind  = 'cast' :1
+  cct2.kind  like '%complete%' :2
+  chn.name  is not NULL and (chn.name like '%man%' or chn.name like '%Man%') :180152
+  it2.info  = 'rating' :1
+  k.keyword  in ('superhero', 'marvel-comics', 'based-on-comic', 'fight') :4
+  kt.kind  = 'movie' :1
+  mi_idx.info  > '8.0' :52629
+  t.production_year  > 2005 :1012920
+  cct1.kind  = 'cast' :1
+  cct2.kind  like '%complete%' :2
+  chn.name  is not NULL and (chn.name like '%man%' or chn.name like '%Man%') :180152
+  it2.info  = 'rating' :1
+  k.keyword  in ('superhero', 'marvel-comics', 'based-on-comic', 'tv-special', 'fight', 'violence', 'magnet', 'web', 'claw', 'laser') :10
+  kt.kind  = 'movie' :1
+  t.production_year  > 2000 :1381453
+  cct1.kind  in ('cast', 'crew') :2
+  cct2.kind  = 'complete' :1
+  cn.country_code !='[pl]' :210031
+  (cn.name LIKE '%Film%' OR cn.name LIKE '%Warner%') :53957
+  ct.kind ='production companies' :1
+  k.keyword ='sequel' :1
+  lt.link LIKE '%follow%' :2
+  mc.note IS NULL :1271989
+  mi.info IN ('Sweden', 'Germany','Swedish', 'German') :134239
+  t.production_year BETWEEN 1950 and 2000 :910581
+  cct1.kind  in ('cast', 'crew') :2
+  cct2.kind  = 'complete' :1
+  cn.country_code !='[pl]' :210031
+  (cn.name LIKE '%Film%' OR cn.name LIKE '%Warner%') :53957
+  ct.kind ='production companies' :1
+  k.keyword ='sequel' :1
+  lt.link LIKE '%follow%' :2
+  mc.note IS NULL :1271989
+  mi.info IN ('Sweden', 'Germany','Swedish', 'German') :134239
+  t.production_year  = 1998 :46583
+  cct1.kind  = 'cast' :1
+  cct2.kind  like 'complete%' :2
+  cn.country_code !='[pl]' :210031
+  (cn.name LIKE '%Film%' OR cn.name LIKE '%Warner%') :53957
+  ct.kind ='production companies' :1
+  k.keyword ='sequel' :1
+  lt.link LIKE '%follow%' :2
+  mc.note IS NULL :1271989
+  mi.info IN ('Sweden', 'Norway', 'Germany', 'Denmark', 'Swedish', 'Denish', 'Norwegian', 'German', 'English') :936223
+  t.production_year BETWEEN 1950 and 2010 :1900368
+  cct1.kind  = 'crew' :1
+  cct2.kind  != 'complete+verified' :3
+  cn.country_code  != '[us]' :126230
+  it1.info  = 'countries' :1
+  it2.info  = 'rating' :1
+  k.keyword  in ('murder', 'murder-in-title', 'blood', 'violence') :3
+  kt.kind  in ('movie', 'episode') :2
+  mc.note  not like '%(USA)%' and mc.note like '%(200%)%' :303271
+  mi.info IN ('Sweden', 'Norway', 'Germany', 'Denmark', 'Swedish', 'Danish', 'Norwegian', 'German', 'USA', 'American') :716210
+  mi_idx.info  < '8.5' :1337634
+  t.production_year  > 2000 :1381453
+  cct1.kind  = 'crew' :1
+  cct2.kind  != 'complete+verified' :3
+  cn.country_code  != '[us]' :126230
+  it1.info  = 'countries' :1
+  it2.info  = 'rating' :1
+  k.keyword  in ('murder', 'murder-in-title', 'blood', 'violence') :3
+  kt.kind  in ('movie', 'episode') :2
+  mc.note  not like '%(USA)%' and mc.note like '%(200%)%' :303271
+  mi.info  IN ('Sweden', 'Germany', 'Swedish', 'German') :134239
+  mi_idx.info  > '6.5' :308267
+  t.production_year  > 2005 :1012920
+  cct1.kind  = 'cast' :1
+  cct2.kind  = 'complete' :1
+  cn.country_code  != '[us]' :126230
+  it1.info  = 'countries' :1
+  it2.info  = 'rating' :1
+  k.keyword  in ('murder', 'murder-in-title', 'blood', 'violence') :3
+  kt.kind  in ('movie', 'episode') :2
+  mc.note  not like '%(USA)%' and mc.note like '%(200%)%' :303271
+  mi.info IN ('Sweden', 'Norway', 'Germany', 'Denmark', 'Swedish', 'Danish', 'Norwegian', 'German', 'USA', 'American') :716210
+  mi_idx.info  < '8.5' :1337634
+  t.production_year  > 2005 :1012920
+  cct1.kind  ='cast' :1
+  cct2.kind  ='complete+verified' :1
+  chn.name  = 'Queen' :1
+  ci.note  in ('(voice)', '(voice) (uncredited)', '(voice: English version)') :836701
+  cn.country_code ='[us]' :84843
+  it.info  = 'release dates' :1
+  it3.info  = 'trivia' :1
+  k.keyword  = 'computer-animation' :1
+  mi.info  is not null and (mi.info like 'Japan:%200%' or mi.info like 'USA:%200%') :451104
+  n.gender ='f' :961555
+  n.name like '%An%' :163621
+  rt.role ='actress' :1
+  t.title  = 'Shrek 2' :3
+  t.production_year  between 2000 and 2010 :1042800
+  cct1.kind  ='cast' :1
+  cct2.kind  ='complete+verified' :1
+  chn.name  = 'Queen' :1
+  ci.note  in ('(voice)', '(voice) (uncredited)', '(voice: English version)') :836701
+  cn.country_code ='[us]' :84843
+  it.info  = 'release dates' :1
+  it3.info  = 'height' :1
+  k.keyword  = 'computer-animation' :1
+  mi.info  like 'USA:%200%' :387683
+  n.gender ='f' :961555
+  n.name like '%An%' :163621
+  rt.role ='actress' :1
+  t.title  = 'Shrek 2' :3
+  t.production_year  between 2000 and 2005 :421546
+  cct1.kind  ='cast' :1
+  cct2.kind  ='complete+verified' :1
+  ci.note  in ('(voice)', '(voice: Japanese version)', '(voice) (uncredited)', '(voice: English version)') :867477
+  cn.country_code ='[us]' :84843
+  it.info  = 'release dates' :1
+  it3.info  = 'trivia' :1
+  k.keyword  = 'computer-animation' :1
+  mi.info  is not null and (mi.info like 'Japan:%200%' or mi.info like 'USA:%200%') :451104
+  n.gender ='f' :961555
+  n.name like '%An%' :163621
+  rt.role ='actress' :1
+  t.production_year  between 2000 and 2010 :1042800
+  cn.country_code ='[de]' :9775
+  k.keyword ='character-name-in-title' :1
+  cn.country_code ='[nl]' :2340
+  k.keyword ='character-name-in-title' :1
+  cn.country_code ='[sm]' :1
+  k.keyword ='character-name-in-title' :1
+  cn.country_code ='[us]' :84843
+  k.keyword ='character-name-in-title' :1
+  cct1.kind  in ('cast', 'crew') :2
+  cct2.kind  ='complete+verified' :1
+  ci.note  in ('(writer)', '(head writer)', '(written by)', '(story)', '(story editor)') :1244716
+  it1.info  = 'genres' :1
+  it2.info  = 'votes' :1
+  k.keyword  in ('murder', 'violence', 'blood', 'gore', 'death', 'female-nudity', 'hospital') :7
+  mi.info  in ('Horror', 'Thriller') :73047
+  n.gender  = 'm' :1739579
+  t.production_year  > 2000 :1381453
+  cct1.kind  in ('cast', 'crew') :2
+  cct2.kind  ='complete+verified' :1
+  ci.note  in ('(writer)', '(head writer)', '(written by)', '(story)', '(story editor)') :1244716
+  it1.info  = 'genres' :1
+  it2.info  = 'votes' :1
+  k.keyword  in ('murder', 'violence', 'blood', 'gore', 'death', 'female-nudity', 'hospital') :7
+  mi.info  in ('Horror', 'Thriller') :73047
+  n.gender  = 'm' :1739579
+  t.production_year  > 2000 and (t.title like '%Freddy%' or t.title like '%Jason%' or t.title like 'Saw%') :533
+  cct1.kind  = 'cast' :1
+  cct2.kind  ='complete+verified' :1
+  ci.note  in ('(writer)', '(head writer)', '(written by)', '(story)', '(story editor)') :1244716
+  it1.info  = 'genres' :1
+  it2.info  = 'votes' :1
+  k.keyword  in ('murder', 'violence', 'blood', 'gore', 'death', 'female-nudity', 'hospital') :7
+  mi.info  in ('Horror', 'Action', 'Sci-Fi', 'Thriller', 'Crime', 'War') :188971
+  n.gender  = 'm' :1739579
+  ci.note  in ('(writer)', '(head writer)', '(written by)', '(story)', '(story editor)') :1244716
+  cn.name  like 'Lionsgate%' :10
+  it1.info  = 'genres' :1
+  it2.info  = 'votes' :1
+  k.keyword  in ('murder', 'violence', 'blood', 'gore', 'death', 'female-nudity', 'hospital') :7
+  mi.info  in ('Horror', 'Thriller') :73047
+  n.gender   = 'm' :1739579
+  ci.note  in ('(writer)', '(head writer)', '(written by)', '(story)', '(story editor)') :1244716
+  cn.name  like 'Lionsgate%' :10
+  it1.info  = 'genres' :1
+  it2.info  = 'votes' :1
+  k.keyword  in ('murder', 'violence', 'blood', 'gore', 'death', 'female-nudity', 'hospital') :7
+  mc.note  like '%(Blu-ray)%' :7963
+  mi.info  in ('Horror', 'Thriller') :73047
+  n.gender  = 'm' :1739579
+  t.production_year  > 2000 and (t.title like '%Freddy%' or t.title like '%Jason%' or t.title like 'Saw%') :533
+  ci.note  in ('(writer)', '(head writer)', '(written by)', '(story)', '(story editor)') :1244716
+  cn.name  like 'Lionsgate%' :10
+  it1.info  = 'genres' :1
+  it2.info  = 'votes' :1
+  k.keyword  in ('murder', 'violence', 'blood', 'gore', 'death', 'female-nudity', 'hospital') :7
+  mi.info  in ('Horror', 'Action', 'Sci-Fi', 'Thriller', 'Crime', 'War') :188971
+  k.keyword ='10,000-mile-club' :1
+  k.keyword ='character-name-in-title' :1
+  cn1.country_code  = '[us]' :84843
+  it1.info  = 'rating' :1
+  it2.info  = 'rating' :1
+  kt1.kind  in ('tv series') :1
+  kt2.kind  in ('tv series') :1
+  lt.link  in ('sequel', 'follows', 'followed by') :2
+  mi_idx2.info  < '3.0' :674828
+  t2.production_year  between 2005 and 2008 :445860
+  cn1.country_code  = '[nl]' :2340
+  it1.info  = 'rating' :1
+  it2.info  = 'rating' :1
+  kt1.kind  in ('tv series') :1
+  kt2.kind  in ('tv series') :1
+  lt.link  LIKE '%follow%' :2
+  mi_idx2.info  < '3.0' :674828
+  t2.production_year  = 2007 :119565
+  cn1.country_code  != '[us]' :126230
+  it1.info  = 'rating' :1
+  it2.info  = 'rating' :1
+  kt1.kind  in ('tv series', 'episode') :2
+  kt2.kind  in ('tv series', 'episode') :2
+  lt.link  in ('sequel', 'follows', 'followed by') :2
+  mi_idx2.info  < '3.5' :687267
+  t2.production_year  between 2000 and 2010 :1042800
+  k.keyword  like '%sequel%' :30
+  mi.info  IN ('Sweden', 'Norway', 'Germany', 'Denmark', 'Swedish', 'Denish', 'Norwegian', 'German') :153897
+  t.production_year > 2005 :1012920
+  k.keyword  like '%sequel%' :30
+  mi.info  IN ('Bulgaria') :2287
+  t.production_year > 2010 :391666
+  k.keyword  like '%sequel%' :30
+  mi.info  IN ('Sweden', 'Norway', 'Germany', 'Denmark', 'Swedish', 'Denish', 'Norwegian', 'German', 'USA', 'American') :706674
+  t.production_year > 1990 :1749032
+  it.info ='rating' :1
+  k.keyword  like '%sequel%' :30
+  mi_idx.info  > '5.0' :517682
+  t.production_year > 2005 :1012920
+  it.info ='rating' :1
+  k.keyword  like '%sequel%' :30
+  mi_idx.info  > '9.0' :8322
+  t.production_year > 2010 :391666
+  it.info ='rating' :1
+  k.keyword  like '%sequel%' :30
+  mi_idx.info  > '2.0' :806365
+  t.production_year > 1990 :1749032
+  ct.kind  = 'production companies' :1
+  mc.note  like '%(theatrical)%' and mc.note like '%(France)%' :24025
+  mi.info  IN ('Sweden', 'Norway', 'Germany', 'Denmark', 'Swedish', 'Denish', 'Norwegian', 'German') :153897
+  t.production_year > 2005 :1012920
+  ct.kind  = 'production companies' :1
+  mc.note  like '%(VHS)%' and mc.note like '%(USA)%' and mc.note like '%(1994)%' :1418
+  mi.info  IN ('USA', 'America') :552777
+  t.production_year > 2010 :391666
+  ct.kind  = 'production companies' :1
+  mc.note  not like '%(TV)%' and mc.note like '%(USA)%' :295628
+  mi.info  IN ('Sweden', 'Norway', 'Germany', 'Denmark', 'Swedish', 'Denish', 'Norwegian', 'German', 'USA', 'American') :706674
+  t.production_year > 1990 :1749032
+  k.keyword = 'marvel-cinematic-universe' :1
+  n.name LIKE '%Downey%Robert%' :2
+  t.production_year > 2010 :391666
+  k.keyword in ('superhero', 'sequel', 'second-part', 'marvel-comics', 'based-on-comic', 'tv-special', 'fight', 'violence') :8
+  n.name LIKE '%Downey%Robert%' :2
+  t.production_year > 2014 :438
+  k.keyword = 'marvel-cinematic-universe' :1
+  n.name LIKE '%Downey%Robert%' :2
+  t.production_year > 2014 :438
+  k.keyword in ('superhero', 'sequel', 'second-part', 'marvel-comics', 'based-on-comic', 'tv-special', 'fight', 'violence') :8
+  n.name LIKE '%Downey%Robert%' :2
+  t.production_year > 2000 :1381453
+  k.keyword = 'marvel-cinematic-universe' :1
+  n.name LIKE '%Downey%Robert%' :2
+  t.production_year > 2000 :1381453
+  k.keyword in ('superhero', 'sequel', 'second-part', 'marvel-comics', 'based-on-comic', 'tv-special', 'fight', 'violence') :8
+  t.production_year > 2000 :1381453
+  an.name LIKE '%a%' :674692
+  it.info ='mini biography' :1
+  lt.link ='features' :1
+  n.name_pcode_cf BETWEEN 'A' and 'F' :1103278
+  (n.gender='m' OR (n.gender = 'f' and n.name LIKE 'B%')) :1817717
+  pi.note ='Volker Boehm' :64
+  t.production_year BETWEEN 1980 and 1995 :340186
+  an.name LIKE '%a%' :674692
+  it.info ='mini biography' :1
+  lt.link ='features' :1
+  n.name_pcode_cf LIKE 'D%' :218546
+  n.gender='m' :1739579
+  pi.note ='Volker Boehm' :64
+  t.production_year BETWEEN 1980 and 1984 :76065
+  an.name  is not NULL and (an.name LIKE '%a%' or an.name LIKE 'A%') :686095
+  it.info ='mini biography' :1
+  lt.link  in ('references', 'referenced in', 'features', 'featured in') :4
+  n.name_pcode_cf BETWEEN 'A' and 'F' :1103278
+  (n.gender='m' OR (n.gender = 'f' and n.name LIKE 'A%')) :1782047
+  pi.note  is not NULL :84183
+  t.production_year BETWEEN 1980 and 2010 :1555597
+  ci.note ='(voice: English version)' :93095
+  cn.country_code ='[jp]' :6752
+  mc.note like '%(Japan)%' and mc.note not like '%(USA)%' :48897
+  n1.name like '%Yo%' and n1.name not like '%Yu%' :20911
+  rt.role ='actress' :1
+  ci.note ='(voice: English version)' :93095
+  cn.country_code ='[jp]' :6752
+  mc.note like '%(Japan)%' and mc.note not like '%(USA)%' and (mc.note like '%(2006)%' or mc.note like '%(2007)%') :8569
+  n.name like '%Yo%' and n.name not like '%Yu%' :20911
+  rt.role ='actress' :1
+  t.production_year between 2006 and 2007 and (t.title like 'One Piece%' or t.title like 'Dragon Ball Z%') :7
+  cn.country_code ='[us]' :84843
+  rt.role ='writer' :1
+  cn.country_code ='[us]' :84843
+  rt.role ='costume designer' :1
+  ci.note  in ('(voice)', '(voice: Japanese version)', '(voice) (uncredited)', '(voice: English version)') :867477
+  cn.country_code ='[us]' :84843
+  mc.note  is not NULL and (mc.note like '%(USA)%' or mc.note like '%(worldwide)%') :590994
+  n.gender ='f' :961555
+  n.name like '%Ang%' :15803
+  rt.role ='actress' :1
+  t.production_year  between 2005 and 2015 :1107888
+  ci.note  = '(voice)' :713828
+  cn.country_code ='[us]' :84843
+  mc.note  like '%(200%)%' and (mc.note like '%(USA)%' or mc.note like '%(worldwide)%') :198519
+  n.gender ='f' :961555
+  n.name like '%Angel%' :12221
+  rt.role ='actress' :1
+  t.production_year  between 2007 and 2010 :512825
+  ci.note  in ('(voice)', '(voice: Japanese version)', '(voice) (uncredited)', '(voice: English version)') :867477
+  cn.country_code ='[us]' :84843
+  n.gender ='f' :961555
+  n.name like '%An%' :163621
+  rt.role ='actress' :1
+  ci.note  in ('(voice)', '(voice: Japanese version)', '(voice) (uncredited)', '(voice: English version)') :867477
+  cn.country_code ='[us]' :84843
+  n.gender ='f' :961555
+  rt.role ='actress' :1
