@@ -124,7 +124,7 @@ public class TDJoinSampler extends PlanningModule {
         for (TrainingDataPoint t : localData) {
           // Use log() since it's normal for costs to vary from 10^5 to 10^11.  This significantly
           // reduces the optimization difficulty during training.
-          t.cost = Math.log(t.cost);
+          t.cost = (float) Math.log(t.cost);
           trainingData.add(t);
         }
 
@@ -255,7 +255,7 @@ public class TDJoinSampler extends PlanningModule {
 
           // exploration
           // System.out.println(rand.nextGaussian());
-          double cost = costCache.getOrComputeIOEstimate(baseline, c, this.name);
+          float cost = costCache.getOrComputeIOEstimate(baseline, c, this.name);
 
           Operator[] trainingToJoin = new Operator[4];
           trainingToJoin[0] = i;
@@ -266,7 +266,7 @@ public class TDJoinSampler extends PlanningModule {
           if (relations.size() <= 10)
             localData.add(
                 new TrainingDataPoint(
-                    trainingToJoin, cost, indicator + 0.0, relations.size() + 0.0));
+                    trainingToJoin, cost, (float) indicator , (float) relations.size()));
 
           // System.out.println(i + "," + j + " "+ indicator+ "=>" + cost);
 

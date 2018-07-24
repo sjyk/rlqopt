@@ -35,7 +35,8 @@ public interface CostModel {
     System.out.println(treeMap);
   }
 
-  default double cardinality(Attribute a) {
-    return 1.0;
+  default float cardinality(Attribute a) {
+    return 1.0f;
   }
+
 }

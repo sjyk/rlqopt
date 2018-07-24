@@ -100,15 +100,15 @@ public class QuickPick extends PlanningModule {
 
   /** Implements the QuickPick algorithm. */
   private Operator quickPick(Operator in, CostModel c) throws OperatorException {
-    double bestCost = Double.MAX_VALUE;
+    float bestCost = Float.MAX_VALUE;
     Operator bestPlan = null;
     for (int i = 1; i <= this.numTrajectories; ++i) {
-      Pair<Operator, Double> joinAndCost = rollout(new ArrayList<>(in.source), c, in, bestCost);
+      Pair<Operator, Float> joinAndCost = rollout(new ArrayList<>(in.source), c, in, bestCost);
       if (joinAndCost == null) continue;
       if (i % 50 == 0) {
         System.out.println("QuickPick: collected trajectory " + i);
       }
-      double cost = joinAndCost.right;
+      float cost = joinAndCost.right;
       if (bestPlan == null || cost < bestCost) {
         bestPlan = joinAndCost.left;
         bestCost = cost;
@@ -118,14 +118,14 @@ public class QuickPick extends PlanningModule {
   }
 
   // "relations" is a forest.
-  private double totalCost(List<Operator> relations, CostModel c) {
-    double cost = 0;
+  private float totalCost(List<Operator> relations, CostModel c) {
+    float cost = 0;
     for (Operator rel : relations) cost += costCache.getOrComputeIOEstimate(rel, c, this.name);
     return cost;
   }
 
-  private Pair<Operator, Double> rollout(
-      List<Operator> relations, final CostModel c, final Operator in, final double bestCost)
+  private Pair<Operator, Float> rollout(
+      List<Operator> relations, final CostModel c, final Operator in, final float bestCost)
       throws OperatorException {
     if (relations.size() == 1) {
       Operator finalJoin = (Operator) (relations.toArray()[0]);
@@ -168,7 +168,7 @@ public class QuickPick extends PlanningModule {
     relations.add(randomJoin);
 
     // Optimization: compute costs of "relations", if it's already larger than best, exit.
-    double totalCost = totalCost(relations, c);
+    float totalCost = totalCost(relations, c);
     if (totalCost >= bestCost) {
       return null;
     }

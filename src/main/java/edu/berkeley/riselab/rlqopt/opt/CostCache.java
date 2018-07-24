@@ -10,7 +10,7 @@ public class CostCache {
 
   private static final boolean disableCaching = true;
 
-  private Map<String, Double> costCache = new HashMap<>();
+  private Map<String, Float> costCache = new HashMap<>();
   private Map<String, Long> cardCache = new HashMap<>();
 
   // Cache hit statistics for debugging.  Only for IO estimate.
@@ -21,17 +21,17 @@ public class CostCache {
     System.out.println("num hits " + numHits + " total " + numTotal);
   }
 
-  public double getOrComputeIOEstimate(Operator op, CostModel c, String plannerName) {
+  public float getOrComputeIOEstimate(Operator op, CostModel c, String plannerName) {
     if (disableCaching) {
-      return (double) c.estimate(op, plannerName).operatorIOcost;
+      return (float) c.estimate(op, plannerName).operatorIOcost;
     }
 
     ++numTotal;
     String opHash = op.toString();
 
-    double cost;
+    float cost;
     if (!costCache.containsKey(opHash)) {
-      cost = (double) c.estimate(op, plannerName).operatorIOcost;
+      cost = (float) c.estimate(op, plannerName).operatorIOcost;
       costCache.put(opHash, cost);
     } else {
       cost = costCache.get(opHash);
@@ -41,7 +41,7 @@ public class CostCache {
     return cost;
   }
 
-  public double getOrComputeCardinality(Operator op, CostModel c, String plannerName) {
+  public float getOrComputeCardinality(Operator op, CostModel c, String plannerName) {
     if (disableCaching) {
       return c.estimate(op, plannerName).resultCardinality;
     }

@@ -13,12 +13,13 @@ import org.nd4j.linalg.factory.Nd4j;
 public class TrainingDataPoint {
 
   public Operator[] oplist;
-  public Double cost = 0.0;
-  public Double gcost = 0.0;
-  public Double size = 0.0;
+  public float cost = 0.0f;
+  public float gcost = 0.0f;
+  public float size = 0.0f;
 
   private static boolean selectivityScaling = false;
   private static boolean queryGraphFeatures = true;
+
   static {
     if (System.getProperty("selScaling") != null) {
       selectivityScaling = Boolean.valueOf(System.getProperty("selScaling"));
@@ -30,12 +31,12 @@ public class TrainingDataPoint {
     System.out.println("queryGraphFeatures = " + queryGraphFeatures);
   }
 
-  public TrainingDataPoint(Operator[] oplist, Double cost) {
+  public TrainingDataPoint(Operator[] oplist, float cost) {
     this.oplist = oplist;
     this.cost = cost;
   }
 
-  public TrainingDataPoint(Operator[] oplist, Double cost, Double greedyCost, Double size) {
+  public TrainingDataPoint(Operator[] oplist, float cost, float greedyCost, float size) {
     this.oplist = oplist;
     this.cost = cost;
     this.size = size;
@@ -46,8 +47,7 @@ public class TrainingDataPoint {
     return Arrays.toString(oplist) + " => " + cost;
   }
 
-  private HashMap<Attribute, Double> calculateSelCardinality(
-      Database db, Operator in, CostModel c) {
+  private HashMap<Attribute, Float> calculateSelCardinality(Database db, Operator in, CostModel c) {
 
     HashMap<Attribute, Long> selCard = new HashMap<>();
 
@@ -58,43 +58,43 @@ public class TrainingDataPoint {
     }
 
     LinkedList<Attribute> allAttributes = db.getAllAttributes();
-    HashMap<Attribute, Double> rtn = new HashMap<>();
+    HashMap<Attribute, Float> rtn = new HashMap<>();
 
     for (Attribute a : allAttributes) {
 
-      if (selCard.containsKey(a)) rtn.put(a, (selCard.get(a) + 0.0) / c.cardinality(a));
+      if (selCard.containsKey(a)) rtn.put(a, (float) selCard.get(a) / c.cardinality(a));
     }
 
     return rtn;
   }
 
-  public Double[] featurize(Database db, CostModel c) {
+  public float[] featurize(Database db, CostModel c) {
 
     LinkedList<Attribute> allAttributes = db.getAllAttributes();
-    HashMap<Attribute, Double> cardMap = new HashMap();
+    HashMap<Attribute, Float> cardMap = new HashMap();
 
     if (selectivityScaling) cardMap = calculateSelCardinality(db, oplist[3], c);
 
     int n = allAttributes.size();
 
-    Double[] vector = new Double[n * 3 + 4];
-    for (int i = 0; i < n * 3; i++) vector[i] = 0.0;
+    float[] vector = new float[n * 3 + 4];
+    for (int i = 0; i < n * 3; i++) vector[i] = 0.0f;
 
     for (Attribute a : oplist[0].getVisibleAttributes()) {
 
-      vector[allAttributes.indexOf(a)] = 1.0;
+      vector[allAttributes.indexOf(a)] = 1.0f;
     }
 
     for (Attribute a : oplist[1].getVisibleAttributes()) {
 
-      vector[allAttributes.indexOf(a) + n] = 1.0;
+      vector[allAttributes.indexOf(a) + n] = 1.0f;
     }
 
     if (queryGraphFeatures) {
       for (Attribute a : oplist[3].getVisibleAttributes()) {
 
         if (selectivityScaling) vector[allAttributes.indexOf(a) + 2 * n] = cardMap.get(a);
-        else vector[allAttributes.indexOf(a) + 2 * n] = 1.0;
+        else vector[allAttributes.indexOf(a) + 2 * n] = 1.0f;
       }
     }
 
@@ -102,7 +102,7 @@ public class TrainingDataPoint {
 
     vector[3 * n + 1] = gcost;
 
-    vector[3 * n + 2] = 0.0;
+    vector[3 * n + 2] = 0.0f;
 
     vector[3 * n + 3] = cost;
 
@@ -110,13 +110,9 @@ public class TrainingDataPoint {
   }
 
   public INDArray featurizeND4j(Database db, CostModel c) {
-    Double[] vector = featurize(db, c);
+    float[] vector = featurize(db, c);
     int p = vector.length;
-
-    float[] xBuffer = new float[p - 1];
-
-    for (int ind = 0; ind < vector.length - 1; ind++) xBuffer[ind] = vector[ind].floatValue();
-
+    float[] xBuffer = Arrays.copyOf(vector, p - 1);
     return Nd4j.create(xBuffer, new int[] {1, p - 1});
   }
 }
