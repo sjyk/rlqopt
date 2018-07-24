@@ -8,16 +8,21 @@ import edu.berkeley.riselab.rlqopt.Operator;
 import edu.berkeley.riselab.rlqopt.OperatorException;
 import edu.berkeley.riselab.rlqopt.OperatorParameters;
 import edu.berkeley.riselab.rlqopt.Relation;
-import edu.berkeley.riselab.rlqopt.cost.*;
+import edu.berkeley.riselab.rlqopt.cost.CostModel;
 import edu.berkeley.riselab.rlqopt.opt.CostCache;
 import edu.berkeley.riselab.rlqopt.opt.PlanningModule;
-import edu.berkeley.riselab.rlqopt.relalg.*;
+import edu.berkeley.riselab.rlqopt.relalg.JoinOperator;
+import edu.berkeley.riselab.rlqopt.relalg.KWayJoinOperator;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.indexing.NDArrayIndex;
 
 // this implements one transformation
 // of the plan match, discount
@@ -124,7 +129,8 @@ public class TDJoinExecutor extends PlanningModule {
 
     for (int i = 0; i < in.source.size() - 1; i++) {
       try {
-        relations = TDMerge(relations, c, in);
+        //                relations = TDMerge(relations, c, in);
+        relations = TDMergeVectorized(relations, c, in);
 
       } catch (OperatorException opex) {
         continue;
@@ -164,6 +170,71 @@ public class TDJoinExecutor extends PlanningModule {
     return new KWayJoinOperator(params, relArray);
   }
 
+  public HashSet<Operator> TDMergeVectorized(HashSet<Operator> relations, CostModel c, Operator in)
+      throws OperatorException {
+    assert net != null;
+
+    Operator[] pairToJoin = new Operator[3];
+    HashSet<Operator> rtn = (HashSet) relations.clone();
+
+    List<TrainingDataPoint> dataPoints = new ArrayList<>();
+
+    for (Operator i : relations) {
+      for (Operator j : relations) {
+
+        // don't join with self
+        if (i == j) continue;
+        Expression e = findJoinExpression(in.params.expression, i, j);
+        if (e == null) continue;
+
+        OperatorParameters params = new OperatorParameters(e.getExpressionList());
+
+        int indicator = 0;
+        for (Operator cjv : JoinOperator.allValidPhysicalJoins(params, i, j)) {
+
+          // exploration
+          Operator[] currentPair = new Operator[4];
+          currentPair[0] = i;
+          currentPair[1] = j;
+          currentPair[2] = cjv;
+          currentPair[3] = in.copy();
+
+          TrainingDataPoint tpd =
+              new TrainingDataPoint(currentPair, 0.0f, (float) indicator, (float) relations.size());
+          dataPoints.add(tpd);
+          indicator++;
+        }
+      }
+    }
+
+    float[][] featMat = new float[dataPoints.size()][];
+    for (int i = 0; i < dataPoints.size(); ++i) {
+      featMat[i] = dataPoints.get(i).featurize(db, c);
+    }
+    INDArray batchedFeatureMat = Nd4j.create(featMat);
+    batchedFeatureMat =
+        batchedFeatureMat.get(NDArrayIndex.all(), NDArrayIndex.interval(0, featMat[0].length - 1));
+
+    // Infer once.
+    INDArray out =
+        DataNormalizer.revertLabel(
+            net.output(DataNormalizer.transformFeature(batchedFeatureMat), false));
+
+    // Argmin.
+    int bestIndex = out.neg().argMax(0).getInt(0);
+    pairToJoin[0] = dataPoints.get(bestIndex).oplist[0];
+    pairToJoin[1] = dataPoints.get(bestIndex).oplist[1];
+    pairToJoin[2] = dataPoints.get(bestIndex).oplist[2];
+
+    numNetEvals += batchedFeatureMat.size(0);
+
+    rtn.remove(pairToJoin[0]);
+    rtn.remove(pairToJoin[1]);
+    rtn.add(pairToJoin[2]);
+
+    return rtn;
+  }
+
   public HashSet<Operator> TDMerge(HashSet<Operator> relations, CostModel c, Operator in)
       throws OperatorException {
     double minCost = Double.MAX_VALUE;
@@ -200,7 +271,8 @@ public class TDJoinExecutor extends PlanningModule {
 
           if (net != null) {
             TrainingDataPoint tpd =
-                new TrainingDataPoint(currentPair, 0.0, indicator + 0.0, (double) relations.size());
+                new TrainingDataPoint(
+                    currentPair, 0.0f, (float) indicator, (float) relations.size());
             INDArray input = tpd.featurizeND4j(db, c);
 
             // long now = System.nanoTime();
@@ -241,7 +313,6 @@ public class TDJoinExecutor extends PlanningModule {
     }
 
     // System.out.println(minCost + " :: => :: " + pairToJoin[2]);
-
     rtn.remove(pairToJoin[0]);
     rtn.remove(pairToJoin[1]);
     rtn.add(pairToJoin[2]);

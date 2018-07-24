@@ -90,7 +90,7 @@ public class DiskCostModel implements CostModel {
     this.handleSelections = handleSelections;
   }
 
-  public double cardinality(Attribute a) {
+  public float cardinality(Attribute a) {
     return cardinality.get(a.relation);
   }
 

@@ -5,7 +5,14 @@ import edu.berkeley.riselab.rlqopt.Database;
 import edu.berkeley.riselab.rlqopt.Expression;
 import edu.berkeley.riselab.rlqopt.Operator;
 import edu.berkeley.riselab.rlqopt.Relation;
-import edu.berkeley.riselab.rlqopt.relalg.*;
+import edu.berkeley.riselab.rlqopt.relalg.CartesianOperator;
+import edu.berkeley.riselab.rlqopt.relalg.GroupByOperator;
+import edu.berkeley.riselab.rlqopt.relalg.HashJoinOperator;
+import edu.berkeley.riselab.rlqopt.relalg.IndexJoinOperator;
+import edu.berkeley.riselab.rlqopt.relalg.JoinOperator;
+import edu.berkeley.riselab.rlqopt.relalg.ProjectOperator;
+import edu.berkeley.riselab.rlqopt.relalg.SelectOperator;
+import edu.berkeley.riselab.rlqopt.relalg.TableAccessOperator;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.HashMap;
@@ -14,15 +21,10 @@ import java.util.Scanner;
 
 public class InMemoryCostModel implements CostModel {
 
-  private double defaultSelectivity = 0.1;
   private HashMap<Relation, Long> cardinality;
   private HashMap<HashSet<Relation>, Long> pairs;
   private HashMap<String, Long> predicates;
   public boolean handleSelections = false;
-
-  public InMemoryCostModel(HashMap<Relation, Long> cardinality) {
-    this.cardinality = cardinality;
-  }
 
   public InMemoryCostModel(Database db, String filename) {
     if (System.getProperty("hasSelection") != null) {
@@ -92,7 +94,7 @@ public class InMemoryCostModel implements CostModel {
     this.handleSelections = handleSelections;
   }
 
-  public double cardinality(Attribute a) {
+  public float cardinality(Attribute a) {
     return cardinality.get(a.relation);
   }
 
@@ -142,9 +144,6 @@ public class InMemoryCostModel implements CostModel {
     long cartCard = cardinality.get(el) * cardinality.get(er);
     long pairCard = pairs.get(rels);
     double rf = (pairCard + 0.) / cartCard;
-
-    JoinOperator jop = (JoinOperator) in;
-
     return Math.max((long) (rf * (countl * countr)), 1);
   }
 
@@ -229,4 +228,5 @@ public class InMemoryCostModel implements CostModel {
 
     return runningCost;
   }
+
 }
