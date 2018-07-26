@@ -141,7 +141,7 @@ public class Experiment {
       List<Double> perQueryCost = new LinkedList<>();
       for (PlanningStatistics queryStats : stats) {
         // Math.log() because getBaselineImprovement() does so.
-        perQueryCost.add(Math.log(queryStats.finalCost));
+        perQueryCost.add(queryStats.finalCost);
       }
       rtn.put(p, perQueryCost);
     }

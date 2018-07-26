@@ -25,12 +25,13 @@ public class IMDBWorkloadGenerator extends WorkloadGenerator {
     super();
     db = new Database(dbschema);
 
-    switch (cm) {
+    /*switch (cm) {
       case MEMORY:
         tm = new InMemoryCostModel(db, tablestats);
       case DISK:
         tm = new DiskCostModel(db, tablestats);
-    }
+    }*/
+    tm = new InMemoryCostModel(db, tablestats);
     this.workloadDir = workloadDir;
     sqlParser = new SQL2RelAlg(db);
   }

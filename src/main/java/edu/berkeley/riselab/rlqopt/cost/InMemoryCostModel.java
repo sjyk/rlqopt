@@ -140,7 +140,7 @@ public class InMemoryCostModel implements CostModel {
 
     JoinOperator jop = (JoinOperator) in;
 
-    return (long) (rf * (countl * countr));
+    return Math.max((long) (rf * (countl * countr)),1);
   }
 
   public Cost hashJoinOperator(Operator in, Cost l, Cost r) {
@@ -164,7 +164,7 @@ public class InMemoryCostModel implements CostModel {
 
     long iocost = 0;
 
-    return new Cost(countr, card, 0);
+    return new Cost(countr + card, card, 0);
   }
 
   public Cost cartesianOperator(Operator in, Cost l, Cost r) {
@@ -214,6 +214,7 @@ public class InMemoryCostModel implements CostModel {
   public Cost estimate(Operator in) {
 
     Cost runningCost = doEstimate(in);
+    runningCost.operatorIOcost += runningCost.resultCardinality;
 
     if (runningCost.operatorIOcost < 0) runningCost.operatorIOcost = Long.MAX_VALUE;
 
