@@ -6,6 +6,7 @@ import edu.berkeley.riselab.rlqopt.Relation;
 import edu.berkeley.riselab.rlqopt.opt.Planner;
 import edu.berkeley.riselab.rlqopt.opt.PlanningStatistics;
 import edu.berkeley.riselab.rlqopt.opt.Trainable;
+import edu.berkeley.riselab.rlqopt.opt.learning.RLQOpt;
 import edu.berkeley.riselab.rlqopt.workload.WorkloadGenerator;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -81,9 +82,23 @@ public class Experiment {
     }
   }
 
+  private void maybePrintJoinSize(List<Operator> workload) {
+    boolean doPrint = false;
+    if (doPrint) {
+      System.out.println("Per query join size:");
+      int i = 0;
+      for (Operator o : workload) {
+        System.out.printf("q%d\t%d\n", i, o.getVisibleRelations().size());
+        ++i;
+      }
+    }
+  }
+
   public void run() throws OperatorException {
 
     LinkedList<Operator> test = workload.generateWorkload(numTest);
+    maybePrintJoinSize(test);
+
     System.out.println("test.size " + test.size() + " train size " + trainWorkload.size());
     if (kWayJoinThreshold != 0) {
       List<Operator> toRemove = new ArrayList<>();
@@ -101,26 +116,29 @@ public class Experiment {
 
       for (Operator op : workload.copyWorkload(test)) {
 
-        if (p == baseline) {
-          p.plan(op.copy(), workload.getStatsModel(), workload.getStatsModel()).toSQLString();
-        } else {
-          p.plan(op.copy(), workload.getNoisyStatsModel(), workload.getStatsModel());
-        }
+        //        if (p == baseline) {
+        //          p.plan(op.copy(), workload.getStatsModel(),
+        // workload.getStatsModel()).toSQLString();
+        //        } else {
+        //          p.plan(op.copy(), workload.getNoisyStatsModel(), workload.getStatsModel());
+        //        }
+        System.out.println("Evaluating " + p + ": opt is using noisy");
+        p.plan(op.copy(), workload.getNoisyStatsModel(), workload.getStatsModel());
 
         System.out.println(
             "+++,q"
                 + op.hashCode()
                 + ","
-                + op.source.size()
+                + op.getVisibleRelations().size() // # of relations in the query graph.
                 + ","
                 + p
                 + ","
                 + p.getLastPlanStats().finalCost);
 
-        System.out.println(
-            op
-                + "+++---\n"
-                + p.plan(op.copy(), workload.getStatsModel(), workload.getStatsModel()));
+        //        System.out.println(
+        //            op
+        //                + "+++---\n"
+        //                + p.plan(op.copy(), workload.getStatsModel(), workload.getStatsModel()));
 
         LinkedList<PlanningStatistics> stats = finalCost.get(p);
         stats.add(p.getLastPlanStats());
@@ -129,19 +147,18 @@ public class Experiment {
     }
   }
 
-  public Map<Planner, Double> getBaselineImprovement() {
+  public Map<Planner, Double> getBaselineImprovement(int dropFirst) {
 
     HashMap<Planner, Double> rtn = new HashMap();
 
     for (Planner p : this.planners) {
       LinkedList<PlanningStatistics> stats = finalCost.get(p);
-      LinkedList<PlanningStatistics> statsB = finalCost.get(this.baseline);
       int n = stats.size();
 
       double sum = 0.0;
       int nt = 0;
 
-      for (int i = 0; i < n; i++) {
+      for (int i = dropFirst; i < n; i++) {
 
         // if (stats.get(i).finalCost == stats.get(i).initialCost)
         //  continue;
@@ -191,7 +208,7 @@ public class Experiment {
       List<Double> perQueryCost = new LinkedList<>();
       for (PlanningStatistics queryStats : stats) {
         // Math.log() because getBaselineImprovement() does so.
-        perQueryCost.add(queryStats.finalCost);
+        perQueryCost.add(Math.log(queryStats.finalCost));
       }
       rtn.put(p, perQueryCost);
     }

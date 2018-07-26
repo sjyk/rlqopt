@@ -2,6 +2,7 @@ package edu.berkeley.riselab.rlqopt.opt.learning;
 
 import edu.berkeley.riselab.rlqopt.Operator;
 import edu.berkeley.riselab.rlqopt.cost.CostModel;
+import edu.berkeley.riselab.rlqopt.cost.InMemoryCostModel;
 import edu.berkeley.riselab.rlqopt.opt.Planner;
 import edu.berkeley.riselab.rlqopt.opt.PlanningStatistics;
 import edu.berkeley.riselab.rlqopt.opt.Trainable;
@@ -39,7 +40,7 @@ public class RLQOpt extends Planner implements Trainable {
     this(w);
     tgen =
         new TrainingDataGenerator(
-            w.getDatabase(), "output.csv", w.getStatsModel(), trainer, trainingDataPath);
+            w.getDatabase(), "output.csv", w.getNoisyStatsModel(), trainer, trainingDataPath);
   }
 
   public void train(LinkedList<Operator> training) {

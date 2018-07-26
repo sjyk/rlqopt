@@ -17,7 +17,7 @@ public class TrainingDataPoint {
   public float gcost = 0.0f;
   public float size = 0.0f;
 
-  private static boolean selectivityScaling = false;
+  private static boolean selectivityScaling = true;
   private static boolean queryGraphFeatures = true;
 
   static {
@@ -48,9 +48,7 @@ public class TrainingDataPoint {
   }
 
   private HashMap<Attribute, Float> calculateSelCardinality(Database db, Operator in, CostModel c) {
-
     HashMap<Attribute, Long> selCard = new HashMap<>();
-
     for (Operator op : in.source) {
       long cardinality = c.estimate(op).resultCardinality;
 
@@ -69,7 +67,6 @@ public class TrainingDataPoint {
   }
 
   public float[] featurize(Database db, CostModel c) {
-
     LinkedList<Attribute> allAttributes = db.getAllAttributes();
     HashMap<Attribute, Float> cardMap = new HashMap();
 

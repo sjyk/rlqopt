@@ -14,7 +14,7 @@ import edu.berkeley.riselab.rlqopt.relalg.JoinOperator;
 import edu.berkeley.riselab.rlqopt.relalg.KWayJoinOperator;
 import java.util.HashMap;
 import java.util.LinkedList;
-import javafx.util.Pair;
+import org.apache.calcite.util.Pair;
 
 // this implements one transformation
 // of the plan match

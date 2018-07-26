@@ -3,8 +3,9 @@ package edu.berkeley.riselab.rlqopt.workload;
 import edu.berkeley.riselab.rlqopt.Database;
 import edu.berkeley.riselab.rlqopt.Operator;
 import edu.berkeley.riselab.rlqopt.OperatorException;
-import edu.berkeley.riselab.rlqopt.cost.*;
-import edu.berkeley.riselab.rlqopt.relalg.*;
+import edu.berkeley.riselab.rlqopt.cost.CostModel;
+import edu.berkeley.riselab.rlqopt.cost.DiskCostModel;
+import edu.berkeley.riselab.rlqopt.cost.InMemoryCostModel;
 import edu.berkeley.riselab.rlqopt.relalg.SQL2RelAlg;
 import java.io.File;
 import java.util.LinkedList;
@@ -14,6 +15,7 @@ public class IMDBWorkloadGenerator extends WorkloadGenerator {
 
   private Database db;
   private CostModel tm;
+  private CostModel noisyCostModel;
   private String workloadDir;
   private SQL2RelAlg sqlParser;
 
@@ -24,10 +26,10 @@ public class IMDBWorkloadGenerator extends WorkloadGenerator {
   public IMDBWorkloadGenerator(String dbschema, String tablestats, String workloadDir, int cm) {
     super();
     db = new Database(dbschema);
-
     switch (cm) {
       case MEMORY:
         tm = new InMemoryCostModel(db, tablestats);
+        noisyCostModel = new InMemoryCostModel(db, tablestats, true);
         System.out.println("Using InMemoryCostModel");
         break;
       case DISK:
@@ -49,7 +51,8 @@ public class IMDBWorkloadGenerator extends WorkloadGenerator {
   }
 
   public CostModel getNoisyStatsModel() {
-    return getStatsModel();
+    assert noisyCostModel != null;
+    return noisyCostModel;
   }
 
   public LinkedList<Operator> generateWorkload(int n) throws OperatorException {

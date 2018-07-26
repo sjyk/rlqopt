@@ -2,9 +2,10 @@ package edu.berkeley.riselab.rlqopt;
 
 import edu.berkeley.riselab.rlqopt.experiments.Experiment;
 import edu.berkeley.riselab.rlqopt.opt.Planner;
-import edu.berkeley.riselab.rlqopt.opt.ikkbz.IKKBZPlanner;
+import edu.berkeley.riselab.rlqopt.opt.bushy.PostgresBushyPlanner;
 import edu.berkeley.riselab.rlqopt.opt.learning.RLQOpt;
 import edu.berkeley.riselab.rlqopt.opt.postgres.PostgresPlanner;
+import edu.berkeley.riselab.rlqopt.opt.quickpick.QuickPickPlanner;
 import edu.berkeley.riselab.rlqopt.workload.DatasetGenerator;
 import edu.berkeley.riselab.rlqopt.workload.IMDBWorkloadGenerator;
 import edu.berkeley.riselab.rlqopt.workload.WorkloadGenerator;
@@ -22,14 +23,12 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.apache.calcite.sql.parser.SqlParseException;
+import org.nd4j.linalg.api.buffer.DataBuffer;
+import org.nd4j.linalg.factory.Nd4j;
 
 /** Unit test for simple App. */
 public class DoExperiments extends TestCase {
-  /**
-   * Create the test case
-   *
-   * @param testName name of the test case
-   */
+
   public DoExperiments() {
     super("Test of the Relational Algebra Suite");
   }
@@ -158,32 +157,52 @@ public class DoExperiments extends TestCase {
   }*/
 
   public void test2() throws OperatorException, SqlParseException {
+    Nd4j.setDataType(DataBuffer.Type.FLOAT);
+
+    String jobQueryFile = "join-order-benchmark/queries/queries.sql";
+    if (System.getProperty("queryFile") != null) {
+      jobQueryFile = System.getProperty("queryFile");
+    }
+    System.out.println("jobQueryFile = " + jobQueryFile);
+
     IMDBWorkloadGenerator workload =
         new IMDBWorkloadGenerator(
             "schematext.sql",
             "tablestats",
-            "join-order-benchmark/queries/queries.sql",
+            jobQueryFile,
+            //            "join-order-benchmark/queries/queries.sql",
+            // These (1) covered join sizes: 6,7,8,9,10,11; (2) randomized, then split; (3) include
+            // variants of templates (intended for use when handleSelections is on).
+            //            "join-order-benchmark/queries/cv-4fold-20-fold0.sql",
+            //                "join-order-benchmark/queries/cv-4fold-20-fold1.sql",
+            //                "join-order-benchmark/queries/cv-4fold-20-fold2.sql",
+            //                "join-order-benchmark/queries/cv-4fold-20-fold3.sql",
             IMDBWorkloadGenerator.MEMORY);
 
-    final int numTraining = 0;
-    final int numTesting = 113;
-    //    final int numTraining = 80;
-    // final int numTesting = 113;
+    final int numTraining = 16;
+    final int numTesting = 20;
+    // Hacky way to do cross-validation.  E.g., 16/20/16 means
+    // trains on first 16 and report test performance on last 4.
+    // Set to 0 to test on all.  Averaging is done manually.
+    final int testPerfDropFirst = numTraining;
 
     // When non-null: load from this file without re-generation, or generate once and persist it.
     // Pass null to disable this caching behavior.
     String trainingDataPath = null; // "job-" + numTraining + ".dat";
 
     LinkedList<Planner> planners = new LinkedList<>();
-    // planners.add(new NoPlanner());
-    planners.add(new IKKBZPlanner());
-    // planners.add(new RightDeepPlanner());
-    // planners.add(new ZigZagPlanner());
+    //    planners.add(new NoPlanner());
+    //    planners.add(new IKKBZPlanner());
     planners.add(new PostgresPlanner());
-    // planners.add(new MinSelectPlanner());
-    // planners.add(new QuickPickPlanner(10000));
-    // planners.add(new QuickPickPlanner(1));
-    // planners.add(new RLQOpt(workload, trainingDataPath));
+    //    planners.add(new RightDeepPlanner());
+    //    planners.add(new ZigZagPlanner());
+    planners.add(new PostgresBushyPlanner());
+    //        planners.add(new MinSelectPlanner());
+    //      planners.add(new VolcanoPlanner());
+    planners.add(new QuickPickPlanner(1000));
+    planners.add(new QuickPickPlanner(10000));
+    //    planners.add(new QuickPickPlanner(1));
+    planners.add(new RLQOpt(workload, trainingDataPath));
 
     /*planners.add(new RLQOpt(workload, trainingDataPath));
     //        planners.add(new NoPlanner());
@@ -198,15 +217,19 @@ public class DoExperiments extends TestCase {
     // Experiment e = new Experiment(workload, 90, 113, planners);
     Experiment e = new Experiment(workload, numTraining, numTesting, planners);
     e.train();
+    System.out.println("train() done, calling run()");
+
     e.run();
 
     System.out.println("Per query improvement: ");
     printPerQuery(e.getPerQueryImprovement());
-    System.out.print("Improvement: ");
+    System.out.println("Per query latency: ");
     printPerQuery(e.getPerQueryLatency());
+
+    System.out.print("Improvement: ");
+    printSorted(e.getBaselineImprovement(testPerfDropFirst));
     System.out.print("Planning latency: ");
-    Map<Planner, Double> latencies = e.getBaselineLatency();
-    printSorted(latencies);
+    printSorted(e.getBaselineLatency());
 
     reportNumEvaluations(workload, planners);
   }

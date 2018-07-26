@@ -15,18 +15,48 @@ import edu.berkeley.riselab.rlqopt.relalg.SelectOperator;
 import edu.berkeley.riselab.rlqopt.relalg.TableAccessOperator;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.Scanner;
 
 public class InMemoryCostModel implements CostModel {
 
-  private HashMap<Relation, Long> cardinality;
+  protected HashMap<Relation, Long> cardinality;
   private HashMap<HashSet<Relation>, Long> pairs;
   private HashMap<String, Long> predicates;
-  public boolean handleSelections = false;
+  public boolean handleSelections = true;
+
+  /** Cardinality perturbation support. */
+  public boolean isNoisy;
+
+  private Random random = new Random(1234), random2 = new Random(12345);
+  // Probability of just passing through the underlying estimate.
+  private static double keepProb = 1.0;
+
+  static {
+    if (System.getProperty("keepProb") != null) {
+      keepProb = Double.valueOf(System.getProperty("keepProb"));
+    }
+  }
+
+  // Covers 5% to 95% tiles of Postgres' estimation errors on all JOB queries.
+  private final List<Double> scales = Arrays.asList(1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1.0, 10.0, 100.0);
+  // Memoize to ensure all planners see the same perturbed stats.
+  // TODO: maybe we need to check hashCode of Operator is deterministic?
+  private Map<Operator, Long> perturbedCard = new HashMap<>();
 
   public InMemoryCostModel(Database db, String filename) {
+    this(db, filename, false);
+  }
+
+  public InMemoryCostModel(Database db, String filename, boolean isNoisy) {
+    System.out.println(
+        "ctor isNoisy = " + isNoisy + " " + this.hashCode() + "; keep_prob " + keepProb);
+
     if (System.getProperty("hasSelection") != null) {
       handleSelections = Boolean.valueOf(System.getProperty("hasSelection"));
     }
@@ -87,11 +117,7 @@ public class InMemoryCostModel implements CostModel {
     } catch (FileNotFoundException e) {
       e.printStackTrace();
     }
-  }
-
-  public InMemoryCostModel(Database db, String filename, boolean handleSelections) {
-    this(db, filename);
-    this.handleSelections = handleSelections;
+    this.isNoisy = isNoisy;
   }
 
   public float cardinality(Attribute a) {
@@ -132,7 +158,7 @@ public class InMemoryCostModel implements CostModel {
     return new Cost(costIn.resultCardinality, count, 0);
   }
 
-  public long getJoinCardinality(Operator in, Cost l, Cost r) {
+  private long getJoinCardinalityOracle(Operator in, Cost l, Cost r) {
     long countl = l.resultCardinality;
     long countr = r.resultCardinality;
 
@@ -147,8 +173,34 @@ public class InMemoryCostModel implements CostModel {
     return Math.max((long) (rf * (countl * countr)), 1);
   }
 
-  public Cost hashJoinOperator(Operator in, Cost l, Cost r) {
+  public long getJoinCardinality(Operator in, Cost l, Cost r) {
+    // If non-noisy, or if the random number says so, returns the oracle-produced cardinality.
+    final long underlyingJoinCard = getJoinCardinalityOracle(in, l, r);
+    if (!isNoisy || random.nextDouble() < keepProb) return underlyingJoinCard;
 
+    Long maybeCard = perturbedCard.get(in);
+    if (maybeCard != null) {
+      return maybeCard;
+    }
+
+    // Uniformly pick a random scale to multiply by.
+    double scale = scales.get(random2.nextInt(scales.size()));
+    long card = Math.max(Math.round(scale * underlyingJoinCard), 1);
+    assert card != 0 || underlyingJoinCard == 0;
+
+    // It should always be okay to shrink.
+    if (scale <= 1.0) return card;
+
+    // If enlarge, we should make sure it's internally consistent.
+    long bound = l.resultCardinality * r.resultCardinality;
+
+    // Edge case: clip max.
+    card = Math.min(bound, card);
+    perturbedCard.put(in, card);
+    return card;
+  }
+
+  public Cost hashJoinOperator(Operator in, Cost l, Cost r) {
     long countl = l.resultCardinality;
     long countr = r.resultCardinality;
 
@@ -160,7 +212,6 @@ public class InMemoryCostModel implements CostModel {
   }
 
   public Cost indexJoinOperator(Operator in, Cost l, Cost r) {
-
     long countl = l.resultCardinality;
     long countr = r.resultCardinality;
 
@@ -178,6 +229,7 @@ public class InMemoryCostModel implements CostModel {
   }
 
   private Cost doEstimate(Operator in) {
+
     if (in instanceof TableAccessOperator) return tableAccessOperator(in);
 
     if (in instanceof ProjectOperator)
@@ -193,17 +245,14 @@ public class InMemoryCostModel implements CostModel {
     Cost right = doEstimate(in.source.get(1));
 
     if (in instanceof HashJoinOperator) {
-      JoinOperator jop = (JoinOperator) in;
       return hashJoinOperator(in, left, right).plus(left).plus(right);
     }
 
     if (in instanceof IndexJoinOperator) {
-      JoinOperator jop = (JoinOperator) in;
       return indexJoinOperator(in, left, right).plus(right);
     }
 
     if (in instanceof JoinOperator) {
-      JoinOperator jop = (JoinOperator) in;
       return hashJoinOperator(in, left, right).plus(left).plus(right);
     }
 
@@ -216,7 +265,6 @@ public class InMemoryCostModel implements CostModel {
   }
 
   public Cost estimate(Operator in) {
-
     Cost runningCost = doEstimate(in);
     runningCost.operatorIOcost += runningCost.resultCardinality;
 
@@ -228,5 +276,4 @@ public class InMemoryCostModel implements CostModel {
 
     return runningCost;
   }
-
 }
