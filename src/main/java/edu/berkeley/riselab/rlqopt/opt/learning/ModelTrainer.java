@@ -60,11 +60,16 @@ public class ModelTrainer {
 
     System.out.println(net.getUpdater());
 
+    long start = System.currentTimeMillis();
+
     // Epochs.
     for (int i = 0; i < 10000; i++) {
       iterator.reset();
       net.fit(iterator);
     }
+
+    System.out.println(
+        "Training took " + (System.currentTimeMillis() * 1.0 - start) / 1e3 + " seconds");
 
     return net;
   }

@@ -2,14 +2,18 @@ package edu.berkeley.riselab.rlqopt.experiments;
 
 import edu.berkeley.riselab.rlqopt.Operator;
 import edu.berkeley.riselab.rlqopt.OperatorException;
+import edu.berkeley.riselab.rlqopt.Relation;
 import edu.berkeley.riselab.rlqopt.opt.Planner;
 import edu.berkeley.riselab.rlqopt.opt.PlanningStatistics;
 import edu.berkeley.riselab.rlqopt.opt.Trainable;
 import edu.berkeley.riselab.rlqopt.workload.WorkloadGenerator;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class Experiment {
 
@@ -19,6 +23,11 @@ public class Experiment {
   List<Planner> planners;
   Planner baseline;
   HashMap<Planner, LinkedList<PlanningStatistics>> finalCost;
+
+  LinkedList<Operator> trainWorkload;
+  // If non-zero, train on templates with join graphs <= this number.  On testing, test on queries
+  // with graphs > this number.  Set to 0 to disable.
+  final int kWayJoinThreshold = 0;
 
   public Experiment(
       WorkloadGenerator workload, int numTraining, int numTest, List<Planner> planners) {
@@ -34,11 +43,40 @@ public class Experiment {
   }
 
   public void train() throws OperatorException {
-    LinkedList<Operator> training = workload.generateWorkload(numTraining);
+    if (trainWorkload == null) {
+      LinkedList<Operator> training = workload.generateWorkload(numTraining);
+      LinkedList<Operator> trainingCpy = workload.copyWorkload(training);
+      List<Operator> toRemove = new ArrayList<>();
+      for (Operator trainOp : trainingCpy) {
+        if (kWayJoinThreshold != 0 && trainOp.source.size() > kWayJoinThreshold) {
+          System.out.println(
+              "kWayJoinThreshold "
+                  + kWayJoinThreshold
+                  + "; removing query with larger graph size "
+                  + trainOp.source.size());
+          toRemove.add(trainOp);
+        }
+      }
+      trainingCpy.removeAll(toRemove);
+      // Count # unique relations.
+      Set<Relation> coveredRelations = new HashSet<>();
+      for (Operator op : trainingCpy) coveredRelations.addAll(op.getVisibleRelations());
+      System.out.println("Covered relations " + coveredRelations.size() + ": " + coveredRelations);
+      System.out.println("Training on " + trainingCpy.size() + " queries");
+
+      trainWorkload = trainingCpy;
+    }
+
     for (Planner p : this.planners) {
       if (p instanceof Trainable) {
-        LinkedList<Operator> trainingCpy = workload.copyWorkload(training);
-        ((Trainable) p).train(trainingCpy);
+        //          System.out.println(
+        //              "*** "
+        //                  + trainOp.toString().hashCode()
+        //                  + "; "
+        //                  + trainOp.source.size()
+        //                  + "; "
+        //                  + trainOp);
+        ((Trainable) p).train(trainWorkload);
       }
     }
   }
@@ -46,6 +84,18 @@ public class Experiment {
   public void run() throws OperatorException {
 
     LinkedList<Operator> test = workload.generateWorkload(numTest);
+    System.out.println("test.size " + test.size() + " train size " + trainWorkload.size());
+    if (kWayJoinThreshold != 0) {
+      List<Operator> toRemove = new ArrayList<>();
+      for (Operator op : test) {
+        if (op.source.size() <= kWayJoinThreshold) {
+          //        if (op.source.size() < 12) {
+          toRemove.add(op);
+        }
+      }
+      test.removeAll(toRemove);
+    }
+    System.out.println("Testing on " + test.size() + " queries");
 
     for (Planner p : this.planners) {
 

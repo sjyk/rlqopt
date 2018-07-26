@@ -38,5 +38,4 @@ public interface CostModel {
   default double cardinality(Attribute a) {
     return 1.0;
   }
-
 }

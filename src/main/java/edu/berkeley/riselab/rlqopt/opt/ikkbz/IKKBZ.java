@@ -13,7 +13,6 @@ import edu.berkeley.riselab.rlqopt.opt.PlanningModule;
 import edu.berkeley.riselab.rlqopt.relalg.JoinOperator;
 import edu.berkeley.riselab.rlqopt.relalg.KWayJoinOperator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import javafx.util.Pair;
 
@@ -55,7 +54,7 @@ public class IKKBZ extends PlanningModule {
 
     for (Attribute a : subL) {
       if (!superL.contains(a)) {
-        //System.out.println(superL + " " + subL);
+        // System.out.println(superL + " " + subL);
         return false;
       }
     }
@@ -79,8 +78,7 @@ public class IKKBZ extends PlanningModule {
     else return in;
   }
 
-  
-  public HashMap<Operator, LinkedList<Pair<Operator, Expression>>> queryGraph(Operator in){
+  public HashMap<Operator, LinkedList<Pair<Operator, Expression>>> queryGraph(Operator in) {
 
     HashMap<Operator, LinkedList<Pair<Operator, Expression>>> rtn = new HashMap();
 
@@ -88,72 +86,71 @@ public class IKKBZ extends PlanningModule {
       LinkedList<Pair<Operator, Expression>> edges = new LinkedList();
       for (Operator j : in.source) {
 
-         if (i == j) continue;
+        if (i == j) continue;
 
-         Expression e = findJoinExpression(in.params.expression, i, j);
+        Expression e = findJoinExpression(in.params.expression, i, j);
 
-         if (e != null) edges.add(new Pair(j,e));
+        if (e != null) edges.add(new Pair(j, e));
       }
       rtn.put(i, edges);
     }
 
     return rtn;
-  
   }
 
-  
-  public Operator highestRankedMerge(HashMap<Operator, LinkedList<Pair<Operator, Expression>>> qg, Operator start, CostModel c) throws OperatorException{
-      Operator max = null;
-      double maxRank = Double.MAX_VALUE;
+  public Operator highestRankedMerge(
+      HashMap<Operator, LinkedList<Pair<Operator, Expression>>> qg, Operator start, CostModel c)
+      throws OperatorException {
+    Operator max = null;
+    double maxRank = Double.MAX_VALUE;
 
-      for(Pair<Operator, Expression> edgeTuple: qg.get(start)){
+    for (Pair<Operator, Expression> edgeTuple : qg.get(start)) {
 
-        Operator edge = edgeTuple.getKey();
-        Expression e = edgeTuple.getValue();
+      Operator edge = edgeTuple.getKey();
+      Expression e = edgeTuple.getValue();
 
-        //System.out.println(edgeTuple + " " + !qg.containsKey(edge));
+      // System.out.println(edgeTuple + " " + !qg.containsKey(edge));
 
-        //if (!qg.containsKey(edge)) continue;
+      // if (!qg.containsKey(edge)) continue;
 
-        long cardinalityRight = c.estimate(edge).resultCardinality;
-        long cardinalityLeft = c.estimate(start).resultCardinality;
+      long cardinalityRight = c.estimate(edge).resultCardinality;
+      long cardinalityLeft = c.estimate(start).resultCardinality;
 
-        OperatorParameters params = new OperatorParameters(e.getExpressionList());
-        JoinOperator cjv = new JoinOperator(params, start, edge);
-
-        double selectivity = (c.estimate(cjv).resultCardinality+0.)/(cardinalityRight);
-
-        double rank = (selectivity*cardinalityRight - 1)/ (selectivity*cardinalityRight);
-
-        if (rank < maxRank){
-          maxRank = rank;
-          max = bestPhysicalOperator(edge, start, e, c);   
-        }
-
-      }
-      return max;
-  }
-
-  public Operator bestPhysicalOperator(Operator i, Operator j, Expression e, CostModel c) throws OperatorException{ 
       OperatorParameters params = new OperatorParameters(e.getExpressionList());
-      double cost = Double.MAX_VALUE;
-      Operator best = null;
-      for (Operator cjv : JoinOperator.allValidPhysicalJoins(params, i, j)) {
+      JoinOperator cjv = new JoinOperator(params, start, edge);
 
-          double opCost = c.estimate(cjv).operatorIOcost;
+      double selectivity = (c.estimate(cjv).resultCardinality + 0.) / (cardinalityRight);
 
-          if (opCost < cost) {
-            cost = opCost;
-            best = cjv;
-          }
+      double rank = (selectivity * cardinalityRight - 1) / (selectivity * cardinalityRight);
 
+      if (rank < maxRank) {
+        maxRank = rank;
+        max = bestPhysicalOperator(edge, start, e, c);
       }
-      return best;
+    }
+    return max;
   }
 
+  public Operator bestPhysicalOperator(Operator i, Operator j, Expression e, CostModel c)
+      throws OperatorException {
+    OperatorParameters params = new OperatorParameters(e.getExpressionList());
+    double cost = Double.MAX_VALUE;
+    Operator best = null;
+    for (Operator cjv : JoinOperator.allValidPhysicalJoins(params, i, j)) {
 
-  public void updateQueryGraph(HashMap<Operator, LinkedList<Pair<Operator, Expression>>> qg, Operator newJoin){
-    
+      double opCost = c.estimate(cjv).operatorIOcost;
+
+      if (opCost < cost) {
+        cost = opCost;
+        best = cjv;
+      }
+    }
+    return best;
+  }
+
+  public void updateQueryGraph(
+      HashMap<Operator, LinkedList<Pair<Operator, Expression>>> qg, Operator newJoin) {
+
     /*System.out.println( "^^" + newJoin.source.get(1) + " \n\n +++ ");
     for(Operator o: qg.keySet())
       System.out.println(o);*/
@@ -169,29 +166,22 @@ public class IKKBZ extends PlanningModule {
     qg.remove(opr);
     qg.put(newJoin, lEdges);
 
-    for (Operator key: qg.keySet())
-    {
-      LinkedList<Pair<Operator,Expression>> edges = qg.get(key);
-      LinkedList<Pair<Operator,Expression>> copy = new LinkedList(edges);
+    for (Operator key : qg.keySet()) {
+      LinkedList<Pair<Operator, Expression>> edges = qg.get(key);
+      LinkedList<Pair<Operator, Expression>> copy = new LinkedList(edges);
 
-      for (Pair<Operator,Expression> edge: copy)
-      {
-        if (edges.equals(lEdges) && edge.getKey().equals(opl))
-        {
+      for (Pair<Operator, Expression> edge : copy) {
+        if (edges.equals(lEdges) && edge.getKey().equals(opl)) {
           edges.remove(edge);
           continue;
         }
 
-        if (edge.getKey().equals(opl) || edge.getKey().equals(opr))
-        {
+        if (edge.getKey().equals(opl) || edge.getKey().equals(opr)) {
           edges.add(new Pair(newJoin, edge.getValue()));
           edges.remove(edge);
         }
-
       }
-
     }
-
   }
 
   public Operator rankOrderJoin(Operator in, Operator root, CostModel c) {
@@ -199,13 +189,12 @@ public class IKKBZ extends PlanningModule {
     HashMap<Operator, LinkedList<Pair<Operator, Expression>>> qg = queryGraph(in);
     for (int i = 0; i < in.source.size(); i++) {
       try {
-        Operator join = highestRankedMerge(qg,root,c);
+        Operator join = highestRankedMerge(qg, root, c);
 
-        if (join == null)
-          return (Operator) root;
+        if (join == null) return (Operator) root;
 
         updateQueryGraph(qg, join);
-        
+
         root = join;
 
       } catch (OperatorException opex) {
@@ -215,22 +204,19 @@ public class IKKBZ extends PlanningModule {
     return (Operator) root;
   }
 
-
   public Operator reorderJoin(Operator in, CostModel c) {
 
     Operator best = null;
-    double cost = Double.MAX_VALUE; 
+    double cost = Double.MAX_VALUE;
 
     for (Operator child : in.source) {
       Operator result = rankOrderJoin(in, child, c);
       double childCost = c.estimate(result).operatorIOcost;
 
-      if(childCost < cost)
-      {
+      if (childCost < cost) {
         best = result;
         cost = childCost;
       }
-      
     }
 
     return best;
@@ -254,5 +240,4 @@ public class IKKBZ extends PlanningModule {
 
     return null;
   }
-
 }

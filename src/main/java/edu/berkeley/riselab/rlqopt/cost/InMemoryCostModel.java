@@ -25,6 +25,11 @@ public class InMemoryCostModel implements CostModel {
   }
 
   public InMemoryCostModel(Database db, String filename) {
+    if (System.getProperty("hasSelection") != null) {
+      handleSelections = Boolean.valueOf(System.getProperty("hasSelection"));
+    }
+    System.out.println("handleSelections = " + handleSelections);
+
     try {
 
       Scanner scanner = new Scanner(new File(filename + "/imdb_tables.txt"));
@@ -140,7 +145,7 @@ public class InMemoryCostModel implements CostModel {
 
     JoinOperator jop = (JoinOperator) in;
 
-    return Math.max((long) (rf * (countl * countr)),1);
+    return Math.max((long) (rf * (countl * countr)), 1);
   }
 
   public Cost hashJoinOperator(Operator in, Cost l, Cost r) {
